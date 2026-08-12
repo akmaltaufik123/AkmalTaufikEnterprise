@@ -164,14 +164,19 @@ body {
 .hero .container {
   position: relative;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-logo {
+  display: block;
   height: clamp(84px, 14vw, 150px);
   width: auto;
   max-width: 80vw;
   object-fit: contain;
-  margin-bottom: 26px;
+  margin: 0 auto 26px;
   filter: drop-shadow(0 0 22px rgba(220, 38, 38, 0.45));
   animation: fadeUp 0.9s ease 0s both;
 }
@@ -180,6 +185,7 @@ body {
   display: inline-block;
   padding: 12px 28px;
   margin-bottom: 28px;
+  text-indent: 0.18em;
   border-radius: 999px;
   border: 1px solid rgba(220, 38, 38, 0.55);
   background: linear-gradient(90deg, rgba(220, 38, 38, 0.18), rgba(220, 38, 38, 0.06), rgba(220, 38, 38, 0.18));
