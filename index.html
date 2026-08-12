@@ -9,9 +9,16 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
   <header class="nav">
     <div class="container nav-inner">
       <a href="index.html" class="brand"><img src="https://plain-apac-prod-public.komododecks.com/202608/12/3HS3RGiBnGa12S29398i/image.png" alt="Logo" class="logo-img"></a>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
       <nav class="nav-links">
         <a href="#services" data-i18n="nav-services">Perkhidmatan</a>
         <a href="#coverage" data-i18n="nav-coverage">Kawasan Liputan</a>
@@ -27,13 +34,14 @@
 
   <section class="hero">
     <div class="container">
+      <div class="slogan" data-i18n="hero-slogan">PANTAS - PROFESSIONAL - DIPERCAYAI</div>
       <h1 data-i18n="hero-title">Rakan perkhidmatan IT anda di Pulau Pinang</h1>
       <p class="lead" data-i18n="hero-lead">Pemasangan server, rack server, WiFi dan CCTV, kabel rangkaian, komputer dan laptop, serta kelas komputer dan AI — dikendalikan secara profesional, di rumah atau di pejabat.</p>
       <div class="hero-actions">
         <a href="#services" class="btn btn-primary btn-lg" data-i18n="hero-btn-services">Lihat Perkhidmatan</a>
         <a href="#contact" class="btn btn-ghost btn-lg" data-i18n="hero-btn-contact">Hubungi Kami</a>
       </div>
-      <p class="hero-note" data-i18n="hero-note">Tindak balas pantas · Harga telus · Perkhidmatan di Pulau Pinang</p>
+      <p class="hero-note" data-i18n="hero-note">Tindak balas pantas | Harga telus | Perkhidmatan di Pulau Pinang</p>
     </div>
   </section>
 
@@ -41,27 +49,27 @@
     <div class="container">
       <h2 data-i18n="services-title">Perkhidmatan Kami</h2>
       <div class="grid">
-        <div class="card">
+        <div class="card reveal">
           <h3 data-i18n="svc-1">Pemasangan Server, Rack Server, WiFi &amp; CCTV</h3>
           <p data-i18n="svc-1-desc">Pemasangan dan konfigurasi server, rack server, sistem CCTV, dan liputan WiFi untuk rumah dan pejabat.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
           <h3 data-i18n="svc-2">Pemasangan Kabel Rangkaian</h3>
           <p data-i18n="svc-2-desc">Pemasangan kabel rangkaian di rumah dan pejabat dengan kemasan yang kemas dan sambungan yang stabil.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
           <h3 data-i18n="svc-3">Pemasangan Komputer &amp; Laptop</h3>
           <p data-i18n="svc-3-desc">Pemasangan dan penyediaan komputer dan laptop di rumah dan pejabat, termasuk pemasangan perisian dan persediaan awal.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
           <h3 data-i18n="svc-4">Kelas Asas Kecerdasan Buatan (AI)</h3>
           <p data-i18n="svc-4-desc">Kelas asasi AI secara online atau bersemuka — belajar cara menggunakan alatan AI secara praktikal dan mudah.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
           <h3 data-i18n="svc-5">Kelas Asas Komputer</h3>
           <p data-i18n="svc-5-desc">Kelas online atau bersemuka untuk asas komputer, daripada tahap permulaan hingga kemahiran harian.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
           <h3 data-i18n="svc-6">Dan Banyak Lagi Perkhidmatan</h3>
           <p data-i18n="svc-6-desc">Perkhidmatan lain tersedia mengikut permintaan. Hubungi kami untuk maklumat lanjut.</p>
         </div>
@@ -73,11 +81,11 @@
     <div class="container">
       <h2 data-i18n="coverage-title">Kawasan Liputan</h2>
       <div class="grid grid-3">
-        <div class="card">
+        <div class="card reveal">
           <h3 data-i18n="coverage-state">Negeri Tersedia</h3>
-          <p>Pulau Pinang</p>
+          <p class="state-name">Pulau Pinang</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
           <h3 data-i18n="coverage-island">Kawasan Tersedia (Dalam Pulau)</h3>
           <ul>
             <li>Gelugor</li>
@@ -88,7 +96,7 @@
             <li>Bayan Lepas</li>
           </ul>
         </div>
-        <div class="card">
+        <div class="card reveal">
           <h3 data-i18n="coverage-mainland">Kawasan Tersedia (Seberang Pulau)</h3>
           <ul>
             <li>Badan Dalam</li>
@@ -108,17 +116,17 @@
     <div class="container">
       <h2 data-i18n="why-title">Kenapa Pilih Kami</h2>
       <div class="steps">
-        <div class="step">
+        <div class="step reveal">
           <span class="step-num">1</span>
           <h3 data-i18n="why-1">Tindak Balas Pantas</h3>
           <p data-i18n="why-1-desc">Kami bertindak balas dengan cepat supaya peranti, rangkaian dan sistem anda kembali berfungsi tanpa masa menunggu yang lama.</p>
         </div>
-        <div class="step">
+        <div class="step reveal">
           <span class="step-num">2</span>
           <h3 data-i18n="why-2">Harga Telus &amp; Berpatutan</h3>
           <p data-i18n="why-2-desc">Tiada caj tersembunyi. Anda mengetahui kos sebelum sebarang kerja dimulakan.</p>
         </div>
-        <div class="step">
+        <div class="step reveal">
           <span class="step-num">3</span>
           <h3 data-i18n="why-3">Remote &amp; On-Site</h3>
           <p data-i18n="why-3-desc">Daripada pembaikan jauh yang pantas kepada pemasangan bersemuka penuh, kami mengikut jadual anda.</p>
@@ -131,18 +139,23 @@
     <div class="container">
       <h2 data-i18n="contact-title">Hubungi Kami</h2>
       <div class="grid grid-3">
-        <div class="card card-contact">
+        <div class="card card-contact reveal">
           <h3 data-i18n="contact-call">Hubungi / WhatsApp</h3>
           <p>+60 18-945 1570</p>
           <a href="tel:+60189451570" class="btn btn-outline btn-sm" data-i18n="contact-call-btn">Hubungi Sekarang</a>
           <a href="https://wa.me/60189451570" class="btn btn-outline btn-sm" target="_blank" rel="noopener">WhatsApp</a>
         </div>
-        <div class="card card-contact">
+        <div class="card card-contact reveal">
           <h3 data-i18n="contact-email">E-mel</h3>
           <p>akmaltaufik.business@gmail.com</p>
           <a href="mailto:akmaltaufik.business@gmail.com" class="btn btn-outline btn-sm" data-i18n="contact-email-btn">Hantar E-mel</a>
         </div>
-        <div class="card card-contact">
+        <div class="card card-contact reveal">
+          <h3 data-i18n="contact-linkedin">LinkedIn</h3>
+          <p data-i18n="contact-linkedin-desc">Berhubung dengan kami di LinkedIn.</p>
+          <a href="https://www.linkedin.com/in/akmaltaufik" class="btn btn-outline btn-sm" target="_blank" rel="noopener" data-i18n="contact-linkedin-btn">Lihat Profil</a>
+        </div>
+        <div class="card card-contact reveal">
           <h3 data-i18n="contact-area">Kawasan Perkhidmatan</h3>
           <p data-i18n="contact-area-desc">Perkhidmatan on-site tersedia di Pulau Pinang. Sokongan remote tersedia di mana-mana.</p>
         </div>
@@ -152,11 +165,13 @@
 
   <footer class="footer">
     <div class="container">
-      <p data-i18n="footer-line">Server &amp; rack server · WiFi &amp; CCTV · Kabel rangkaian · Komputer &amp; laptop · Kelas komputer &amp; AI</p>
+      <p data-i18n="footer-line">Server &amp; rack server | WiFi &amp; CCTV | Kabel rangkaian | Komputer &amp; laptop | Kelas komputer &amp; AI</p>
+      <p class="slogan-mini" data-i18n="hero-slogan">PANTAS - PROFESSIONAL - DIPERCAYAI</p>
       <p class="muted" data-i18n="footer-copy">© 2026 Hak cipta terpelihara.</p>
     </div>
   </footer>
 
   <script src="js/lang.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
