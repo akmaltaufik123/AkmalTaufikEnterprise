@@ -183,6 +183,10 @@ body {
   transform: scale(1.03);
 }
 
+.card-contact .btn {
+  margin: 8px 8px 0 0;
+}
+
 .steps {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
