@@ -41,18 +41,11 @@ body {
   color: var(--text);
 }
 
-.brand-text span {
-  color: var(--primary);
-}
-
-.brand-text {
-  font-size: 1.5rem;
-  font-weight: 800;
-}
-
 .logo-img {
-  height: 34px;
+  height: 40px;
   width: auto;
+  max-width: 200px;
+  object-fit: contain;
 }
 
 .nav {
