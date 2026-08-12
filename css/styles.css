@@ -166,6 +166,16 @@ body {
   z-index: 2;
 }
 
+.hero-logo {
+  height: clamp(84px, 14vw, 150px);
+  width: auto;
+  max-width: 80vw;
+  object-fit: contain;
+  margin-bottom: 26px;
+  filter: drop-shadow(0 0 22px rgba(220, 38, 38, 0.45));
+  animation: fadeUp 0.9s ease 0s both;
+}
+
 .slogan {
   display: inline-block;
   padding: 12px 28px;
