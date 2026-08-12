@@ -80,6 +80,56 @@ body {
   color: var(--accent);
 }
 
+.lang-switch {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.lang-btn {
+  background: transparent;
+  color: var(--text);
+  border: none;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.lang-btn:hover {
+  color: var(--accent);
+}
+
+.lang-btn.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.lang-btn.active:hover {
+  color: #fff;
+}
+
+.card ul {
+  list-style: none;
+  margin-top: 8px;
+}
+
+.card ul li {
+  padding: 4px 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.coverage-note {
+  text-align: center;
+  color: var(--muted);
+  max-width: 640px;
+  margin: 28px auto 0;
+}
+
 .hero {
   text-align: center;
   padding: 96px 0 80px;
