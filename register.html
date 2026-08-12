@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — AutomateMY</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="auth-body">
+  <main class="auth-card">
+    <a href="index.html" class="brand auth-brand"><img src="assets/logo.svg" alt="Logo" class="logo-img"></a>
+    <h1>Create your account</h1>
+    <p class="muted">Start automating your business today.</p>
+
+    <form id="register-form" novalidate>
+      <div class="form-group">
+        <label for="name">Full name</label>
+        <input type="text" id="name" name="name" placeholder="Ahmad bin Ali" required>
+      </div>
+      <div class="form-group">
+        <label for="company">Company (optional)</label>
+        <input type="text" id="company" name="company" placeholder="Ahmad Enterprise Sdn Bhd">
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="you@company.com" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Minimum 6 characters" minlength="6" required>
+      </div>
+      <p id="form-error" class="form-error" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+    </form>
+
+    <p class="auth-switch">Already have an account? <a href="login.html">Login</a></p>
+    <p class="auth-switch"><a href="index.html">&larr; Back to home</a></p>
+  </main>
+
+  <script src="js/auth.js"></script>
+</body>
+</html>

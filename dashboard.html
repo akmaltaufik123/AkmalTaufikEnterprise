@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — AutomateMY</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="auth-body">
+  <main class="auth-card dashboard-card">
+    <div class="dashboard-top">
+      <a href="index.html" class="brand auth-brand"><img src="assets/logo.svg" alt="Logo" class="logo-img"></a>
+      <button id="logout-btn" class="btn btn-ghost">Logout</button>
+    </div>
+
+    <h1>Hello, <span id="user-name"></span>!</h1>
+    <p class="muted">Your workspace is ready. Pick where you want to start.</p>
+
+    <div class="dashboard-grid">
+      <div class="card">
+        <h3>Book a free call</h3>
+        <p>We map your repetitive tasks and show you what can be automated.</p>
+        <a href="#" class="btn btn-outline btn-sm">Request Call</a>
+      </div>
+      <div class="card">
+        <h3>Explore templates</h3>
+        <p>WhatsApp booking, e-Invoice, Shopee order sync — pick a starter flow.</p>
+        <a href="#" class="btn btn-outline btn-sm">Browse Templates</a>
+      </div>
+      <div class="card">
+        <h3>Account settings</h3>
+        <p><span class="muted">Signed in as</span> <strong id="user-email"></strong></p>
+        <a href="index.html" class="btn btn-outline btn-sm">View Site</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/auth.js"></script>
+</body>
+</html>
