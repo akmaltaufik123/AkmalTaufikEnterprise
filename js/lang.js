@@ -107,7 +107,10 @@
     var t = dict[lang];
     document.querySelectorAll("[data-i18n]").forEach(function (el) {
       var key = el.getAttribute("data-i18n");
-      if (t[key] != null) el.textContent = t[key];
+      if (t[key] != null) {
+        el.textContent = t[key];
+        if (el.hasAttribute("data-text")) el.setAttribute("data-text", t[key]);
+      }
     });
     document.querySelectorAll(".lang-btn").forEach(function (btn) {
       btn.classList.toggle("active", btn.getAttribute("data-lang") === lang);
