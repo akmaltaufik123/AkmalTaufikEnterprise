@@ -4,22 +4,10 @@
   var canvas = document.getElementById("bg-canvas");
   if (canvas && !reduce) {
     var ctx = canvas.getContext("2d");
-    var W = 0, H = 0, spacing = 34, amp = 16, colCount = 1, dots = [];
+    var W = 0, H = 0, fontSize = 15, cols = 0, drops = [];
     var DPR = Math.min(window.devicePixelRatio || 1, 2);
-    var mouse = { x: -9999, y: -9999 };
+    var chars = "01";
     var rafId = null;
-
-    function build() {
-      dots = [];
-      spacing = W < 768 ? 44 : 34;
-      amp = W < 768 ? 10 : 16;
-      colCount = Math.ceil(W / spacing) + 1;
-      for (var y = spacing; y < H + spacing; y += spacing) {
-        for (var x = spacing; x < W + spacing; x += spacing) {
-          dots.push({ x: x, y: y, ox: x, oy: y, r: 1.4 + ((x + y) % 17) / 10 });
-        }
-      }
-    }
 
     function resize() {
       W = window.innerWidth;
@@ -29,54 +17,41 @@
       canvas.style.width = W + "px";
       canvas.style.height = H + "px";
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-      build();
+      fontSize = W < 768 ? 18 : 15;
+      cols = Math.floor(W / fontSize);
+      drops = [];
+      for (var i = 0; i < cols; i++) {
+        drops[i] = Math.floor(Math.random() * -150);
+      }
+      ctx.fillStyle = "#07070a";
+      ctx.fillRect(0, 0, W, H);
     }
 
-    function draw(t) {
-      ctx.clearRect(0, 0, W, H);
-      var speed = t * 0.0016;
-      var i, d;
-      for (i = 0; i < dots.length; i++) {
-        d = dots[i];
-        var wave = Math.sin(d.ox * 0.006 + speed) * amp + Math.sin(d.oy * 0.009 - speed * 1.3) * amp * 0.4;
-        d.y = d.oy + wave;
-        var dx = d.x - mouse.x, dy = d.y - mouse.y, dist2 = dx * dx + dy * dy;
-        if (dist2 < 12000 && dist2 > 0) {
-          var f = (1 - dist2 / 12000) * 18;
-          d.x += (dx / Math.sqrt(dist2)) * f;
-          d.y += (dy / Math.sqrt(dist2)) * f;
+    function draw() {
+      ctx.fillStyle = "rgba(7, 7, 10, 0.16)";
+      ctx.fillRect(0, 0, W, H);
+      ctx.font = fontSize + "px monospace";
+      for (var i = 0; i < cols; i++) {
+        var x = i * fontSize;
+        var y = drops[i] * fontSize;
+        var ch = chars[Math.floor(Math.random() * chars.length)];
+        var ch2 = chars[Math.floor(Math.random() * chars.length)];
+        var ch3 = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillStyle = "rgba(220, 38, 38, 0.35)";
+        ctx.fillText(ch3, x, y - fontSize * 2);
+        ctx.fillStyle = "rgba(220, 38, 38, 0.6)";
+        ctx.fillText(ch2, x, y - fontSize);
+        ctx.fillStyle = "rgba(248, 113, 113, 0.95)";
+        ctx.fillText(ch, x, y);
+        if (y > H && Math.random() > 0.972) {
+          drops[i] = 0;
         }
-        ctx.beginPath();
-        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(239,68,68,0.5)";
-        ctx.shadowColor = "rgba(220,38,38,0.9)";
-        ctx.shadowBlur = 7;
-        ctx.fill();
-        ctx.shadowBlur = 0;
+        drops[i]++;
       }
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = "rgba(220,38,38,0.09)";
-      ctx.beginPath();
-      for (i = 0; i < dots.length; i++) {
-        d = dots[i];
-        if ((i + 1) % colCount !== 0 && i + 1 < dots.length) {
-          ctx.moveTo(d.x, d.y);
-          ctx.lineTo(dots[i + 1].x, dots[i + 1].y);
-        }
-        if (i + colCount < dots.length) {
-          ctx.moveTo(d.x, d.y);
-          ctx.lineTo(dots[i + colCount].x, dots[i + colCount].y);
-        }
-      }
-      ctx.stroke();
       rafId = requestAnimationFrame(draw);
     }
 
     window.addEventListener("resize", resize);
-    window.addEventListener("pointermove", function (e) {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-    });
     document.addEventListener("visibilitychange", function () {
       if (document.hidden) {
         cancelAnimationFrame(rafId);
