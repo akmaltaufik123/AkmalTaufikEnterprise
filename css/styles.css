@@ -106,10 +106,14 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
   }
 }
 
-#bg-canvas {
+.bg-video {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   z-index: 0;
+  opacity: 0.6;
   pointer-events: none;
 }
 
