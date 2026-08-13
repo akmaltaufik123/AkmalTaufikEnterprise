@@ -591,12 +591,17 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
   }
 }
 
+.auth-video {
+  display: none;
+}
+
 .auth-body {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
+  background: radial-gradient(ellipse at top, rgba(220, 38, 38, 0.12) 0%, #07070a 55%);
 }
 
 .auth-card {
