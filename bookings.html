@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <title>Tempahan — Portal Pelanggan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <video class="bg-video auth-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+    <source src="assets/rain.mp4" type="video/mp4">
+  </video>
+
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="brand"><img src="https://plain-apac-prod-public.komododecks.com/202608/12/3HS3RGiBnGa12S29398i/image.png" alt="Logo" class="logo-img"></a>
+      <nav class="portal-nav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="request.html">Permohonan Baru</a>
+        <a href="my-requests.html">Permohonan Saya</a>
+        <a href="bookings.html" class="active">Tempahan</a>
+        <a href="classes.html">Kelas</a>
+        <a href="admin.html" id="admin-link" hidden>Admin</a>
+        <button id="signout-btn" class="btn btn-ghost btn-sm">Log Keluar</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="portal-main">
+    <div class="container">
+      <div class="portal-header">
+        <h2>Temujanji Perkhidmatan</h2>
+        <p class="muted">Pilih tarikh dan masa untuk servis di lokasi anda.</p>
+      </div>
+
+      <form id="booking-form" class="card booking-form">
+        <div class="form-group">
+          <label for="b-service">Perkhidmatan</label>
+          <select id="b-service">
+            <option>Pemasangan Server, Rack Server, WiFi &amp; CCTV</option>
+            <option>Pemasangan Kabel Rangkaian</option>
+            <option>Pemasangan Komputer &amp; Laptop</option>
+            <option>Kelas Asas Kecerdasan Buatan (AI)</option>
+            <option>Kelas Asas Komputer</option>
+            <option>Lain-lain</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="b-date">Tarikh</label>
+          <input type="date" id="b-date" required>
+        </div>
+        <div class="form-group">
+          <label>Masa (pilih slot)</label>
+          <div id="time-slots" class="time-slots"></div>
+        </div>
+        <div class="form-group">
+          <label for="b-location">Kawasan / Lokasi</label>
+          <input type="text" id="b-location" maxlength="120" placeholder="cth: Bayan Lepas, Pulau Pinang" required>
+        </div>
+        <div class="form-group">
+          <label for="b-notes">Nota (pilihan)</label>
+          <textarea id="b-notes" rows="3" maxlength="1000" placeholder="Terangkan keperluan anda"></textarea>
+        </div>
+        <p id="form-error" class="form-error" hidden></p>
+        <button type="submit" class="btn btn-primary">Tempah Sekarang</button>
+      </form>
+
+      <h2 class="sub-title">Tempahan Saya</h2>
+      <div class="card">
+        <div id="bookings-list"><p class="muted">Memuatkan...</p></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/portal.js"></script>
+  <script src="js/customize.js"></script>
+  <script>
+    (function () {
+      var SLOTS = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"];
+      var esc = window.portal.esc;
+
+      window.portal.requireAuth().then(async function (session) {
+        if (!session) return;
+        var sb = window.portal.supabase;
+        var errorBox = document.getElementById("form-error");
+        var slotsBox = document.getElementById("time-slots");
+        var dateInput = document.getElementById("b-date");
+        var selectedSlot = null;
+        var takenSlots = [];
+
+        dateInput.min = new Date().toISOString().split("T")[0];
+        dateInput.addEventListener("change", loadTakenSlots);
+        dateInput.addEventListener("change", renderSlots);
+
+        function renderSlots() {
+          slotsBox.innerHTML = SLOTS.map(function (s) {
+            var taken = takenSlots.indexOf(s) > -1;
+            return '<button type="button" class="time-slot' + (taken ? " taken" : "") + (selectedSlot === s ? " active" : "") + '" data-slot="' + s + '"' + (taken ? " disabled" : "") + ">" + s + "</button>";
+          }).join("");
+          slotsBox.querySelectorAll(".time-slot").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              if (btn.disabled) return;
+              selectedSlot = btn.getAttribute("data-slot");
+              slotsBox.querySelectorAll(".time-slot").forEach(function (b) { b.classList.remove("active"); });
+              btn.classList.add("active");
+            });
+          });
+        }
+
+        async function loadTakenSlots() {
+          takenSlots = [];
+          var date = dateInput.value;
+          if (!date) return;
+          var { data } = await sb.from("bookings")
+            .select("booking_time")
+            .eq("booking_date", date)
+            .in("status", ["pending", "confirmed"]);
+          (data || []).forEach(function (b) { takenSlots.push(b.booking_time); });
+          if (selectedSlot && takenSlots.indexOf(selectedSlot) > -1) selectedSlot = null;
+          renderSlots();
+        }
+
+        renderSlots();
+
+        document.getElementById("booking-form").addEventListener("submit", async function (e) {
+          e.preventDefault();
+          var p = window.portal;
+          var service = document.getElementById("b-service").value;
+          var date = dateInput.value;
+          var location = p.sanitize(document.getElementById("b-location").value, 120);
+          var notes = p.sanitize(document.getElementById("b-notes").value, 1000);
+          if (!date) {
+            errorBox.textContent = "Sila pilih tarikh.";
+            errorBox.hidden = false;
+            return;
+          }
+          if (!selectedSlot) {
+            errorBox.textContent = "Sila pilih slot masa.";
+            errorBox.hidden = false;
+            return;
+          }
+          if (!location) {
+            errorBox.textContent = "Sila masukkan lokasi.";
+            errorBox.hidden = false;
+            return;
+          }
+          var { data: dup } = await sb.from("bookings")
+            .select("id")
+            .eq("booking_date", date)
+            .eq("booking_time", selectedSlot)
+            .in("status", ["pending", "confirmed"]);
+          if (dup && dup.length > 0) {
+            errorBox.textContent = "Slot ini sudah ditempah. Sila pilih masa lain.";
+            errorBox.hidden = false;
+            loadTakenSlots();
+            return;
+          }
+          var { error } = await sb.from("bookings").insert({
+            user_id: session.user.id,
+            service: service,
+            booking_date: date,
+            booking_time: selectedSlot,
+            location: location,
+            notes: notes,
+            status: "pending"
+          });
+          if (error) {
+            errorBox.textContent = error.message;
+            errorBox.hidden = false;
+            return;
+          }
+          errorBox.className = "alert ok";
+          errorBox.textContent = "Tempahan dihantar! Admin akan mengesahkan tempahan anda.";
+          errorBox.hidden = false;
+          e.target.reset();
+          selectedSlot = null;
+          dateInput.value = "";
+          takenSlots = [];
+          loadBookings();
+        });
+
+        async function loadBookings() {
+          var { data, error } = await sb.from("bookings")
+            .select("id, service, booking_date, booking_time, location, notes, status, created_at")
+            .order("created_at", { ascending: false });
+          var box = document.getElementById("bookings-list");
+          if (error) {
+            box.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
+            return;
+          }
+          if (!data || data.length === 0) {
+            box.innerHTML = '<p class="muted">Belum ada tempahan. Buat tempahan pertama anda di atas.</p>';
+            return;
+          }
+          box.innerHTML = '<table class="table"><thead><tr><th>Perkhidmatan</th><th>Tarikh</th><th>Masa</th><th>Lokasi</th><th>Status</th><th>Tindakan</th></tr></thead><tbody>' +
+            data.map(function (b) {
+              var notes = b.notes ? '<div class="table-desc">' + esc(b.notes) + '</div>' : "";
+              return '<tr><td>' + esc(b.service) + notes + '</td><td>' + esc(b.booking_date) + "</td><td>" + esc(b.booking_time) +
+                "</td><td>" + esc(b.location) +
+                '</td><td><span class="badge ' + esc(b.status) + '">' + window.portal.badge(b.status) +
+                '</span></td><td>' + (b.status === "pending" || b.status === "confirmed"
+                  ? '<button class="action-btn danger" data-cancel-booking="' + b.id + '">Batal</button>'
+                  : "") + "</td></tr>";
+            }).join("") + "</tbody></table>";
+
+          box.querySelectorAll("[data-cancel-booking]").forEach(function (btn) {
+            btn.addEventListener("click", async function () {
+              var id = btn.getAttribute("data-cancel-booking");
+              if (!confirm("Batal tempahan ini?")) return;
+              var { error } = await sb.from("bookings").delete().eq("id", id);
+              if (error) alert("Ralat: " + error.message);
+              loadBookings();
+            });
+          });
+        }
+
+        loadBookings();
+      });
+    })();
+  </script>
+  <script>
+    (function () {
+      var L = document.getElementById("loader");
+      if (!L) return;
+      function done() {
+        if (L.dataset.done) return;
+        L.dataset.done = "1";
+        L.classList.add("loader-hide");
+        setTimeout(function () { if (L.parentNode) L.parentNode.removeChild(L); }, 700);
+      }
+      window.addEventListener("load", done);
+      setTimeout(done, 4000);
+    })();
+  </script>
+</body>
+</html>

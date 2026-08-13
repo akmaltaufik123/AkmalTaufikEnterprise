@@ -16,7 +16,7 @@
   }
 
   function badge(status) {
-    var map = { pending: "Menunggu", in_progress: "Dalam Proses", done: "Selesai" };
+    var map = { pending: "Menunggu", in_progress: "Dalam Proses", done: "Selesai", confirmed: "Disahkan", cancelled: "Dibatalkan" };
     return map[status] || status;
   }
 
