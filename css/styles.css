@@ -956,6 +956,10 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
   display: none;
 }
 
+.modal-sm {
+  max-width: 480px;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
