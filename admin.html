@@ -10,29 +10,30 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body class="radial-bg">
   <div id="loader" class="loader-overlay">
     <div class="loader-inner">
       <div class="loader-ring"><div class="loader-spin"></div></div>
       <div class="loader-dot"></div>
-      <div class="loader-text">Sila tunggu...</div>
+      <div class="loader-text" data-i18n="loading-text">Sila tunggu...</div>
     </div>
   </div>
 
-  <video class="bg-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
-    <source src="assets/rain.mp4" type="video/mp4">
-  </video>
 
   <header class="nav">
     <div class="container nav-inner">
       <a href="index.html" class="brand"><img src="https://plain-apac-prod-public.komododecks.com/202608/12/3HS3RGiBnGa12S29398i/image.png" alt="Logo" class="logo-img"></a>
       <nav class="portal-nav">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="request.html">Permohonan Baru</a>
-        <a href="my-requests.html">Permohonan Saya</a>
-        <a href="classes.html">Kelas</a>
-        <a href="admin.html" class="active">Admin</a>
-        <button id="signout-btn" class="btn btn-ghost btn-sm">Log Keluar</button>
+        <a href="dashboard.html" data-i18n="nav-dashboard">Dashboard</a>
+        <a href="request.html" data-i18n="nav-request">Permohonan Baru</a>
+        <a href="my-requests.html" data-i18n="nav-my">Permohonan Saya</a>
+        <a href="classes.html" data-i18n="nav-classes">Kelas</a>
+        <a href="admin.html" class="active" data-i18n="nav-admin">Admin</a>
+        <button id="signout-btn" class="btn btn-ghost btn-sm" data-i18n="signout">Log Keluar</button>
+        <div class="lang-switch">
+          <button class="lang-btn" data-lang="my">MY</button>
+          <button class="lang-btn" data-lang="en">ENG</button>
+        </div>
       </nav>
     </div>
   </header>
@@ -40,15 +41,15 @@
   <main class="portal-main">
     <div class="container">
       <div class="portal-header">
-        <h2>Panel Pentadbir</h2>
-        <p class="muted">Kawalan penuh — permohonan, kursus, kelas dan pelanggan.</p>
+        <h2 data-i18n="header-title">Panel Pentadbir</h2>
+        <p class="muted" data-i18n="header-sub">Kawalan penuh — permohonan, kursus, kelas dan pelanggan.</p>
       </div>
 
       <div id="denied" hidden>
         <div class="card">
-          <h3>Akses Ditolak</h3>
-          <p class="muted">Akaun anda tidak mempunyai kebenaran pentadbir.</p>
-          <a href="dashboard.html" class="btn btn-outline btn-sm">Kembali ke Dashboard</a>
+          <h3 data-i18n="denied">Akses Ditolak</h3>
+          <p class="muted" data-i18n="denied-sub">Akaun anda tidak mempunyai kebenaran pentadbir.</p>
+          <a href="dashboard.html" class="btn btn-outline btn-sm" data-i18n="denied-back">Kembali ke Dashboard</a>
         </div>
       </div>
 
@@ -56,92 +57,92 @@
         <div class="grid grid-3 stats-row">
           <div class="card stat-card">
             <h3 id="stat-total">0</h3>
-            <p class="muted">Jumlah Permohonan</p>
+            <p class="muted" data-i18n="stat-requests">Jumlah Permohonan</p>
           </div>
           <div class="card stat-card">
             <h3 id="stat-pending">0</h3>
-            <p class="muted">Menunggu</p>
+            <p class="muted" data-i18n="stat-pending">Menunggu</p>
           </div>
           <div class="card stat-card">
             <h3 id="stat-enroll">0</h3>
-            <p class="muted">Pendaftaran Kelas</p>
+            <p class="muted" data-i18n="stat-enroll">Pendaftaran Kelas</p>
           </div>
         </div>
 
         <div class="tab-bar">
-          <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
-          <button class="tab-btn" data-tab="requests">Permohonan</button>
-          <button class="tab-btn" data-tab="bookings">Tempahan</button>
-          <button class="tab-btn" data-tab="classes">Kelas</button>
-          <button class="tab-btn" data-tab="customers">Pelanggan</button>
-          <button class="tab-btn" data-tab="report">Laporan</button>
-          <button class="tab-btn" data-tab="web">Edit Webpage</button>
+          <button class="tab-btn active" data-tab="dashboard" data-i18n="tab-dashboard">Dashboard</button>
+          <button class="tab-btn" data-tab="requests" data-i18n="tab-requests">Permohonan</button>
+          <button class="tab-btn" data-tab="bookings" data-i18n="tab-bookings">Tempahan</button>
+          <button class="tab-btn" data-tab="classes" data-i18n="tab-classes">Kelas</button>
+          <button class="tab-btn" data-tab="customers" data-i18n="tab-customers">Pelanggan</button>
+          <button class="tab-btn" data-tab="report" data-i18n="tab-report">Laporan</button>
+          <button class="tab-btn" data-tab="web" data-i18n="tab-web">Edit Webpage</button>
         </div>
 
 <div id="tab-dashboard" class="tab-panel">
   <div class="grid grid-3 stats-row">
     <div class="card stat-card">
       <h3 id="dash-customers">0</h3>
-      <p class="muted">Pelanggan (Tempoh)</p>
+      <p class="muted" data-i18n="stat-cust">Pelanggan (Tempoh)</p>
     </div>
     <div class="card stat-card">
       <h3 id="dash-requests">0</h3>
-      <p class="muted">Permohonan (Tempoh)</p>
+      <p class="muted" data-i18n="stat-req">Permohonan (Tempoh)</p>
     </div>
     <div class="card stat-card">
       <h3 id="dash-income">RM 0</h3>
-      <p class="muted">Pendapatan (Tempoh)</p>
+      <p class="muted" data-i18n="stat-income">Pendapatan (Tempoh)</p>
     </div>
     <div class="card stat-card">
       <h3 id="dash-pending">0</h3>
-      <p class="muted">Menunggu (Tempoh)</p>
+      <p class="muted" data-i18n="stat-pending2">Menunggu (Tempoh)</p>
     </div>
   </div>
 
   <div class="card">
     <div class="card-toolbar">
-      <h3>Kalendar Aktiviti</h3>
+      <h3 data-i18n="cal-title">Kalendar Aktiviti</h3>
       <div class="cal-nav">
         <button id="cal-prev" class="action-btn">◀</button>
         <select id="cal-month"></select>
         <select id="cal-year"></select>
         <button id="cal-next" class="action-btn">▶</button>
-        <button id="cal-today" class="action-btn">Hari Ini</button>
+        <button id="cal-today" class="action-btn" data-i18n="cal-today">Hari Ini</button>
       </div>
     </div>
     <div id="calendar" class="calendar"></div>
-    <p class="muted cal-legend"><span class="cal-badge reg">N daftar</span> pendaftaran pelanggan &middot; <span class="cal-badge inc">RM</span> pendapatan hari tersebut. Klik mana-mana tarikh untuk menapis graf ke hari itu.</p>
+    <p class="muted cal-legend" data-i18n="cal-legend" data-i18n-html><span class="cal-badge reg">N daftar</span> pendaftaran pelanggan &middot; <span class="cal-badge inc">RM</span> pendapatan hari tersebut. Klik mana-mana tarikh untuk menapis graf ke hari itu.</p>
     <p id="cal-info" class="muted"></p>
   </div>
 
   <div class="card">
     <div class="card-toolbar">
-      <h3>Penapis Graf &amp; Tempoh</h3>
+      <h3 data-i18n="filter-title">Penapis Graf &amp; Tempoh</h3>
       <div class="filter-row">
-        <label>Pelanggan</label>
+        <label data-i18n="f-cust">Pelanggan</label>
         <select id="filter-cust">
-          <option value="7d">7 Hari</option>
-          <option value="14d" selected>14 Hari</option>
-          <option value="30d">30 Hari</option>
-          <option value="8w">8 Minggu</option>
-          <option value="12m">12 Bulan</option>
-          <option value="5y">5 Tahun</option>
-          <option value="custom">Tempoh Pilihan</option>
+          <option value="7d" data-i18n="f-7d">7 Hari</option>
+          <option value="14d" selected data-i18n="f-14d">14 Hari</option>
+          <option value="30d" data-i18n="f-30d">30 Hari</option>
+          <option value="8w" data-i18n="f-8w">8 Minggu</option>
+          <option value="12m" data-i18n="f-12m">12 Bulan</option>
+          <option value="5y" data-i18n="f-5y">5 Tahun</option>
+          <option value="custom" data-i18n="f-custom">Tempoh Pilihan</option>
         </select>
-        <label>Pendapatan</label>
+        <label data-i18n="f-income">Pendapatan</label>
         <select id="filter-income">
           <option value="14d">14 Hari</option>
-          <option value="12w">12 Minggu</option>
+          <option value="12w" data-i18n="f-12w">12 Minggu</option>
           <option value="12m" selected>12 Bulan</option>
-          <option value="5y">5 Tahun</option>
-          <option value="custom">Tempoh Pilihan</option>
+          <option value="5y" data-i18n="f-5y">5 Tahun</option>
+          <option value="custom" data-i18n="f-custom">Tempoh Pilihan</option>
         </select>
-        <label>Dari</label>
+        <label data-i18n="f-from">Dari</label>
         <input type="datetime-local" id="range-from">
-        <label>Hingga</label>
+        <label data-i18n="f-to">Hingga</label>
         <input type="datetime-local" id="range-to">
-        <button id="btn-apply" class="action-btn">Guna</button>
-        <button id="btn-reset" class="action-btn danger">Reset</button>
+        <button id="btn-apply" class="action-btn" data-i18n="f-apply">Guna</button>
+        <button id="btn-reset" class="action-btn danger" data-i18n="f-reset">Reset</button>
       </div>
     </div>
   </div>
@@ -149,53 +150,53 @@
   <div class="charts-grid">
     <div class="card">
       <div class="card-toolbar">
-        <h3 id="title-cust">Pendaftaran Pelanggan</h3>
-        <button id="graph-report-btn" class="btn btn-primary btn-sm">Muat Turun Laporan</button>
+        <h3 id="title-cust" data-i18n="chart-cust">Pendaftaran Pelanggan</h3>
+        <button id="graph-report-btn" class="btn btn-primary btn-sm" data-i18n="report-btn">Muat Turun Laporan</button>
       </div>
       <div class="chart-wrap"><canvas id="chart-cust"></canvas></div>
     </div>
     <div class="card">
-      <h3 id="title-income">Pendapatan</h3>
+      <h3 id="title-income" data-i18n="chart-income">Pendapatan</h3>
       <div class="chart-wrap"><canvas id="chart-income"></canvas></div>
     </div>
   </div>
 
   <div class="charts-grid">
     <div class="card">
-      <h3>Permohonan Mengikut Status</h3>
+      <h3 data-i18n="chart-status">Permohonan Mengikut Status</h3>
       <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
     </div>
     <div class="card">
       <div class="card-toolbar">
-        <h3>Rekod Pendapatan</h3>
-        <button id="add-tx-btn" class="btn btn-primary btn-sm">+ Rekod Baru</button>
+        <h3 data-i18n="tx-title">Rekod Pendapatan</h3>
+        <button id="add-tx-btn" class="btn btn-primary btn-sm" data-i18n="tx-add">+ Rekod Baru</button>
       </div>
-      <div id="tx-list"><p class="muted">Memuatkan...</p></div>
+      <div id="tx-list"><p class="muted" data-i18n="loading">Memuatkan...</p></div>
     </div>
   </div>
 </div>
 
   <div class="modal-overlay" id="graph-report-modal" hidden>
     <div class="modal-box modal-sm">
-      <h3>Muat Turun Laporan</h3>
+      <h3 data-i18n="report-modal-title">Muat Turun Laporan</h3>
       <div class="form-group">
-        <label for="gr-scope">Jenis Laporan</label>
+        <label for="gr-scope" data-i18n="report-scope">Jenis Laporan</label>
         <select id="gr-scope">
-          <option value="semua">Laporan Lengkap (Semua)</option>
-          <option value="requests">Permohonan Perkhidmatan</option>
-          <option value="bookings">Tempahan</option>
-          <option value="enrollments">Pendaftaran Kelas</option>
-          <option value="customers">Pelanggan</option>
-          <option value="transactions">Transaksi</option>
+          <option value="semua" data-i18n="scope-semua">Laporan Lengkap (Semua)</option>
+          <option value="requests" data-i18n="scope-requests">Permohonan Perkhidmatan</option>
+          <option value="bookings" data-i18n="scope-bookings">Tempahan</option>
+          <option value="enrollments" data-i18n="scope-enrollments">Pendaftaran Kelas</option>
+          <option value="customers" data-i18n="scope-customers">Pelanggan</option>
+          <option value="transactions" data-i18n="scope-transactions">Transaksi</option>
         </select>
       </div>
       <div class="report-range">
         <div class="form-group">
-          <label for="gr-from">Dari Tarikh (pilihan)</label>
+          <label for="gr-from" data-i18n="from-label">Dari Tarikh (pilihan)</label>
           <input type="date" id="gr-from">
         </div>
         <div class="form-group">
-          <label for="gr-to">Hingga Tarikh (pilihan)</label>
+          <label for="gr-to" data-i18n="to-label">Hingga Tarikh (pilihan)</label>
           <input type="date" id="gr-to">
         </div>
       </div>
@@ -204,34 +205,34 @@
         <button class="btn btn-primary" id="gr-excel">Excel</button>
         <button class="btn btn-primary" id="gr-word">Word</button>
         <button class="btn btn-primary" id="gr-csv">CSV</button>
-        <button class="btn btn-ghost" id="gr-close">Tutup</button>
+        <button class="btn btn-ghost" id="gr-close" data-i18n="close">Tutup</button>
       </div>
-      <p class="muted form-hint">Semua format mengandungi kandungan yang sama. Kosongkan tarikh untuk laporan penuh.</p>
+      <p class="muted form-hint" data-i18n="fmt-hint">Semua format mengandungi kandungan yang sama. Kosongkan tarikh untuk laporan penuh.</p>
     </div>
   </div>
         <div id="tab-requests" class="tab-panel">
           <div class="card">
-            <div id="requests-list"><p class="muted">Memuatkan...</p></div>
+            <div id="requests-list"><p class="muted" data-i18n="loading">Memuatkan...</p></div>
           </div>
         </div>
 
         <div id="tab-bookings" class="tab-panel" hidden>
           <div class="card">
-            <div id="bookings-list"><p class="muted">Memuatkan...</p></div>
+            <div id="bookings-list"><p class="muted" data-i18n="loading">Memuatkan...</p></div>
           </div>
         </div>
 
         <div id="tab-classes" class="tab-panel" hidden>
           <div class="card">
             <div class="card-toolbar">
-              <h3>Kategori &amp; Kelas</h3>
+              <h3 data-i18n="cat-title">Kategori &amp; Kelas</h3>
               <div class="toolbar-actions">
-                <span class="muted hint">Seret kad untuk susun semula</span>
-                <button id="add-cat-btn" class="btn btn-primary btn-sm">+ Tambah Kategori</button>
+                <span class="muted hint" data-i18n="cat-drag">Seret kad untuk susun semula</span>
+                <button id="add-cat-btn" class="btn btn-primary btn-sm" data-i18n="cat-add">+ Tambah Kategori</button>
               </div>
             </div>
             <div id="cat-grid" class="cat-grid">
-              <p class="muted">Memuatkan...</p>
+              <p class="muted" data-i18n="loading">Memuatkan...</p>
             </div>
           </div>
 
@@ -239,37 +240,37 @@
             <div class="card-toolbar">
               <h3>Pendaftaran Kelas</h3>
             </div>
-            <div id="classes-list"><p class="muted">Memuatkan...</p></div>
+            <div id="classes-list"><p class="muted" data-i18n="loading">Memuatkan...</p></div>
           </div>
         </div>
 
         <div id="tab-customers" class="tab-panel" hidden>
           <div class="card">
-            <div id="customers-list"><p class="muted">Memuatkan...</p></div>
+            <div id="customers-list"><p class="muted" data-i18n="loading">Memuatkan...</p></div>
           </div>
         </div>
 
         <div id="tab-report" class="tab-panel" hidden>
           <div class="card">
-            <h3>Muat Turun Laporan</h3>
+            <h3 data-i18n="report-modal-title">Muat Turun Laporan</h3>
             <div class="form-group">
-              <label for="report-scope">Jenis Laporan</label>
+              <label for="report-scope" data-i18n="report-scope">Jenis Laporan</label>
               <select id="report-scope">
-                <option value="semua">Laporan Lengkap (Semua)</option>
-                <option value="requests">Permohonan Perkhidmatan</option>
-                <option value="bookings">Tempahan</option>
-                <option value="enrollments">Pendaftaran Kelas</option>
-                <option value="customers">Pelanggan</option>
-                <option value="transactions">Transaksi</option>
+                <option value="semua" data-i18n="scope-semua">Laporan Lengkap (Semua)</option>
+                <option value="requests" data-i18n="scope-requests">Permohonan Perkhidmatan</option>
+                <option value="bookings" data-i18n="scope-bookings">Tempahan</option>
+                <option value="enrollments" data-i18n="scope-enrollments">Pendaftaran Kelas</option>
+                <option value="customers" data-i18n="scope-customers">Pelanggan</option>
+                <option value="transactions" data-i18n="scope-transactions">Transaksi</option>
               </select>
             </div>
             <div class="report-range">
               <div class="form-group">
-                <label for="report-from">Dari Tarikh (pilihan)</label>
+                <label for="report-from" data-i18n="from-label">Dari Tarikh (pilihan)</label>
                 <input type="date" id="report-from">
               </div>
               <div class="form-group">
-                <label for="report-to">Hingga Tarikh (pilihan)</label>
+                <label for="report-to" data-i18n="to-label">Hingga Tarikh (pilihan)</label>
                 <input type="date" id="report-to">
               </div>
             </div>
@@ -279,14 +280,14 @@
               <button class="btn btn-primary" id="report-word">Word</button>
               <button class="btn btn-primary" id="report-csv">CSV</button>
             </div>
-            <p class="muted form-hint">Semua format (PDF, Excel, Word, CSV) mengandungi kandungan yang sama. Kosongkan tarikh untuk laporan penuh.</p>
+            <p class="muted form-hint" data-i18n="fmt-hint">Semua format (PDF, Excel, Word, CSV) mengandungi kandungan yang sama. Kosongkan tarikh untuk laporan penuh.</p>
           </div>
         </div>
 
         <div id="tab-web" class="tab-panel" hidden>
           <div class="card">
             <div class="card-toolbar">
-              <h3>Edit Webpage</h3>
+              <h3 data-i18n="tab-web">Edit Webpage</h3>
               <div class="toolbar-actions">
                 <select id="page-select">
                   <option value="/">/ (index.html)</option>
@@ -298,53 +299,53 @@
                   <option value="my-requests.html">/my-requests.html</option>
                   <option value="classes.html">/classes.html</option>
                   <option value="admin.html">/admin.html</option>
-                  <option value="__custom__">+ Halaman tersuai...</option>
+                  <option value="__custom__" data-i18n="web-custom">+ Halaman tersuai...</option>
                 </select>
                 <input id="page-custom" class="path-input" placeholder="cth: /promosi.html" hidden>
-                <button id="web-save" class="btn btn-primary btn-sm">Simpan</button>
-                <button id="web-reset" class="btn btn-ghost btn-sm">Padam Tetapan</button>
-                <a id="web-open" class="btn btn-outline btn-sm" target="_blank" rel="noopener">Buka Halaman</a>
+                <button id="web-save" class="btn btn-primary btn-sm" data-i18n="web-save">Simpan</button>
+                <button id="web-reset" class="btn btn-ghost btn-sm" data-i18n="web-delete">Padam Tetapan</button>
+                <a id="web-open" class="btn btn-outline btn-sm" target="_blank" rel="noopener" data-i18n="web-open">Buka Halaman</a>
               </div>
             </div>
 
             <div class="web-grid">
               <div>
-                <h4 class="sub-title">Halaman</h4>
+                <h4 class="sub-title" data-i18n="web-page">Halaman</h4>
                 <div class="form-group">
-                  <label for="web-title">Judul Tab</label>
+                  <label for="web-title" data-i18n="web-title">Judul Tab</label>
                   <input id="web-title" placeholder="Kosongkan untuk guna tajuk sedia ada">
                 </div>
                 <div class="form-group">
-                  <label for="web-meta">Penerangan Meta (SEO)</label>
+                  <label for="web-meta" data-i18n="web-meta">Penerangan Meta (SEO)</label>
                   <input id="web-meta" placeholder="Kosongkan untuk guna sedia ada">
                 </div>
-                <h4 class="sub-title">Kod Tersuai (halaman ini sahaja)</h4>
+                <h4 class="sub-title" data-i18n="web-pagecode">Kod Tersuai (halaman ini sahaja)</h4>
                 <div class="form-group">
-                  <label for="web-css">CSS Tersuai</label>
+                  <label for="web-css" data-i18n="web-css">CSS Tersuai</label>
                   <textarea id="web-css" class="code-area" rows="9" placeholder="body { background: #000; }&#10;.hero h1 { font-size: 3rem; }"></textarea>
                 </div>
                 <div class="form-group">
-                  <label for="web-js">JS Tersuai</label>
+                  <label for="web-js" data-i18n="web-js">JS Tersuai</label>
                   <textarea id="web-js" class="code-area" rows="9" placeholder="console.log('Halaman dimuat');"></textarea>
                 </div>
               </div>
 
               <div>
-                <h4 class="sub-title">Tema Global (semua halaman)</h4>
+                <h4 class="sub-title" data-i18n="web-theme">Tema Global (semua halaman)</h4>
                 <div class="color-row">
                   <div class="form-group">
-                    <label for="theme-accent">Warna Utama</label>
+                    <label for="theme-accent" data-i18n="web-accent">Warna Utama</label>
                     <input type="color" id="theme-accent" value="#dc2626">
                   </div>
                   <div class="form-group">
-                    <label for="theme-bg">Warna Latar</label>
+                    <label for="theme-bg" data-i18n="web-bg">Warna Latar</label>
                     <input type="color" id="theme-bg" value="#07070a">
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="theme-heading">Font Tajuk</label>
+                  <label for="theme-heading" data-i18n="web-fhead">Font Tajuk</label>
                   <select id="theme-heading">
-                    <option value="">Default (Orbitron)</option>
+                    <option value="" data-i18n="web-fhead-def">Default (Orbitron)</option>
                     <option>Orbitron</option>
                     <option>Chakra Petch</option>
                     <option>Arial</option>
@@ -355,9 +356,9 @@
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="theme-body">Font Isi Kandungan</label>
+                  <label for="theme-body" data-i18n="web-fbody">Font Isi Kandungan</label>
                   <select id="theme-body">
-                    <option value="">Default (Chakra Petch)</option>
+                    <option value="" data-i18n="web-fbody-def">Default (Chakra Petch)</option>
                     <option>Orbitron</option>
                     <option>Chakra Petch</option>
                     <option>Arial</option>
@@ -368,7 +369,7 @@
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="theme-logo">URL Logo (seluruh laman)</label>
+                  <label for="theme-logo" data-i18n="web-logo">URL Logo (seluruh laman)</label>
                   <input id="theme-logo" placeholder="https://... (kosongkan = logo sedia ada)">
                 </div>
                 <p class="muted">Pilih halaman di atas, taip CSS/JS tersuai, kemudian tekan Simpan. Tetapan disimpan dalam pangkalan data dan digunakan serta-merta pada semua pelawat.</p>
@@ -385,8 +386,8 @@
       <h3 id="modal-title"></h3>
       <div id="modal-body"></div>
       <div class="modal-actions">
-        <button id="modal-cancel" class="btn btn-ghost btn-sm">Batal</button>
-        <button id="modal-save" class="btn btn-primary btn-sm">Simpan</button>
+        <button id="modal-cancel" class="btn btn-ghost btn-sm" data-i18n="btn-cancel">Batal</button>
+        <button id="modal-save" class="btn btn-primary btn-sm" data-i18n="web-save">Simpan</button>
       </div>
     </div>
   </div>
@@ -398,6 +399,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>
   <script src="js/portal.js"></script>
+  <script src="js/admin-i18n.js"></script>
   <script src="js/customize.js"></script>
   <script>
 (function () {
@@ -580,7 +582,7 @@
           document.getElementById("dash-income").textContent = "RM " + incTotal.toFixed(2);
 
           document.getElementById("title-cust").textContent = "Pendaftaran Pelanggan — " + document.getElementById("filter-cust").selectedOptions[0].text;
-          document.getElementById("title-income").textContent = "Pendapatan — " + document.getElementById("filter-income").selectedOptions[0].text;
+          document.getElementById("title-income").textContent = adminI18n.t("chart-income") + " — " + document.getElementById("filter-income").selectedOptions[0].text;
 
           var statusCounts = { pending: 0, in_progress: 0, done: 0 };
           dash.requestsData.forEach(function (x) {
@@ -589,7 +591,7 @@
           makeChart("chart-status", {
             type: "doughnut",
             data: {
-              labels: ["Menunggu", "Dalam Proses", "Selesai"],
+              labels: ["Menunggu", "Dalam Proses", adminI18n.t("btn-done")],
               datasets: [{
                 data: [statusCounts.pending, statusCounts.in_progress, statusCounts.done],
                 backgroundColor: ["#f59e0b", "#3b82f6", "#22c55e"],
@@ -624,7 +626,7 @@
             data: {
               labels: inc.buckets.map(function (b) { return b.label; }),
               datasets: [{
-                label: "Pendapatan (RM)",
+                label: adminI18n.t("chart-income") + " (RM)",
                 data: inc.buckets.map(function (b) { return b.value; }),
                 backgroundColor: inc.buckets.map(function (b) {
                   return b.value >= 0 ? "rgba(220,38,38,0.75)" : "rgba(38,38,46,0.8)";
@@ -641,7 +643,7 @@
           });
         }
 
-        var MS_MONTHS = ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September", "Oktober", "November", "Disember"];
+        var MS_MONTHS = [adminI18n.t('month-0'), adminI18n.t('month-1'), adminI18n.t('month-2'), adminI18n.t('month-3'), adminI18n.t('month-4'), adminI18n.t('month-5'), adminI18n.t('month-6'), adminI18n.t('month-7'), adminI18n.t('month-8'), adminI18n.t('month-9'), adminI18n.t('month-10'), adminI18n.t('month-11')];
 
         function renderCalendar() {
           var grid = document.getElementById("calendar");
@@ -677,7 +679,7 @@
             var ds = y + "-" + p2(m + 1) + "-" + p2(day);
             html += '<div class="' + cls + '" data-day="' + k + '" data-date="' + ds + '">';
             html += '<span class="cal-num">' + day + "</span>";
-            if (regByDay[k]) html += '<span class="cal-badge reg">' + regByDay[k] + ' daftar</span>';
+            if (regByDay[k]) html += '<span class="cal-badge reg">' + regByDay[k] + ' ' + adminI18n.t("cal-reg") + '</span>';
             if (incByDay[k] != null) html += '<span class="cal-badge inc">RM ' + incByDay[k].toFixed(0) + "</span>";
             html += "</div>";
           }
@@ -697,7 +699,7 @@
               var inc = incByDay[dash.selDay];
               document.getElementById("cal-info").textContent = "Tarikh dipilih: " + ds +
                 " — Pendaftaran: " + reg +
-                (inc != null ? ", Pendapatan: RM " + inc.toFixed(2) : ", Tiada rekod pendapatan");
+                (inc != null ? ", " + adminI18n.t("chart-income") + ": RM " + inc.toFixed(2) : ", " + adminI18n.t("e-tx"));
             });
           });
         }
@@ -785,7 +787,7 @@
         }
 
         function statusOptions(selected) {
-          var labels = { pending: "Menunggu", in_progress: "Dalam Proses", done: "Selesai" };
+          var labels = { pending: adminI18n.t("badge-pending"), in_progress: adminI18n.t("badge-in_progress"), done: adminI18n.t("badge-done") };
           return ["pending", "in_progress", "done"].map(function (s) {
             return '<option value="' + s + '"' + (s === selected ? " selected" : "") + ">" + labels[s] + "</option>";
           }).join("");
@@ -801,17 +803,17 @@
             return;
           }
           if (!data || data.length === 0) {
-            box.innerHTML = '<p class="muted">Belum ada permohonan.</p>';
+            box.innerHTML = '<p class="muted">' + adminI18n.t("e-requests") + '</p>';
             return;
           }
-          box.innerHTML = '<table class="table"><thead><tr><th>Pelanggan</th><th>Perkhidmatan</th><th>Lokasi</th><th>Tarikh</th><th>Status</th><th>Tindakan</th></tr></thead><tbody>' +
+          box.innerHTML = '<table class="table"><thead><tr><th>' + adminI18n.t("th-user") + '</th><th>' + adminI18n.t("th-service") + '</th><th>' + adminI18n.t("th-location") + '</th><th>' + adminI18n.t("th-date") + '</th><th>' + adminI18n.t("th-status") + '</th><th>' + adminI18n.t("th-action") + '</th></tr></thead><tbody>' +
             data.map(function (r) {
               var desc = r.description ? '<div class="table-desc">' + esc(r.description) + '</div>' : "";
               return '<tr data-id="' + r.id + '"><td>' + esc(customerName(r.user_id)) + '</td><td>' + esc(r.service) + desc + "</td><td>" + esc(r.location) + "</td><td>" +
                 new Date(r.created_at).toLocaleDateString("ms-MY") +
                 '</td><td><span class="badge ' + r.status + '">' + window.portal.badge(r.status) +
-                '</span></td><td><button class="action-btn" data-edit-request="' + r.id + '">Edit</button> ' +
-                '<button class="action-btn danger" data-delete-request="' + r.id + '">Padam</button></td></tr>';
+                '</span></td><td><button class="action-btn" data-edit-request="' + r.id + '">' + adminI18n.t("btn-edit") + '</button> ' +
+                '<button class="action-btn danger" data-delete-request="' + r.id + '">' + adminI18n.t("btn-del") + '</button></td></tr>';
             }).join("") + "</tbody></table>";
 
           box.querySelectorAll("[data-edit-request]").forEach(function (btn) {
@@ -833,7 +835,7 @@
                   description: document.getElementById("m-description").value,
                   status: document.getElementById("m-status").value
                 }).eq("id", id);
-                if (error) alert("Ralat: " + error.message);
+                if (error) showToast("Ralat: " + error.message);
                 closeModal();
                 loadRequests();
                 loadStats();
@@ -846,9 +848,9 @@
           box.querySelectorAll("[data-delete-request]").forEach(function (btn) {
             btn.addEventListener("click", async function () {
               var id = btn.getAttribute("data-delete-request");
-              if (!confirm("Padam permohonan ini?")) return;
+              if (!confirm(adminI18n.t("c-del-request"))) return;
               var { error } = await sb.from("service_requests").delete().eq("id", id);
-              if (error) alert("Ralat: " + error.message);
+              if (error) showToast("Ralat: " + error.message);
               loadRequests();
               loadStats();
               dash.requestsData = (await sb.from("service_requests").select("id, status, created_at")).data || [];
@@ -859,7 +861,7 @@
 
         var FONT_OPTIONS = ["Orbitron", "Chakra Petch", "Arial", "Verdana", "Georgia", "Courier New", "Impact"];
         var FONT_SIZES = { "kecil": "0.9rem", "sederhana": "1.15rem", "besar": "1.45rem" };
-        var FONT_SIZE_LABELS = { "kecil": "Kecil", "sederhana": "Sederhana", "besar": "Besar" };
+        var FONT_SIZE_LABELS = { "kecil": adminI18n.t("size-small"), "sederhana": adminI18n.t("size-medium"), "besar": adminI18n.t("size-big") };
         var catData = [];
 
         function fontPreview(f) {
@@ -894,7 +896,7 @@
             '<div class="cat-meta"><span class="badge ' + (c.active ? "done" : "pending") + '">' + (c.active ? "Aktif" : "Tidak Aktif") +
             '</span><span class="badge in_progress">' + esc(c.mode) + "</span></div>" +
             '<div class="cat-actions">' +
-            '<button class="action-btn" data-edit-cat="' + esc(c.id) + '">Edit</button> ' +
+            '<button class="action-btn" data-edit-cat="' + esc(c.id) + '">' + adminI18n.t("btn-edit") + '</button> ' +
             '<button class="action-btn" data-toggle-cat="' + esc(c.id) + '">' + (c.active ? "Nyahaktif" : "Aktifkan") + "</button> " +
             '<button class="action-btn danger" data-delete-cat="' + esc(c.id) + '">Padam</button></div></div>';
         }
@@ -916,9 +918,9 @@
           grid.querySelectorAll("[data-delete-cat]").forEach(function (btn) {
             btn.addEventListener("click", async function () {
               var id = btn.getAttribute("data-delete-cat");
-              if (!confirm("Padam kategori ini? Pendaftaran sedia ada akan kekal.")) return;
+              if (!confirm(adminI18n.t("c-del-category"))) return;
               var { error } = await sb.from("courses").delete().eq("id", id);
-              if (error) alert("Ralat: " + error.message);
+              if (error) showToast("Ralat: " + error.message);
               loadCategories();
             });
           });
@@ -967,7 +969,7 @@
           }
           catData = data || [];
           if (catData.length === 0) {
-            grid.innerHTML = '<p class="muted">Belum ada kategori. Tekan "+ Tambah Kategori".</p>';
+            grid.innerHTML = '<p class="muted">' + adminI18n.t("cat-empty") + '</p>';
             return;
           }
           grid.innerHTML = catData.map(catCard).join("");
@@ -977,29 +979,29 @@
 
         function categoryModal(c) {
           var editing = !!c;
-          openModal(editing ? "Edit Kategori" : "Tambah Kategori",
-            '<div class="form-group"><label>Nama Kategori</label><input id="c-name" value="' + (editing ? esc(c.name) : "") + '"></div>' +
-            '<div class="form-group"><label>Penerangan</label><textarea id="c-desc" rows="3">' + (editing ? esc(c.description) : "") + "</textarea></div>" +
-            '<div class="form-group"><label>Mod Kelas</label><select id="c-mode">' +
+          openModal(editing ? adminI18n.t("btn-edit") + " " + adminI18n.t("cat-title") : adminI18n.t("cat-add"),
+            '<div class="form-group"><label>' + adminI18n.t("cat-name") + '</label><input id="c-name" value="' + (editing ? esc(c.name) : "") + '"></div>' +
+            '<div class="form-group"><label>' + adminI18n.t("cat-desc") + '</label><textarea id="c-desc" rows="3">' + (editing ? esc(c.description) : "") + "</textarea></div>" +
+            '<div class="form-group"><label>' + adminI18n.t("cat-mode") + '</label><select id="c-mode">' +
             ["Online", "Bersemuka", "Online & Bersemuka"].map(function (m) {
               return '<option' + (editing && c.mode === m ? " selected" : "") + ">" + m + "</option>";
             }).join("") + "</select></div>" +
-            '<div class="switch-row"><input type="checkbox" id="c-active" class="checkbox"' + (editing && c.active ? " checked" : "") + '><label for="c-active">Aktif (dipaparkan kepada pelanggan)</label></div>' +
+            '<div class="switch-row"><input type="checkbox" id="c-active" class="checkbox"' + (editing && c.active ? " checked" : "") + '><label for="c-active">' + adminI18n.t("cat-active") + '</label></div>' +
             '<div class="color-row">' +
-            '<div class="form-group"><label>Warna Teks</label><input type="color" id="c-color" value="' + (editing && c.color ? esc(c.color) : "#f4f4f5") + '"></div>' +
-            '<div class="form-group"><label>Warna Latar</label><input type="color" id="c-bg" value="' + (editing && c.bg_color ? esc(c.bg_color) : "#16161c") + '"></div>' +
+            '<div class="form-group"><label>' + adminI18n.t("cat-color") + '</label><input type="color" id="c-color" value="' + (editing && c.color ? esc(c.color) : "#f4f4f5") + '"></div>' +
+            '<div class="form-group"><label>' + adminI18n.t("cat-bgcolor") + '</label><input type="color" id="c-bg" value="' + (editing && c.bg_color ? esc(c.bg_color) : "#16161c") + '"></div>' +
             "</div>" +
-            '<div class="form-group"><label>Gaya Font</label><select id="c-font">' +
+            '<div class="form-group"><label>' + adminI18n.t("cat-font") + '</label><select id="c-font">' +
             FONT_OPTIONS.map(function (f) {
               return '<option' + (editing && c.font_family === f ? " selected" : "") + ">" + f + "</option>";
             }).join("") + "</select></div>" +
-            '<div class="form-group"><label>Saiz Tajuk</label><select id="c-fontsize">' +
+            '<div class="form-group"><label>' + adminI18n.t("cat-size") + '</label><select id="c-fontsize">' +
             Object.keys(FONT_SIZES).map(function (s) {
               return '<option value="' + s + '"' + (editing && c.font_size === s ? " selected" : "") + ">" + FONT_SIZE_LABELS[s] + "</option>";
             }).join("") + "</select></div>" +
-            '<div class="form-group"><label>Gambar / GIF (URL)</label><input id="c-imgurl" placeholder="https://... (atau muat naik fail di bawah)" value="' + (editing ? esc(c.image_url || "") : "") + '"></div>' +
-            '<div class="form-group"><label>Muat Naik Fail (.gif / .png / .jpg)</label><input type="file" id="c-imgfile" accept="image/gif,image/png,image/jpeg,image/webp"></div>' +
-            (editing && c.image_url ? '<p class="muted"><img id="c-imgprev" class="modal-preview" src="' + esc(c.image_url) + '" alt=""> <button type="button" class="action-btn danger" id="c-imgclear">Buang Gambar</button></p>' : ""));
+            '<div class="form-group"><label>' + adminI18n.t("cat-image") + '</label><input id="c-imgurl" placeholder="https://... (atau muat naik fail di bawah)" value="' + (editing ? esc(c.image_url || "") : "") + '"></div>' +
+            '<div class="form-group"><label>' + adminI18n.t("cat-upload") + '</label><input type="file" id="c-imgfile" accept="image/gif,image/png,image/jpeg,image/webp"></div>' +
+            (editing && c.image_url ? '<p class="muted"><img id="c-imgprev" class="modal-preview" src="' + esc(c.image_url) + '" alt=""> <button type="button" class="action-btn danger" id="c-imgclear">' + adminI18n.t("cat-delete") + '</button></p>' : ""));
           var prev = document.getElementById("c-imgprev");
           if (prev) {
             document.getElementById("c-imgclear").addEventListener("click", function () {
@@ -1049,7 +1051,7 @@
               var { error } = editing
                 ? await sb.from("courses").update(payload).eq("id", c.id)
                 : await sb.from("courses").insert(Object.assign({ position: catData.length }, payload));
-              if (error) alert("Ralat: " + error.message);
+              if (error) showToast("Ralat: " + error.message);
             } catch (err) {
               alert("Gagal muat naik gambar: " + err.message);
               return;
@@ -1073,10 +1075,10 @@ async function loadEnrollments() {
             return;
           }
           if (!data || data.length === 0) {
-            box.innerHTML = '<p class="muted">Belum ada pendaftaran kelas.</p>';
+            box.innerHTML = '<p class="muted">' + adminI18n.t("e-enrollments") + '</p>';
             return;
           }
-          box.innerHTML = '<table class="table"><thead><tr><th>Pelanggan</th><th>Kelas</th><th>Mod</th><th>Tarikh</th><th>Tindakan</th></tr></thead><tbody>' +
+          box.innerHTML = '<table class="table"><thead><tr><th>' + adminI18n.t("th-student") + '</th><th>' + adminI18n.t("th-class") + '</th><th>' + adminI18n.t("th-mode") + '</th><th>' + adminI18n.t("th-date") + '</th><th>' + adminI18n.t("th-action") + '</th></tr></thead><tbody>' +
             data.map(function (e) {
               return '<tr><td>' + esc(customerName(e.user_id)) + '</td><td>' + esc(e.class_name) + "</td><td>" + esc(e.mode) + "</td><td>" +
                 new Date(e.created_at).toLocaleDateString("ms-MY") +
@@ -1086,9 +1088,9 @@ async function loadEnrollments() {
           box.querySelectorAll("[data-delete-enroll]").forEach(function (btn) {
             btn.addEventListener("click", async function () {
               var id = btn.getAttribute("data-delete-enroll");
-              if (!confirm("Padam pendaftaran ini?")) return;
+              if (!confirm(adminI18n.t("c-del-enrollment"))) return;
               var { error } = await sb.from("class_enrollments").delete().eq("id", id);
-              if (error) alert("Ralat: " + error.message);
+              if (error) showToast("Ralat: " + error.message);
               loadEnrollments();
               loadStats();
             });
@@ -1106,10 +1108,10 @@ async function loadEnrollments() {
             return;
           }
           if (!data || data.length === 0) {
-            box.innerHTML = '<p class="muted">Belum ada pelanggan berdaftar.</p>';
+            box.innerHTML = '<p class="muted">' + adminI18n.t("e-customers") + '</p>';
             return;
           }
-          box.innerHTML = '<table class="table"><thead><tr><th>Nama</th><th>E-mel</th><th>Tarikh Daftar</th><th>Tindakan</th></tr></thead><tbody>' +
+          box.innerHTML = '<table class="table"><thead><tr><th>' + adminI18n.t("th-name") + '</th><th>' + adminI18n.t("th-email") + '</th><th>' + adminI18n.t("th-date") + '</th><th>' + adminI18n.t("th-action") + '</th></tr></thead><tbody>' +
             data.map(function (p) {
               return "<tr><td>" + esc(p.full_name || "-") + "</td><td>" + esc(p.email) + "</td><td>" +
                 new Date(p.created_at).toLocaleDateString("ms-MY") +
@@ -1120,12 +1122,12 @@ async function loadEnrollments() {
             btn.addEventListener("click", async function () {
               var uid = btn.getAttribute("data-delete-customer");
               var nm = customerName(uid);
-              if (!confirm("Padam semua data pelanggan '" + nm + "'? Permohonan, pendaftaran kelas dan rekod pendapatan pelanggan ini turut dipadam.")) return;
+              if (!confirm(adminI18n.t("c-del-customer") + " '" + nm + "'?")) return;
               await sb.from("class_enrollments").delete().eq("user_id", uid);
               await sb.from("service_requests").delete().eq("user_id", uid);
               await sb.from("transactions").delete().eq("user_id", uid);
               var { error } = await sb.from("profiles").delete().eq("id", uid);
-              if (error) alert("Ralat: " + error.message);
+              if (error) showToast("Ralat: " + error.message);
         async function loadBookings() {
           var { data, error } = await sb.from("bookings")
             .select("id, user_id, service, booking_date, booking_time, location, notes, status, created_at, customer_name, phone, email, image_url, video_url")
@@ -1136,10 +1138,10 @@ async function loadEnrollments() {
             return;
           }
           if (!data || data.length === 0) {
-            box.innerHTML = '<p class="muted">Belum ada tempahan.</p>';
+            box.innerHTML = '<p class="muted">' + adminI18n.t("e-bookings") + '</p>';
             return;
           }
-          box.innerHTML = '<table class="table"><thead><tr><th>Pelanggan</th><th>Hubungi</th><th>Perkhidmatan</th><th>Tarikh</th><th>Masa</th><th>Lokasi</th><th>Fail</th><th>Status</th><th>Tindakan</th></tr></thead><tbody>' +
+          box.innerHTML = '<table class="table"><thead><tr><th>' + adminI18n.t("th-user") + '</th><th>' + adminI18n.t("th-contact") + '</th><th>' + adminI18n.t("th-service") + '</th><th>' + adminI18n.t("th-date") + '</th><th>' + adminI18n.t("th-time") + '</th><th>' + adminI18n.t("th-location") + '</th><th>' + adminI18n.t("th-files") + '</th><th>' + adminI18n.t("th-status") + '</th><th>' + adminI18n.t("th-action") + '</th></tr></thead><tbody>' +
             data.map(function (b) {
               var notes = b.notes ? '<div class="table-desc">' + esc(b.notes) + '</div>' : "";
               var who = esc(b.customer_name || customerName(b.user_id) || "—");
@@ -1150,11 +1152,11 @@ async function loadEnrollments() {
               var fileCell = files.length ? files.join(" ") : "—";
               var acts = "";
               if (b.status === "pending") {
-                acts += '<button class="action-btn" data-confirm-booking="' + b.id + '">Sahkan</button> ';
+                acts += '<button class="action-btn" data-confirm-booking="' + b.id + '">' + adminI18n.t("btn-ok") + '</button> ';
               }
               if (b.status === "pending" || b.status === "confirmed") {
-                acts += '<button class="action-btn" data-done-booking="' + b.id + '">Selesai</button> ';
-                acts += '<button class="action-btn" data-cancel-booking="' + b.id + '">Batal</button> ';
+                acts += '<button class="action-btn" data-done-booking="' + b.id + '">' + adminI18n.t("btn-done") + '</button> ';
+                acts += '<button class="action-btn" data-cancel-booking="' + b.id + '">' + adminI18n.t("btn-cancel") + '</button> ';
               }
               acts += '<button class="action-btn danger" data-delete-booking="' + b.id + '">Padam</button>';
               return '<tr><td>' + who + '</td><td>' + contact + '</td><td>' + esc(b.service) + notes + '</td><td>' + esc(b.booking_date) +
@@ -1167,11 +1169,11 @@ async function loadEnrollments() {
             box.querySelectorAll("[data-" + id + "-booking]").forEach(function (btn) {
               btn.addEventListener("click", async function () {
                 var bid = btn.getAttribute("data-" + id + "-booking");
-                if (id === "delete" && !confirm("Padam tempahan ini?")) return;
-                if (id === "cancel" && !confirm("Batal tempahan ini?")) return;
+                if (id === "delete" && !confirm(adminI18n.t("c-del-booking"))) return;
+                if (id === "cancel" && !confirm(adminI18n.t("c-cancel-booking"))) return;
                 var payload = action;
                 var { error } = await sb.from("bookings").update(payload).eq("id", bid);
-                if (error) alert("Ralat: " + error.message);
+                if (error) showToast("Ralat: " + error.message);
                 loadBookings();
               });
             });
@@ -1182,9 +1184,9 @@ async function loadEnrollments() {
           box.querySelectorAll("[data-delete-booking]").forEach(function (btn) {
             btn.addEventListener("click", async function () {
               var bid = btn.getAttribute("data-delete-booking");
-              if (!confirm("Padam tempahan ini?")) return;
+              if (!confirm(adminI18n.t("c-del-booking"))) return;
               var { error } = await sb.from("bookings").delete().eq("id", bid);
-              if (error) alert("Ralat: " + error.message);
+              if (error) showToast("Ralat: " + error.message);
               loadBookings();
             });
           });
@@ -1214,18 +1216,18 @@ async function loadEnrollments() {
           renderCharts();
           renderCalendar();
           if (!dash.txData.length) {
-            box.innerHTML = '<p class="muted">Belum ada rekod pendapatan. Tekan "+ Rekod Baru".</p>';
+            box.innerHTML = '<p class="muted">' + adminI18n.t("e-tx") + '</p>';
             return;
           }
-          box.innerHTML = '<table class="table"><thead><tr><th>Tarikh</th><th>Penerangan</th><th>Jenis</th><th>Amaun</th><th>Tindakan</th></tr></thead><tbody>' +
+          box.innerHTML = '<table class="table"><thead><tr><th>' + adminI18n.t("th-date") + '</th><th>' + adminI18n.t("th-desc") + '</th><th>' + adminI18n.t("th-type") + '</th><th>' + adminI18n.t("th-amount") + '</th><th>' + adminI18n.t("th-action") + '</th></tr></thead><tbody>' +
             dash.txData.map(function (t) {
               var amt = parseFloat(t.amount) || 0;
               var cls = t.type === "expense" ? "neg" : "pos";
               var sign = t.type === "expense" ? "-" : "+";
               return '<tr><td>' + new Date(t.created_at).toLocaleString("ms-MY") +
-                '</td><td>' + esc(t.label) + "</td><td>" + (t.type === "expense" ? "Perbelanjaan" : "Pendapatan") +
+                '</td><td>' + esc(t.label) + "</td><td>" + (t.type === "expense" ? adminI18n.t("type-expense") : adminI18n.t("type-income")) +
                 '</td><td class="record-amount ' + cls + '">' + sign + " RM " + amt.toFixed(2) + "</td>" +
-                '<td><button class="action-btn" data-edit-tx="' + t.id + '">Edit</button> ' +
+                '<td><button class="action-btn" data-edit-tx="' + t.id + '">' + adminI18n.t("btn-edit") + '</button> ' +
                 '<button class="action-btn danger" data-delete-tx="' + t.id + '">Padam</button></td></tr>';
             }).join("") + "</tbody></table>";
 
@@ -1239,9 +1241,9 @@ async function loadEnrollments() {
           box.querySelectorAll("[data-delete-tx]").forEach(function (btn) {
             btn.addEventListener("click", async function () {
               var id = btn.getAttribute("data-delete-tx");
-              if (!confirm("Padam rekod ini?")) return;
+              if (!confirm(adminI18n.t("c-del-tx"))) return;
               var { error } = await sb.from("transactions").delete().eq("id", id);
-              if (error) alert("Ralat: " + error.message);
+              if (error) showToast("Ralat: " + error.message);
               loadTx();
             });
           });
@@ -1253,8 +1255,8 @@ async function loadEnrollments() {
             '<div class="form-group"><label>Penerangan</label><input id="t-label" value="' + (editing ? esc(t.label) : "") + '"></div>' +
             '<div class="form-group"><label>Amaun (RM)</label><input id="t-amount" type="number" step="0.01" min="0" value="' + (editing ? t.amount : "") + '"></div>' +
             '<div class="form-group"><label>Jenis</label><select id="t-type">' +
-            '<option value="income"' + (editing && t.type === "income" ? " selected" : "") + ">Pendapatan</option>" +
-            '<option value="expense"' + (editing && t.type === "expense" ? " selected" : "") + ">Perbelanjaan</option>" +
+            '<option value="income"' + (editing && t.type === "income" ? " selected" : "") + '>' + adminI18n.t("type-income") + '</option>' +
+            '<option value="expense"' + (editing && t.type === "expense" ? " selected" : "") + '>' + adminI18n.t("type-expense") + '</option>' +
             "</select></div>" +
             '<div class="form-group"><label>Tarikh &amp; Masa</label><input id="t-date" type="datetime-local" value="' + (editing ? toLocalInput(t.created_at) : toLocalInput(new Date())) + '"></div>');
           modalSave.onclick = async function () {
@@ -1270,7 +1272,7 @@ async function loadEnrollments() {
             var { error } = editing
               ? await sb.from("transactions").update(payload).eq("id", t.id)
               : await sb.from("transactions").insert(payload);
-            if (error) alert("Ralat: " + error.message);
+            if (error) showToast("Ralat: " + error.message);
             closeModal();
             loadTx();
           };
@@ -1356,7 +1358,7 @@ var pageSelect = document.getElementById("page-select");
         document.getElementById("web-reset").addEventListener("click", async function () {
           var path = currentPagePath();
           if (!path) return;
-          if (!confirm("Padam semua tetapan tema dan halaman ini?")) return;
+          if (!confirm(adminI18n.t("c-del-web"))) return;
           await sb.from("site_pages").delete().eq("path", path);
           await sb.from("site_theme").delete().eq("id", 1);
           loadWebPage();
@@ -1366,16 +1368,16 @@ var pageSelect = document.getElementById("page-select");
           document.getElementById("theme-heading").value = "";
           document.getElementById("theme-body").value = "";
           document.getElementById("theme-logo").value = "";
-          alert("Tetapan dipadam.");
+          showToast(adminI18n.t("deleted"), true);
         });
 
         var REPORT_SCOPES = {
-          semua: "Laporan Lengkap",
-          requests: "Permohonan Perkhidmatan",
-          bookings: "Tempahan",
-          enrollments: "Pendaftaran Kelas",
-          customers: "Pelanggan",
-          transactions: "Transaksi"
+          semua: adminI18n.t("report-all"),
+          requests: adminI18n.t("scope-requests"),
+          bookings: adminI18n.t("scope-bookings"),
+          enrollments: adminI18n.t("scope-enrollments"),
+          customers: adminI18n.t("scope-customers"),
+          transactions: adminI18n.t("scope-transactions")
         };
 
         function reportDate(ts) {
@@ -1438,7 +1440,7 @@ var pageSelect = document.getElementById("page-select");
               if (!reportInRange(r.created_at, from, to)) return;
               rows.push([who(r.user_id), r.service, r.location, r.description || "—", window.portal.badge(r.status), reportDate(r.created_at)]);
             });
-            add("Permohonan Perkhidmatan", ["Pelanggan", "Perkhidmatan", "Lokasi", "Penerangan", "Status", "Tarikh"], rows);
+            add(adminI18n.t("scope-requests"), [adminI18n.t("th-user"), adminI18n.t("th-service"), adminI18n.t("th-location"), adminI18n.t("th-desc"), adminI18n.t("th-status"), adminI18n.t("th-date")], rows);
           }
 
           if (scope === "semua" || scope === "bookings") {
@@ -1449,7 +1451,7 @@ var pageSelect = document.getElementById("page-select");
               if (!reportInRange(b.created_at, from, to)) return;
               rows.push([b.customer_name || who(b.user_id), b.phone || "—", b.email || "—", b.service, b.booking_date, b.booking_time, b.location, b.notes || "—", window.portal.badge(b.status), b.image_url || "—", b.video_url || "—"]);
             });
-            add("Tempahan", ["Pelanggan", "Telefon", "E-mel", "Perkhidmatan", "Tarikh", "Masa", "Lokasi", "Nota", "Status", "Gambar", "Video"], rows);
+            add(adminI18n.t("scope-bookings"), [adminI18n.t("th-user"), adminI18n.t("th-phone"), adminI18n.t("th-email"), adminI18n.t("th-service"), adminI18n.t("th-date"), adminI18n.t("th-time"), adminI18n.t("th-location"), adminI18n.t("th-notes"), adminI18n.t("th-status"), "Gambar", "Video"], rows);
           }
 
           if (scope === "semua" || scope === "enrollments") {
@@ -1459,7 +1461,7 @@ var pageSelect = document.getElementById("page-select");
               if (!reportInRange(e.created_at, from, to)) return;
               rows.push([who(e.user_id), e.class_name, e.mode, reportDate(e.created_at)]);
             });
-            add("Pendaftaran Kelas", ["Pelajar", "Kelas", "Mod", "Tarikh"], rows);
+            add(adminI18n.t("scope-enrollments"), [adminI18n.t("th-student"), adminI18n.t("th-class"), adminI18n.t("th-mode"), adminI18n.t("th-date")], rows);
           }
 
           if (scope === "semua" || scope === "customers") {
@@ -1469,7 +1471,7 @@ var pageSelect = document.getElementById("page-select");
               if (!reportInRange(c.created_at, from, to)) return;
               rows.push([c.full_name || "—", c.email || "—", reportDate(c.created_at)]);
             });
-            add("Pelanggan", ["Nama", "E-mel", "Tarikh Daftar"], rows);
+            add(adminI18n.t("scope-customers"), [adminI18n.t("th-name"), adminI18n.t("th-email"), adminI18n.t("th-date")], rows);
           }
 
           if (scope === "semua" || scope === "transactions") {
@@ -1477,12 +1479,12 @@ var pageSelect = document.getElementById("page-select");
             var rows = [];
             (trs || []).forEach(function (x) {
               if (!reportInRange(x.created_at, from, to)) return;
-              rows.push([x.label, "RM " + Number(x.amount).toFixed(2), x.type === "income" ? "Pendapatan" : "Perbelanjaan", reportDate(x.created_at)]);
+              rows.push([x.label, "RM " + Number(x.amount).toFixed(2), x.type === "income" ? adminI18n.t("type-income") : adminI18n.t("type-expense"), reportDate(x.created_at)]);
             });
-            add("Transaksi", ["Label", "Jumlah", "Jenis", "Tarikh"], rows);
+            add(adminI18n.t("scope-transactions"), [adminI18n.t("th-label"), adminI18n.t("th-amount"), adminI18n.t("th-type"), adminI18n.t("th-date")], rows);
           }
 
-          return { title: REPORT_SCOPES[scope], sections: sections, range: from || to ? "Dari " + (from || "awal") + " hingga " + (to || "kini") : "Semua tarikh" };
+          return { title: REPORT_SCOPES[scope], sections: sections, range: from || to ? adminI18n.t("report-range-from") + (from || adminI18n.t("report-early")) + adminI18n.t("report-range-to") + (to || adminI18n.t("report-now")) : adminI18n.t("report-range-full") };
         }
 
         function reportPDF(data) {
@@ -1501,7 +1503,7 @@ var pageSelect = document.getElementById("page-select");
             doc.setFont("helvetica", "normal");
             doc.setFontSize(10);
             doc.setTextColor(90, 90, 90);
-            doc.text(data.range + "  |  Dijana: " + new Date().toLocaleString("ms-MY"), 40, 60);
+            doc.text(data.range + "  |  " + adminI18n.t("report-generated") + new Date().toLocaleString("ms-MY"), 40, 60);
             doc.setFont("helvetica", "bold");
             doc.setFontSize(13);
             doc.setTextColor(10, 10, 10);
@@ -1531,7 +1533,7 @@ var pageSelect = document.getElementById("page-select");
         function reportWord(data) {
           var html = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><title>" + escHtml(data.title) + "</title></head><body>";
           html += "<h1>AkmalTaufikEnterprise - " + escHtml(data.title) + "</h1>";
-          html += "<p>" + escHtml(data.range) + " | Dijana: " + escHtml(new Date().toLocaleString("ms-MY")) + "</p>";
+          html += "<p>" + escHtml(data.range) + " | " + escHtml(adminI18n.t("report-generated")) + escHtml(new Date().toLocaleString("ms-MY")) + "</p>";
           data.sections.forEach(function (s) {
             html += "<h2>" + escHtml(s.name) + "</h2>";
             html += "<table border='1' cellpadding='6' style='border-collapse:collapse;width:100%;font-family:Arial;font-size:11px'><tr>" +
@@ -1546,7 +1548,7 @@ var pageSelect = document.getElementById("page-select");
         }
 
         function reportCSV(data) {
-          var lines = ["AkmalTaufikEnterprise - " + data.title, data.range + " | Dijana: " + new Date().toLocaleString("ms-MY")];
+          var lines = ["AkmalTaufikEnterprise - " + data.title, data.range + " | " + adminI18n.t("report-generated") + new Date().toLocaleString("ms-MY")];
           data.sections.forEach(function (s) {
             lines.push("");
             lines.push(s.name);
@@ -1565,13 +1567,13 @@ var pageSelect = document.getElementById("page-select");
               try {
                 var data = await buildReport();
                 if (!data.sections.length) {
-                  showToast("Tiada data untuk laporan ini.");
+                  showToast(adminI18n.t("report-empty"));
                   return;
                 }
                 jobs[f](data);
-                showToast("Laporan dimuat turun: " + data.title, true);
+                showToast(adminI18n.t("report-done") + data.title, true);
               } catch (err) {
-                showToast("Ralat menjana laporan: " + err.message);
+                showToast(adminI18n.t("report-error") + err.message);
               } finally {
                 btn.disabled = false;
               }
@@ -1597,13 +1599,13 @@ var pageSelect = document.getElementById("page-select");
                 document.getElementById("report-to").value = document.getElementById("gr-to").value;
                 var data = await buildReport();
                 if (!data.sections.length) {
-                  showToast("Tiada data untuk laporan ini.");
+                  showToast(adminI18n.t("report-empty"));
                   return;
                 }
                 jobs[f](data);
-                showToast("Laporan dimuat turun: " + data.title, true);
+                showToast(adminI18n.t("report-done") + data.title, true);
               } catch (err) {
-                showToast("Ralat menjana laporan: " + err.message);
+                showToast(adminI18n.t("report-error") + err.message);
               } finally {
                 btn.disabled = false;
               }
