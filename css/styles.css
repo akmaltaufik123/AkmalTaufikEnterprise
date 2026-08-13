@@ -348,6 +348,19 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
   animation: fadeUp 0.9s ease 0.4s both;
 }
 
+.btn-pulse {
+  animation: btnPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes btnPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(220, 38, 38, 0.9), 0 0 8px rgba(239, 68, 68, 0.95);
+  }
+}
+
 .hero-note {
   font-size: 0.95rem;
   color: var(--muted);
