@@ -32,34 +32,11 @@
     <div class="container">
       <div class="portal-header">
         <h2>Pendaftaran Kelas</h2>
-        <p class="muted">Daftar untuk kelas asas komputer atau kelas AI.</p>
+        <p class="muted">Pilih kursus dan daftar untuk kelas online atau bersemuka.</p>
       </div>
 
-      <div class="grid grid-3">
-        <div class="card">
-          <h3>Kelas Asas Kecerdasan Buatan (AI)</h3>
-          <p>Belajar cara menggunakan alatan AI secara praktikal dan mudah.</p>
-          <div class="form-group">
-            <label for="mode-ai">Mod Kelas</label>
-            <select id="mode-ai">
-              <option>Online</option>
-              <option>Bersemuka</option>
-            </select>
-          </div>
-          <button class="btn btn-primary" data-class="Kelas Asas Kecerdasan Buatan (AI)" data-mode="mode-ai">Daftar Kelas</button>
-        </div>
-        <div class="card">
-          <h3>Kelas Asas Komputer</h3>
-          <p>Asas komputer daripada tahap permulaan hingga kemahiran harian.</p>
-          <div class="form-group">
-            <label for="mode-computer">Mod Kelas</label>
-            <select id="mode-computer">
-              <option>Online</option>
-              <option>Bersemuka</option>
-            </select>
-          </div>
-          <button class="btn btn-primary" data-class="Kelas Asas Komputer" data-mode="mode-computer">Daftar Kelas</button>
-        </div>
+      <div id="courses-grid" class="grid grid-3">
+        <p class="muted">Memuatkan kursus...</p>
       </div>
 
       <h2 class="sub-title">Kelas Saya</h2>
@@ -78,6 +55,58 @@
         if (!session) return;
         var sb = window.portal.supabase;
         var listBox = document.getElementById("enrolled-list");
+        var gridBox = document.getElementById("courses-grid");
+
+        async function loadCourses() {
+          var { data, error } = await sb.from("courses").select("*").eq("active", true).order("created_at");
+          if (error) {
+            gridBox.innerHTML = '<p class="muted">Ralat: ' + error.message + '</p>';
+            return;
+          }
+          if (!data || data.length === 0) {
+            gridBox.innerHTML = '<p class="muted">Tiada kursus buat masa ini.</p>';
+            return;
+          }
+          gridBox.innerHTML = data.map(function (c, i) {
+            return '<div class="card" data-course="' + c.id + '">' +
+              '<h3>' + c.name + '</h3>' +
+              '<p>' + (c.description || "") + '</p>' +
+              '<div class="form-group"><label>Mod Kelas</label><select id="mode-' + i + '">' +
+              (c.mode.indexOf("Bersemuka") > -1 ? '<option>Bersemuka</option>' : "") +
+              (c.mode.indexOf("Online") > -1 ? '<option>Online</option>' : "") +
+              (c.mode.indexOf("Online") === -1 && c.mode.indexOf("Bersemuka") === -1 ? '<option>Online</option>' : "") +
+              "</select></div>" +
+              '<button class="btn btn-primary" data-enroll="' + i + '" data-name="' + c.name.replace(/"/g, "&quot;") + '">Daftar Kelas</button></div>';
+          }).join("");
+
+          gridBox.querySelectorAll("[data-enroll]").forEach(function (btn) {
+            btn.addEventListener("click", async function () {
+              var idx = btn.getAttribute("data-enroll");
+              var name = btn.getAttribute("data-name");
+              var mode = document.getElementById("mode-" + idx).value;
+              var existing = await sb.from("class_enrollments")
+                .select("id")
+                .eq("user_id", session.user.id)
+                .eq("class_name", name)
+                .eq("mode", mode);
+              if (existing.data && existing.data.length > 0) {
+                alert("Anda sudah mendaftar untuk kelas ini (" + mode + ").");
+                return;
+              }
+              var { error } = await sb.from("class_enrollments").insert({
+                user_id: session.user.id,
+                class_name: name,
+                mode: mode
+              });
+              if (error) {
+                alert("Ralat: " + error.message);
+                return;
+              }
+              alert("Pendaftaran berjaya: " + name + " (" + mode + ")");
+              loadEnrolled();
+            });
+          });
+        }
 
         async function loadEnrolled() {
           var { data, error } = await sb.from("class_enrollments")
@@ -98,33 +127,7 @@
             }).join("") + '</tbody></table>';
         }
 
-        document.querySelectorAll("[data-class]").forEach(function (btn) {
-          btn.addEventListener("click", async function () {
-            var className = btn.getAttribute("data-class");
-            var mode = document.getElementById(btn.getAttribute("data-mode")).value;
-            var existing = await sb.from("class_enrollments")
-              .select("id")
-              .eq("user_id", session.user.id)
-              .eq("class_name", className)
-              .eq("mode", mode);
-            if (existing.data && existing.data.length > 0) {
-              alert("Anda sudah mendaftar untuk kelas ini (" + mode + ").");
-              return;
-            }
-            var { error } = await sb.from("class_enrollments").insert({
-              user_id: session.user.id,
-              class_name: className,
-              mode: mode
-            });
-            if (error) {
-              alert("Ralat: " + error.message);
-              return;
-            }
-            alert("Pendaftaran berjaya: " + className + " (" + mode + ")");
-            loadEnrolled();
-          });
-        });
-
+        loadCourses();
         loadEnrolled();
       });
     })();

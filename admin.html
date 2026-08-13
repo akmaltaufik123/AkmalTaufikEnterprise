@@ -32,7 +32,7 @@
     <div class="container">
       <div class="portal-header">
         <h2>Panel Pentadbir</h2>
-        <p class="muted">Urus semua permohonan dan pendaftaran kelas pelanggan.</p>
+        <p class="muted">Kawalan penuh — permohonan, kursus, kelas dan pelanggan.</p>
       </div>
 
       <div id="denied" hidden>
@@ -61,7 +61,9 @@
 
         <div class="tab-bar">
           <button class="tab-btn active" data-tab="requests">Permohonan</button>
+          <button class="tab-btn" data-tab="courses">Kursus</button>
           <button class="tab-btn" data-tab="classes">Kelas</button>
+          <button class="tab-btn" data-tab="customers">Pelanggan</button>
         </div>
 
         <div id="tab-requests" class="tab-panel">
@@ -70,14 +72,41 @@
           </div>
         </div>
 
+        <div id="tab-courses" class="tab-panel" hidden>
+          <div class="card">
+            <div class="card-toolbar">
+              <h3>Senarai Kursus</h3>
+              <button id="add-course-btn" class="btn btn-primary btn-sm">+ Tambah Kursus</button>
+            </div>
+            <div id="courses-list"><p class="muted">Memuatkan...</p></div>
+          </div>
+        </div>
+
         <div id="tab-classes" class="tab-panel" hidden>
           <div class="card">
             <div id="classes-list"><p class="muted">Memuatkan...</p></div>
           </div>
         </div>
+
+        <div id="tab-customers" class="tab-panel" hidden>
+          <div class="card">
+            <div id="customers-list"><p class="muted">Memuatkan...</p></div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
+
+  <div id="modal" class="modal-overlay" hidden>
+    <div class="modal-box">
+      <h3 id="modal-title"></h3>
+      <div id="modal-body"></div>
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn btn-ghost btn-sm">Batal</button>
+        <button id="modal-save" class="btn btn-primary btn-sm">Simpan</button>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>
@@ -94,74 +123,61 @@
         document.getElementById("admin-content").hidden = false;
         var sb = window.portal.supabase;
 
+        function esc(s) {
+          return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+          });
+        }
+
+        function openModal(title, bodyHtml) {
+          document.getElementById("modal-title").textContent = title;
+          document.getElementById("modal-body").innerHTML = bodyHtml;
+          document.getElementById("modal").hidden = false;
+        }
+
+        function closeModal() {
+          document.getElementById("modal").hidden = true;
+        }
+
+        document.getElementById("modal-cancel").addEventListener("click", closeModal);
+        document.getElementById("modal").addEventListener("click", function (e) {
+          if (e.target === this) closeModal();
+        });
+
+        var modalSave = document.getElementById("modal-save");
+
         document.querySelectorAll(".tab-btn").forEach(function (btn) {
           btn.addEventListener("click", function () {
             document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
             btn.classList.add("active");
-            document.getElementById("tab-requests").hidden = btn.getAttribute("data-tab") !== "requests";
-            document.getElementById("tab-classes").hidden = btn.getAttribute("data-tab") !== "classes";
+            ["requests", "courses", "classes", "customers"].forEach(function (t) {
+              document.getElementById("tab-" + t).hidden = btn.getAttribute("data-tab") !== t;
+            });
           });
         });
 
-        async function loadRequests() {
-          var { data, error } = await sb.from("service_requests")
-            .select("id, service, location, description, status, created_at, user_id")
-            .order("created_at", { ascending: false });
-          var box = document.getElementById("requests-list");
-          if (error) {
-            box.innerHTML = '<p class="muted">Ralat: ' + error.message + '</p>';
-            return;
-          }
-          if (!data || data.length === 0) {
-            box.innerHTML = '<p class="muted">Belum ada permohonan.</p>';
-            return;
-          }
-          var statuses = ["pending", "in_progress", "done"];
-          var labels = { pending: "Menunggu", in_progress: "Dalam Proses", done: "Selesai" };
-          box.innerHTML = '<table class="table"><thead><tr><th>Perkhidmatan</th><th>Lokasi</th><th>Tarikh</th><th>Status</th><th>Tindakan</th></tr></thead><tbody>' +
-            data.map(function (r) {
-              var desc = r.description ? '<div class="table-desc">' + r.description + '</div>' : '';
-              var opts = statuses.map(function (s) {
-                return '<option value="' + s + '"' + (s === r.status ? " selected" : "") + '>' + labels[s] + '</option>';
-              }).join("");
-              return '<tr data-id="' + r.id + '"><td>' + r.service + desc + '</td><td>' + r.location + '</td><td>' +
-                new Date(r.created_at).toLocaleDateString("ms-MY") +
-                '</td><td><span class="badge ' + r.status + '">' + window.portal.badge(r.status) +
-                '</span></td><td><select class="status-select" data-status>' + opts + '</select></td></tr>';
-            }).join("") + '</tbody></table>';
+        var profiles = {};
 
-          document.querySelectorAll("[data-status]").forEach(function (sel) {
-            sel.addEventListener("change", async function () {
-              var id = sel.closest("tr").getAttribute("data-id");
-              var { error } = await sb.from("service_requests").update({ status: sel.value }).eq("id", id);
-              if (error) {
-                alert("Ralat: " + error.message);
-              }
-              loadRequests();
-              loadStats();
-            });
+        async function loadProfiles() {
+          var { data } = await sb.from("profiles").select("id, full_name, email");
+          profiles = {};
+          (data || []).forEach(function (p) {
+            profiles[p.id] = p.full_name || p.email || "Pelanggan";
           });
         }
 
-        async function loadClasses() {
-          var { data, error } = await sb.from("class_enrollments")
-            .select("class_name, mode, created_at, user_id")
-            .order("created_at", { ascending: false });
-          var box = document.getElementById("classes-list");
-          if (error) {
-            box.innerHTML = '<p class="muted">Ralat: ' + error.message + '</p>';
-            return;
-          }
-          if (!data || data.length === 0) {
-            box.innerHTML = '<p class="muted">Belum ada pendaftaran kelas.</p>';
-            return;
-          }
-          box.innerHTML = '<table class="table"><thead><tr><th>Kelas</th><th>Mod</th><th>Tarikh Daftar</th></tr></thead><tbody>' +
-            data.map(function (e) {
-              return '<tr><td>' + e.class_name + '</td><td>' + e.mode + '</td><td>' +
-                new Date(e.created_at).toLocaleDateString("ms-MY") + '</td></tr>';
-            }).join("") + '</tbody></table>';
+        function customerName(uid) {
+          return profiles[uid] || "Pelanggan";
         }
+
+        var serviceOptions = [
+          "Pemasangan Server, Rack Server, WiFi & CCTV",
+          "Pemasangan Kabel Rangkaian",
+          "Pemasangan Komputer & Laptop",
+          "Kelas Asas Kecerdasan Buatan (AI)",
+          "Kelas Asas Komputer",
+          "Lain-lain"
+        ];
 
         async function loadStats() {
           var total = await sb.from("service_requests").select("id", { count: "exact" });
@@ -172,9 +188,213 @@
           document.getElementById("stat-enroll").textContent = enroll.count || 0;
         }
 
+        function statusOptions(selected) {
+          var labels = { pending: "Menunggu", in_progress: "Dalam Proses", done: "Selesai" };
+          return ["pending", "in_progress", "done"].map(function (s) {
+            return '<option value="' + s + '"' + (s === selected ? " selected" : "") + ">" + labels[s] + "</option>";
+          }).join("");
+        }
+
+        async function loadRequests() {
+          var { data, error } = await sb.from("service_requests")
+            .select("id, service, location, description, status, created_at, user_id")
+            .order("created_at", { ascending: false });
+          var box = document.getElementById("requests-list");
+          if (error) {
+            box.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
+            return;
+          }
+          if (!data || data.length === 0) {
+            box.innerHTML = '<p class="muted">Belum ada permohonan.</p>';
+            return;
+          }
+          box.innerHTML = '<table class="table"><thead><tr><th>Pelanggan</th><th>Perkhidmatan</th><th>Lokasi</th><th>Tarikh</th><th>Status</th><th>Tindakan</th></tr></thead><tbody>' +
+            data.map(function (r) {
+              var desc = r.description ? '<div class="table-desc">' + esc(r.description) + '</div>' : "";
+              return '<tr data-id="' + r.id + '"><td>' + esc(customerName(r.user_id)) + '</td><td>' + esc(r.service) + desc + "</td><td>" + esc(r.location) + "</td><td>" +
+                new Date(r.created_at).toLocaleDateString("ms-MY") +
+                '</td><td><span class="badge ' + r.status + '">' + window.portal.badge(r.status) +
+                '</span></td><td><button class="action-btn" data-edit-request="' + r.id + '">Edit</button> ' +
+                '<button class="action-btn danger" data-delete-request="' + r.id + '">Padam</button></td></tr>';
+            }).join("") + "</tbody></table>";
+
+          box.querySelectorAll("[data-edit-request]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var id = btn.getAttribute("data-edit-request");
+              var row = data.find(function (r) { return r.id === id; });
+              var opts = serviceOptions.map(function (s) {
+                return '<option' + (s === row.service ? " selected" : "") + ">" + esc(s) + "</option>";
+              }).join("");
+              openModal("Edit Permohonan",
+                '<div class="form-group"><label>Perkhidmatan</label><select id="m-service">' + opts + "</select></div>" +
+                '<div class="form-group"><label>Lokasi</label><input id="m-location" value="' + esc(row.location) + '"></div>' +
+                '<div class="form-group"><label>Penerangan</label><textarea id="m-description" rows="3">' + esc(row.description) + "</textarea></div>" +
+                '<div class="form-group"><label>Status</label><select id="m-status">' + statusOptions(row.status) + "</select></div>");
+              modalSave.onclick = async function () {
+                var { error } = await sb.from("service_requests").update({
+                  service: document.getElementById("m-service").value,
+                  location: document.getElementById("m-location").value,
+                  description: document.getElementById("m-description").value,
+                  status: document.getElementById("m-status").value
+                }).eq("id", id);
+                if (error) alert("Ralat: " + error.message);
+                closeModal();
+                loadRequests();
+                loadStats();
+              };
+            });
+          });
+
+          box.querySelectorAll("[data-delete-request]").forEach(function (btn) {
+            btn.addEventListener("click", async function () {
+              var id = btn.getAttribute("data-delete-request");
+              if (!confirm("Padam permohonan ini?")) return;
+              var { error } = await sb.from("service_requests").delete().eq("id", id);
+              if (error) alert("Ralat: " + error.message);
+              loadRequests();
+              loadStats();
+            });
+          });
+        }
+
+        async function loadCourses() {
+          var { data, error } = await sb.from("courses").select("*").order("created_at");
+          var box = document.getElementById("courses-list");
+          if (error) {
+            box.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
+            return;
+          }
+          if (!data || data.length === 0) {
+            box.innerHTML = '<p class="muted">Belum ada kursus. Tekan "+ Tambah Kursus".</p>';
+            return;
+          }
+          box.innerHTML = '<table class="table"><thead><tr><th>Nama</th><th>Penerangan</th><th>Mod</th><th>Status</th><th>Tindakan</th></tr></thead><tbody>' +
+            data.map(function (c) {
+              return '<tr data-id="' + c.id + '"><td>' + esc(c.name) + '</td><td>' + esc(c.description) + "</td><td>" + esc(c.mode) +
+                '</td><td><span class="badge ' + (c.active ? "done" : "pending") + '">' + (c.active ? "Aktif" : "Tidak Aktif") +
+                '</span></td><td><button class="action-btn" data-toggle-course="' + c.id + '">' + (c.active ? "Nyahaktif" : "Aktifkan") +
+                '</button> <button class="action-btn" data-edit-course="' + c.id + '">Edit</button> ' +
+                '<button class="action-btn danger" data-delete-course="' + c.id + '">Padam</button></td></tr>';
+            }).join("") + "</tbody></table>";
+
+          box.querySelectorAll("[data-edit-course]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var c = data.find(function (x) { return x.id === btn.getAttribute("data-edit-course"); });
+              courseModal(c);
+            });
+          });
+
+          box.querySelectorAll("[data-toggle-course]").forEach(function (btn) {
+            btn.addEventListener("click", async function () {
+              var c = data.find(function (x) { return x.id === btn.getAttribute("data-toggle-course"); });
+              await sb.from("courses").update({ active: !c.active }).eq("id", c.id);
+              loadCourses();
+            });
+          });
+
+          box.querySelectorAll("[data-delete-course]").forEach(function (btn) {
+            btn.addEventListener("click", async function () {
+              var id = btn.getAttribute("data-delete-course");
+              if (!confirm("Padam kursus ini? Pendaftaran sedia ada akan kekal.")) return;
+              var { error } = await sb.from("courses").delete().eq("id", id);
+              if (error) alert("Ralat: " + error.message);
+              loadCourses();
+            });
+          });
+        }
+
+        function courseModal(c) {
+          var editing = !!c;
+          openModal(editing ? "Edit Kursus" : "Tambah Kursus",
+            '<div class="form-group"><label>Nama Kursus</label><input id="c-name" value="' + (editing ? esc(c.name) : "") + '"></div>' +
+            '<div class="form-group"><label>Penerangan</label><textarea id="c-desc" rows="3">' + (editing ? esc(c.description) : "") + "</textarea></div>" +
+            '<div class="form-group"><label>Mod</label><select id="c-mode">' +
+            ["Online", "Bersemuka", "Online & Bersemuka"].map(function (m) {
+              return '<option' + (editing && c.mode === m ? " selected" : "") + ">" + m + "</option>";
+            }).join("") + "</select></div>" +
+            '<div class="switch-row"><input type="checkbox" id="c-active" class="checkbox"' + (editing && c.active ? " checked" : "") + '><label for="c-active">Kursus aktif (dipaparkan kepada pelanggan)</label></div>');
+          modalSave.onclick = async function () {
+            var payload = {
+              name: document.getElementById("c-name").value.trim(),
+              description: document.getElementById("c-desc").value.trim(),
+              mode: document.getElementById("c-mode").value,
+              active: document.getElementById("c-active").checked
+            };
+            if (!payload.name) {
+              alert("Nama kursus diperlukan.");
+              return;
+            }
+            var { error } = editing
+              ? await sb.from("courses").update(payload).eq("id", c.id)
+              : await sb.from("courses").insert(payload);
+            if (error) alert("Ralat: " + error.message);
+            closeModal();
+            loadCourses();
+          };
+        }
+
+        document.getElementById("add-course-btn").addEventListener("click", function () {
+          courseModal(null);
+        });
+
+        async function loadEnrollments() {
+          var { data, error } = await sb.from("class_enrollments")
+            .select("id, class_name, mode, created_at, user_id")
+            .order("created_at", { ascending: false });
+          var box = document.getElementById("classes-list");
+          if (error) {
+            box.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
+            return;
+          }
+          if (!data || data.length === 0) {
+            box.innerHTML = '<p class="muted">Belum ada pendaftaran kelas.</p>';
+            return;
+          }
+          box.innerHTML = '<table class="table"><thead><tr><th>Pelanggan</th><th>Kelas</th><th>Mod</th><th>Tarikh</th><th>Tindakan</th></tr></thead><tbody>' +
+            data.map(function (e) {
+              return '<tr><td>' + esc(customerName(e.user_id)) + '</td><td>' + esc(e.class_name) + "</td><td>" + esc(e.mode) + "</td><td>" +
+                new Date(e.created_at).toLocaleDateString("ms-MY") +
+                '</td><td><button class="action-btn danger" data-delete-enroll="' + e.id + '">Padam</button></td></tr>';
+            }).join("") + "</tbody></table>";
+
+          box.querySelectorAll("[data-delete-enroll]").forEach(function (btn) {
+            btn.addEventListener("click", async function () {
+              var id = btn.getAttribute("data-delete-enroll");
+              if (!confirm("Padam pendaftaran ini?")) return;
+              var { error } = await sb.from("class_enrollments").delete().eq("id", id);
+              if (error) alert("Ralat: " + error.message);
+              loadEnrollments();
+              loadStats();
+            });
+          });
+        }
+
+        async function loadCustomers() {
+          var { data, error } = await sb.from("profiles")
+            .select("id, full_name, email, created_at")
+            .order("created_at", { ascending: false });
+          var box = document.getElementById("customers-list");
+          if (error) {
+            box.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
+            return;
+          }
+          if (!data || data.length === 0) {
+            box.innerHTML = '<p class="muted">Belum ada pelanggan berdaftar.</p>';
+            return;
+          }
+          box.innerHTML = '<table class="table"><thead><tr><th>Nama</th><th>E-mel</th><th>Tarikh Daftar</th></tr></thead><tbody>' +
+            data.map(function (p) {
+              return "<tr><td>" + esc(p.full_name || "-") + "</td><td>" + esc(p.email) + "</td><td>" +
+                new Date(p.created_at).toLocaleDateString("ms-MY") + "</td></tr>";
+            }).join("") + "</tbody></table>";
+        }
+
+        await loadProfiles();
         loadStats();
         loadRequests();
-        loadClasses();
+        loadCourses();
+        loadEnrollments();
+        loadCustomers();
       });
     })();
   </script>

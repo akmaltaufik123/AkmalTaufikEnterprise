@@ -875,6 +875,96 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
   color: var(--text);
 }
 
+.card-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: "Orbitron", sans-serif;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.15s ease;
+}
+
+.action-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.action-btn.danger {
+  color: #f87171;
+  border-color: rgba(220, 38, 38, 0.5);
+}
+
+.action-btn.danger:hover {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: #f87171;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 16px;
+}
+
+.modal-box {
+  background: #16161c;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 520px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-box h3 {
+  margin-bottom: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.switch-row label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
 @media (max-width: 640px) {
   .tab-btn {
     padding: 8px 12px;
