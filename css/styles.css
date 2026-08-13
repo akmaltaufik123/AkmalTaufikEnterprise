@@ -1327,3 +1327,13 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
   0%, 100% { opacity: 0.5; transform: scale(0.8); }
   50% { opacity: 1; transform: scale(1.15); }
 }
+
+.red-link {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.red-link:hover {
+  color: #f87171;
+}

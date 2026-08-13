@@ -81,7 +81,7 @@
           .limit(5);
         var box = document.getElementById("recent-list");
         if (error || !data || data.length === 0) {
-          box.innerHTML = '<p class="muted">Belum ada permohonan. <a href="request.html">Buat permohonan pertama anda</a>.</p>';
+          box.innerHTML = '<p class="muted">Belum ada permohonan. <a href="request.html" class="red-link">Buat permohonan pertama anda</a>.</p>';
           return;
         }
         box.innerHTML = '<table class="table"><thead><tr><th>Perkhidmatan</th><th>Tarikh</th><th>Status</th></tr></thead><tbody>' +
