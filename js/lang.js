@@ -49,7 +49,8 @@
       "contact-area": "Kawasan Perkhidmatan",
       "contact-area-desc": "Perkhidmatan on-site tersedia di Pulau Pinang. Sokongan remote tersedia di mana-mana.",
       "footer-line": "Server & rack server | WiFi & CCTV | Kabel rangkaian | Komputer & laptop | Kelas komputer & AI",
-      "footer-copy": "© 2026 Hak cipta terpelihara."
+      "footer-copy": "© 2026 Hak cipta terpelihara.",
+      "loading-text": "Sila tunggu..."
     },
     en: {
       "title": "IT Services Penang — Server, CCTV, Computer & AI Classes",
@@ -100,7 +101,8 @@
       "contact-area": "Service Area",
       "contact-area-desc": "On-site service available in Penang. Remote support available everywhere.",
       "footer-line": "Server & rack server | WiFi & CCTV | Network cabling | Computers & laptops | Computer & AI classes",
-      "footer-copy": "© 2026 All rights reserved."
+      "footer-copy": "© 2026 All rights reserved.",
+      "loading-text": "Please wait..."
     }
   };
 
