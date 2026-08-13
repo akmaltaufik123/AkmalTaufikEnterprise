@@ -149,6 +149,16 @@
           <label for="lb-notes" data-i18n="booking-notes">Nota (pilihan)</label>
           <textarea id="lb-notes" data-role="notes" rows="3" maxlength="1000" placeholder="Terangkan keperluan anda"></textarea>
         </div>
+        <div class="form-group">
+          <label for="lb-image" data-i18n="booking-image">Gambar (pilihan) — untuk rujukan admin</label>
+          <input type="file" id="lb-image" data-role="image" accept="image/*">
+          <p class="muted form-hint" data-i18n="booking-image-hint">Maksimum 10MB. Contoh: gambar peranti/kerosakan.</p>
+        </div>
+        <div class="form-group">
+          <label for="lb-video" data-i18n="booking-video">Video (pilihan) — untuk rujukan admin</label>
+          <input type="file" id="lb-video" data-role="video" accept="video/*">
+          <p class="muted form-hint" data-i18n="booking-video-hint">Maksimum 50MB. Contoh: video masalah yang berlaku.</p>
+        </div>
         <p id="lb-error" class="form-error" hidden></p>
         <p id="lb-msg" class="alert ok" data-role="booking-msg" hidden>Tempahan dihantar! Admin akan menghubungi anda untuk pengesahan.</p>
         <button type="submit" class="btn btn-primary" data-i18n="booking-btn">Tempah Sekarang</button>

@@ -1052,7 +1052,7 @@ async function loadEnrollments() {
               if (error) alert("Ralat: " + error.message);
         async function loadBookings() {
           var { data, error } = await sb.from("bookings")
-            .select("id, user_id, service, booking_date, booking_time, location, notes, status, created_at, customer_name, phone, email")
+            .select("id, user_id, service, booking_date, booking_time, location, notes, status, created_at, customer_name, phone, email, image_url, video_url")
             .order("created_at", { ascending: false });
           var box = document.getElementById("bookings-list");
           if (error) {
@@ -1063,11 +1063,15 @@ async function loadEnrollments() {
             box.innerHTML = '<p class="muted">Belum ada tempahan.</p>';
             return;
           }
-          box.innerHTML = '<table class="table"><thead><tr><th>Pelanggan</th><th>Hubungi</th><th>Perkhidmatan</th><th>Tarikh</th><th>Masa</th><th>Lokasi</th><th>Status</th><th>Tindakan</th></tr></thead><tbody>' +
+          box.innerHTML = '<table class="table"><thead><tr><th>Pelanggan</th><th>Hubungi</th><th>Perkhidmatan</th><th>Tarikh</th><th>Masa</th><th>Lokasi</th><th>Fail</th><th>Status</th><th>Tindakan</th></tr></thead><tbody>' +
             data.map(function (b) {
               var notes = b.notes ? '<div class="table-desc">' + esc(b.notes) + '</div>' : "";
               var who = esc(b.customer_name || customerName(b.user_id) || "—");
               var contact = b.phone ? esc(b.phone) + (b.email ? "<br>" + esc(b.email) : "") : (b.email ? esc(b.email) : "—");
+              var files = [];
+              if (b.image_url) files.push('<a href="' + esc(b.image_url) + '" target="_blank" rel="noopener"><img src="' + esc(b.image_url) + '" class="booking-thumb" alt="Gambar"></a>');
+              if (b.video_url) files.push('<a class="btn btn-ghost btn-sm" href="' + esc(b.video_url) + '" target="_blank" rel="noopener">Video</a>');
+              var fileCell = files.length ? files.join(" ") : "—";
               var acts = "";
               if (b.status === "pending") {
                 acts += '<button class="action-btn" data-confirm-booking="' + b.id + '">Sahkan</button> ';
@@ -1078,7 +1082,7 @@ async function loadEnrollments() {
               }
               acts += '<button class="action-btn danger" data-delete-booking="' + b.id + '">Padam</button>';
               return '<tr><td>' + who + '</td><td>' + contact + '</td><td>' + esc(b.service) + notes + '</td><td>' + esc(b.booking_date) +
-                "</td><td>" + esc(b.booking_time) + "</td><td>" + esc(b.location) +
+                "</td><td>" + esc(b.booking_time) + "</td><td>" + esc(b.location) + "</td><td>" + fileCell +
                 '</td><td><span class="badge ' + esc(b.status) + '">' + window.portal.badge(b.status) +
                 "</span></td><td>" + acts + "</td></tr>";
             }).join("") + "</tbody></table>";

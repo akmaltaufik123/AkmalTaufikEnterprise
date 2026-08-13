@@ -88,6 +88,16 @@
           <label for="b-notes">Nota (pilihan)</label>
           <textarea id="b-notes" data-role="notes" rows="3" maxlength="1000" placeholder="Terangkan keperluan anda"></textarea>
         </div>
+        <div class="form-group">
+          <label for="b-image">Gambar (pilihan) — untuk rujukan admin</label>
+          <input type="file" id="b-image" data-role="image" accept="image/*">
+          <p class="muted form-hint">Maksimum 10MB. Contoh: gambar peranti/kerosakan.</p>
+        </div>
+        <div class="form-group">
+          <label for="b-video">Video (pilihan) — untuk rujukan admin</label>
+          <input type="file" id="b-video" data-role="video" accept="video/*">
+          <p class="muted form-hint">Maksimum 50MB. Contoh: video masalah yang berlaku.</p>
+        </div>
         <p id="form-error" class="form-error" hidden></p>
         <p id="booking-msg" class="alert ok" data-role="booking-msg" hidden>Tempahan dihantar! Admin akan menghubungi anda untuk pengesahan.</p>
         <button type="submit" class="btn btn-primary">Tempah Sekarang</button>

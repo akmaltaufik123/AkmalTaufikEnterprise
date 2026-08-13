@@ -24,6 +24,8 @@
     var apSel = form.querySelector("[data-role=ap]");
     var fmtRow = form.querySelector(".time-format");
     var slotsBox = form.querySelector(".time-slots");
+    var imgInput = form.querySelector("[data-role=image]");
+    var vidInput = form.querySelector("[data-role=video]");
     var msg = form.querySelector("[data-role=booking-msg]");
     var errorBox = form.querySelector(".form-error");
     var submitBtn = form.querySelector("[type=submit]");
@@ -147,6 +149,24 @@
 
     dateInput.addEventListener("change", loadTaken);
 
+    async function uploadFile(file, kind) {
+      var maxMB = kind === "image" ? 10 : 50;
+      if (file.size > maxMB * 1024 * 1024) {
+        showError(t("Fail " + (kind === "image" ? "gambar" : "video") + " terlalu besar (maksimum " + maxMB + "MB).",
+                    (kind === "image" ? "Image" : "Video") + " file too large (max " + maxMB + "MB)."));
+        return null;
+      }
+      var ext = (file.name.split(".").pop() || "bin").toLowerCase();
+      var path = "booking-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + ext;
+      var { error } = await sb.storage.from("booking-files").upload(path, file, { upsert: false });
+      if (error) {
+        showError(t("Gagal muat naik " + (kind === "image" ? "gambar" : "video") + ": ", "Failed to upload " + (kind === "image" ? "image" : "video") + ": ") + error.message);
+        return null;
+      }
+      var { data } = sb.storage.from("booking-files").getPublicUrl(path);
+      return data.publicUrl;
+    }
+
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
       hideError();
@@ -183,6 +203,20 @@
 
       submitBtn.disabled = true;
       submitBtn.textContent = t("Menghantar...", "Sending...");
+      var imageUrl = null;
+      var videoUrl = null;
+      if (imgInput && imgInput.files && imgInput.files[0]) imageUrl = await uploadFile(imgInput.files[0], "image");
+      if (vidInput && vidInput.files && vidInput.files[0]) videoUrl = await uploadFile(vidInput.files[0], "video");
+      if (imgInput && imgInput.files && imgInput.files[0] && !imageUrl) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = t("Tempah Sekarang", "Book Now");
+        return;
+      }
+      if (vidInput && vidInput.files && vidInput.files[0] && !videoUrl) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = t("Tempah Sekarang", "Book Now");
+        return;
+      }
       var payload = {
         service: service,
         booking_date: date,
@@ -192,6 +226,8 @@
         customer_name: name,
         phone: phone,
         email: email,
+        image_url: imageUrl,
+        video_url: videoUrl,
         user_id: opts && opts.session ? opts.session.user.id : null
       };
       var { error } = await sb.from("bookings").insert(payload);
@@ -203,9 +239,12 @@
       }
       msg.style.display = "block";
       form.querySelectorAll("input, select, textarea").forEach(function (el) { el.value = ""; });
+      if (imgInput) imgInput.value = "";
+      if (vidInput) vidInput.value = "";
       h24 = 9;
       mi = 0;
       renderSelects();
+      if (slotsBox) renderSlots();
     });
 
     renderSelects();
