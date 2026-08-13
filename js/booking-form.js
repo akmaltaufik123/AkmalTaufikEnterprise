@@ -61,6 +61,7 @@
     }
 
     function renderSelects() {
+      apSel.innerHTML = '<option value="AM">AM</option><option value="PM">PM</option>';
       apSel.style.display = fmt === "12" ? "" : "none";
       var hours = [];
       if (fmt === "12") {
