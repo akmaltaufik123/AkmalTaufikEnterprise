@@ -1043,6 +1043,96 @@ async function loadEnrollments() {
               await sb.from("transactions").delete().eq("user_id", uid);
               var { error } = await sb.from("profiles").delete().eq("id", uid);
               if (error) alert("Ralat: " + error.message);
+              await loadProfiles();
+              loadCustomers();
+              loadStats();
+              dash.profilesData = ((await sb.from("profiles").select("id, created_at")).data || []).filter(function (p) { return p.id !== adminId; });
+              dash.requestsData = (await sb.from("service_requests").select("id, status, created_at")).data || [];
+              renderCharts();
+              renderCalendar();
+            });
+          });
+        }
+
+        async function loadTx() {
+          var { data, error } = await sb.from("transactions")
+            .select("id, label, amount, type, created_at")
+            .order("created_at", { ascending: false });
+          var box = document.getElementById("tx-list");
+          if (error) {
+            box.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
+            return;
+          }
+          dash.txData = data || [];
+          renderCharts();
+          renderCalendar();
+          if (!dash.txData.length) {
+            box.innerHTML = '<p class="muted">Belum ada rekod pendapatan. Tekan "+ Rekod Baru".</p>';
+            return;
+          }
+          box.innerHTML = '<table class="table"><thead><tr><th>Tarikh</th><th>Penerangan</th><th>Jenis</th><th>Amaun</th><th>Tindakan</th></tr></thead><tbody>' +
+            dash.txData.map(function (t) {
+              var amt = parseFloat(t.amount) || 0;
+              var cls = t.type === "expense" ? "neg" : "pos";
+              var sign = t.type === "expense" ? "-" : "+";
+              return '<tr><td>' + new Date(t.created_at).toLocaleString("ms-MY") +
+                '</td><td>' + esc(t.label) + "</td><td>" + (t.type === "expense" ? "Perbelanjaan" : "Pendapatan") +
+                '</td><td class="record-amount ' + cls + '">' + sign + " RM " + amt.toFixed(2) + "</td>" +
+                '<td><button class="action-btn" data-edit-tx="' + t.id + '">Edit</button> ' +
+                '<button class="action-btn danger" data-delete-tx="' + t.id + '">Padam</button></td></tr>';
+            }).join("") + "</tbody></table>";
+
+          box.querySelectorAll("[data-edit-tx]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var t = dash.txData.find(function (x) { return x.id === btn.getAttribute("data-edit-tx"); });
+              txModal(t);
+            });
+          });
+
+          box.querySelectorAll("[data-delete-tx]").forEach(function (btn) {
+            btn.addEventListener("click", async function () {
+              var id = btn.getAttribute("data-delete-tx");
+              if (!confirm("Padam rekod ini?")) return;
+              var { error } = await sb.from("transactions").delete().eq("id", id);
+              if (error) alert("Ralat: " + error.message);
+              loadTx();
+            });
+          });
+        }
+
+        function txModal(t) {
+          var editing = !!t;
+          openModal(editing ? "Edit Rekod" : "Rekod Baru",
+            '<div class="form-group"><label>Penerangan</label><input id="t-label" value="' + (editing ? esc(t.label) : "") + '"></div>' +
+            '<div class="form-group"><label>Amaun (RM)</label><input id="t-amount" type="number" step="0.01" min="0" value="' + (editing ? t.amount : "") + '"></div>' +
+            '<div class="form-group"><label>Jenis</label><select id="t-type">' +
+            '<option value="income"' + (editing && t.type === "income" ? " selected" : "") + ">Pendapatan</option>" +
+            '<option value="expense"' + (editing && t.type === "expense" ? " selected" : "") + ">Perbelanjaan</option>" +
+            "</select></div>" +
+            '<div class="form-group"><label>Tarikh &amp; Masa</label><input id="t-date" type="datetime-local" value="' + (editing ? toLocalInput(t.created_at) : toLocalInput(new Date())) + '"></div>');
+          modalSave.onclick = async function () {
+            var label = document.getElementById("t-label").value.trim();
+            var amount = parseFloat(document.getElementById("t-amount").value);
+            var type = document.getElementById("t-type").value;
+            var dt = new Date(document.getElementById("t-date").value);
+            if (!label || isNaN(amount) || amount <= 0 || isNaN(dt.getTime())) {
+              alert("Sila isi semua ruangan dengan betul.");
+              return;
+            }
+            var payload = { label: label, amount: amount, type: type, created_at: dt.toISOString() };
+            var { error } = editing
+              ? await sb.from("transactions").update(payload).eq("id", t.id)
+              : await sb.from("transactions").insert(payload);
+            if (error) alert("Ralat: " + error.message);
+            closeModal();
+            loadTx();
+          };
+        }
+
+        document.getElementById("add-tx-btn").addEventListener("click", function () {
+          txModal(null);
+        });
+
 var pageSelect = document.getElementById("page-select");
         var pageCustom = document.getElementById("page-custom");
         var webOpen = document.getElementById("web-open");
@@ -1133,98 +1223,6 @@ var pageSelect = document.getElementById("page-select");
         });
 
         await loadProfiles();
-loadCustomers();
-        loadWebPage();
-        loadWebTheme();
-              loadStats();
-              dash.profilesData = ((await sb.from("profiles").select("id, created_at")).data || []).filter(function (p) { return p.id !== adminId; });
-              dash.requestsData = (await sb.from("service_requests").select("id, status, created_at")).data || [];
-              renderCharts();
-              renderCalendar();
-            });
-          });
-        }
-
-        async function loadTx() {
-          var { data, error } = await sb.from("transactions")
-            .select("id, label, amount, type, created_at")
-            .order("created_at", { ascending: false });
-          var box = document.getElementById("tx-list");
-          if (error) {
-            box.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
-            return;
-          }
-          dash.txData = data || [];
-          renderCharts();
-          renderCalendar();
-          if (!dash.txData.length) {
-            box.innerHTML = '<p class="muted">Belum ada rekod pendapatan. Tekan "+ Rekod Baru".</p>';
-            return;
-          }
-          box.innerHTML = '<table class="table"><thead><tr><th>Tarikh</th><th>Penerangan</th><th>Jenis</th><th>Amaun</th><th>Tindakan</th></tr></thead><tbody>' +
-            dash.txData.map(function (t) {
-              var amt = parseFloat(t.amount) || 0;
-              var cls = t.type === "expense" ? "neg" : "pos";
-              var sign = t.type === "expense" ? "-" : "+";
-              return '<tr><td>' + new Date(t.created_at).toLocaleString("ms-MY") +
-                '</td><td>' + esc(t.label) + "</td><td>" + (t.type === "expense" ? "Perbelanjaan" : "Pendapatan") +
-                '</td><td class="record-amount ' + cls + '">' + sign + " RM " + amt.toFixed(2) + "</td>" +
-                '<td><button class="action-btn" data-edit-tx="' + t.id + '">Edit</button> ' +
-                '<button class="action-btn danger" data-delete-tx="' + t.id + '">Padam</button></td></tr>';
-            }).join("") + "</tbody></table>";
-
-          box.querySelectorAll("[data-edit-tx]").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-              var t = dash.txData.find(function (x) { return x.id === btn.getAttribute("data-edit-tx"); });
-              txModal(t);
-            });
-          });
-
-          box.querySelectorAll("[data-delete-tx]").forEach(function (btn) {
-            btn.addEventListener("click", async function () {
-              var id = btn.getAttribute("data-delete-tx");
-              if (!confirm("Padam rekod ini?")) return;
-              var { error } = await sb.from("transactions").delete().eq("id", id);
-              if (error) alert("Ralat: " + error.message);
-              loadTx();
-            });
-          });
-        }
-
-        function txModal(t) {
-          var editing = !!t;
-          openModal(editing ? "Edit Rekod" : "Rekod Baru",
-            '<div class="form-group"><label>Penerangan</label><input id="t-label" value="' + (editing ? esc(t.label) : "") + '"></div>' +
-            '<div class="form-group"><label>Amaun (RM)</label><input id="t-amount" type="number" step="0.01" min="0" value="' + (editing ? t.amount : "") + '"></div>' +
-            '<div class="form-group"><label>Jenis</label><select id="t-type">' +
-            '<option value="income"' + (editing && t.type === "income" ? " selected" : "") + ">Pendapatan</option>" +
-            '<option value="expense"' + (editing && t.type === "expense" ? " selected" : "") + ">Perbelanjaan</option>" +
-            "</select></div>" +
-            '<div class="form-group"><label>Tarikh &amp; Masa</label><input id="t-date" type="datetime-local" value="' + (editing ? toLocalInput(t.created_at) : toLocalInput(new Date())) + '"></div>');
-          modalSave.onclick = async function () {
-            var label = document.getElementById("t-label").value.trim();
-            var amount = parseFloat(document.getElementById("t-amount").value);
-            var type = document.getElementById("t-type").value;
-            var dt = new Date(document.getElementById("t-date").value);
-            if (!label || isNaN(amount) || amount <= 0 || isNaN(dt.getTime())) {
-              alert("Sila isi semua ruangan dengan betul.");
-              return;
-            }
-            var payload = { label: label, amount: amount, type: type, created_at: dt.toISOString() };
-            var { error } = editing
-              ? await sb.from("transactions").update(payload).eq("id", t.id)
-              : await sb.from("transactions").insert(payload);
-            if (error) alert("Ralat: " + error.message);
-            closeModal();
-            loadTx();
-          };
-        }
-
-        document.getElementById("add-tx-btn").addEventListener("click", function () {
-          txModal(null);
-        });
-
-        await loadProfiles();
         dash.profilesData = ((await sb.from("profiles").select("id, created_at")).data || []).filter(function (p) { return p.id !== adminId; });
         dash.requestsData = (await sb.from("service_requests").select("id, status, created_at")).data || [];
         initCalendar();
@@ -1235,6 +1233,8 @@ loadCustomers();
         loadCategories();
         loadEnrollments();
         loadCustomers();
+        loadWebPage();
+        loadWebTheme();
         loadTx();
       });
     })();
