@@ -36,6 +36,29 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
 
 .glitch {
   position: relative;
+  text-shadow:
+    0 0 8px rgba(220, 38, 38, 0.95),
+    0 0 18px rgba(220, 38, 38, 0.75),
+    0 0 38px rgba(220, 38, 38, 0.55),
+    0 0 72px rgba(220, 38, 38, 0.4);
+  animation: glitchGlow 2.4s ease-in-out infinite;
+}
+
+@keyframes glitchGlow {
+  0%, 100% {
+    text-shadow:
+      0 0 8px rgba(220, 38, 38, 0.95),
+      0 0 18px rgba(220, 38, 38, 0.75),
+      0 0 38px rgba(220, 38, 38, 0.55),
+      0 0 72px rgba(220, 38, 38, 0.4);
+  }
+  50% {
+    text-shadow:
+      0 0 12px rgba(239, 68, 68, 1),
+      0 0 26px rgba(220, 38, 38, 0.9),
+      0 0 52px rgba(220, 38, 38, 0.7),
+      0 0 96px rgba(220, 38, 38, 0.5);
+  }
 }
 
 .glitch::before,
@@ -52,11 +75,19 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
 
 .glitch::before {
   color: #22d3ee;
+  text-shadow:
+    0 0 8px rgba(34, 211, 238, 0.95),
+    0 0 22px rgba(34, 211, 238, 0.65),
+    0 0 44px rgba(34, 211, 238, 0.4);
   animation: glitchA 3.4s infinite steps(1);
 }
 
 .glitch::after {
   color: #f43f5e;
+  text-shadow:
+    0 0 8px rgba(244, 63, 94, 0.95),
+    0 0 22px rgba(244, 63, 94, 0.65),
+    0 0 44px rgba(244, 63, 94, 0.4);
   animation: glitchB 2.9s infinite steps(1);
 }
 
@@ -299,11 +330,17 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
 }
 
 .hero h1 {
-  font-size: clamp(1.8rem, 5.5vw, 6rem);
+  font-size: 4.2rem;
   line-height: 1.12;
   max-width: 1100px;
   margin: 0 auto 16px;
   animation: fadeUp 0.9s ease 0.1s both;
+}
+
+@media (max-width: 900px) {
+  .hero h1 {
+    font-size: 3rem;
+  }
 }
 
 .lead {
@@ -587,7 +624,7 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
   }
 
   .hero h1 {
-    font-size: clamp(1.6rem, 7vw, 2.1rem);
+    font-size: 2.1rem;
   }
 }
 
