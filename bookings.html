@@ -54,12 +54,17 @@
           <input type="date" id="b-date" data-role="date" required>
         </div>
         <div class="form-group">
-          <label for="b-time">Masa</label>
+          <label>Masa</label>
           <div class="time-format">
-            <button type="button" class="time-fmt active" data-fmt="12">12 Jam (AM/PM)</button>
+            <button type="button" class="time-fmt active" data-fmt="12">12 Jam</button>
             <button type="button" class="time-fmt" data-fmt="24">24 Jam</button>
           </div>
-          <input type="text" id="b-time" data-role="time-custom" maxlength="10" placeholder="Taip masa anda — cth: 10:30 AM atau 14:45" required>
+          <div class="time-row">
+            <select data-role="hour" aria-label="Jam"></select>
+            <span class="time-colon">:</span>
+            <select data-role="minute" aria-label="Minit"></select>
+            <select data-role="ap" aria-label="AM / PM" class="time-ap"></select>
+          </div>
           <p class="muted form-hint">Atau pilih slot sedia ada di bawah (sekadar cepat, bukan wajib):</p>
           <div class="time-slots" data-role="slots"></div>
         </div>

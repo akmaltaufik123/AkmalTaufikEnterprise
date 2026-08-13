@@ -1,6 +1,10 @@
 (function () {
   var SLOTS = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
 
+  function pad(n) {
+    return String(n).padStart(2, "0");
+  }
+
   function to12(t) {
     var h = parseInt(t.slice(0, 2), 10);
     var ap = h >= 12 ? "PM" : "AM";
@@ -8,30 +12,16 @@
     return hh + t.slice(2) + " " + ap;
   }
 
-  function parseTime(v) {
-    var s = v.trim().toUpperCase();
-    var m = s.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/);
-    if (!m) return null;
-    var h = parseInt(m[1], 10);
-    var mi = parseInt(m[2], 10);
-    if (mi > 59) return null;
-    var ap = m[3];
-    if (ap) {
-      if (h < 1 || h > 12) return null;
-      if (ap === "PM" && h !== 12) h += 12;
-      if (ap === "AM" && h === 12) h = 0;
-    } else {
-      if (h > 23) return null;
-    }
-    return String(h).padStart(2, "0") + ":" + String(mi).padStart(2, "0");
-  }
-
   function init(form, opts) {
     var fmt = "12";
+    var h24 = 9;
+    var mi = 0;
     var taken = new Set();
 
     var dateInput = form.querySelector("[data-role=date]");
-    var timeInput = form.querySelector("[data-role=time-custom]");
+    var hourSel = form.querySelector("[data-role=hour]");
+    var minuteSel = form.querySelector("[data-role=minute]");
+    var apSel = form.querySelector("[data-role=ap]");
     var fmtRow = form.querySelector(".time-format");
     var slotsBox = form.querySelector(".time-slots");
     var msg = form.querySelector("[data-role=booking-msg]");
@@ -70,6 +60,27 @@
         });
     }
 
+    function renderSelects() {
+      apSel.style.display = fmt === "12" ? "" : "none";
+      var hours = [];
+      if (fmt === "12") {
+        for (var i = 1; i <= 12; i++) hours.push(i);
+      } else {
+        for (var i = 0; i <= 23; i++) hours.push(i);
+      }
+      hourSel.innerHTML = hours.map(function (h) {
+        var val = fmt === "12" ? h : pad(h);
+        var sel = fmt === "12" ? (h24 % 12 || 12) === h : h24 === h;
+        return '<option value="' + val + '"' + (sel ? " selected" : "") + ">" + val + "</option>";
+      }).join("");
+      var mins = [];
+      for (var i = 0; i <= 59; i++) mins.push(pad(i));
+      minuteSel.innerHTML = mins.map(function (m) {
+        return '<option value="' + m + '"' + (mi === parseInt(m, 10) ? " selected" : "") + ">" + m + "</option>";
+      }).join("");
+      apSel.value = h24 >= 12 ? "PM" : "AM";
+    }
+
     function renderSlots() {
       var list = SLOTS.slice();
       if (fmt === "12") {
@@ -87,12 +98,39 @@
         if (taken.has(s)) btn.classList.add("taken");
         btn.addEventListener("click", function () {
           if (btn.classList.contains("taken")) return;
-          timeInput.value = fmt === "12" ? to12(s) : s;
+          h24 = parseInt(s.slice(0, 2), 10);
+          mi = parseInt(s.slice(3, 5), 10);
+          renderSelects();
           hideError();
         });
         slotsBox.appendChild(btn);
       });
     }
+
+    function syncFromHour() {
+      var v = parseInt(hourSel.value, 10);
+      if (fmt === "12") {
+        var h12 = v === 12 ? 12 : v % 12;
+        h24 = apSel.value === "PM" ? (h12 === 12 ? 12 : h12 + 12) : (h12 === 12 ? 0 : h12);
+      } else {
+        h24 = v;
+      }
+    }
+
+    hourSel.addEventListener("change", function () {
+      syncFromHour();
+      hideError();
+    });
+
+    minuteSel.addEventListener("change", function () {
+      mi = parseInt(minuteSel.value, 10);
+      hideError();
+    });
+
+    apSel.addEventListener("change", function () {
+      syncFromHour();
+      hideError();
+    });
 
     if (fmtRow) {
       fmtRow.querySelectorAll(".time-fmt").forEach(function (b) {
@@ -100,11 +138,8 @@
           fmt = b.getAttribute("data-fmt");
           fmtRow.querySelectorAll(".time-fmt").forEach(function (x) { x.classList.remove("active"); });
           b.classList.add("active");
+          renderSelects();
           renderSlots();
-          if (timeInput.value) {
-            var p = parseTime(timeInput.value);
-            if (p) timeInput.value = fmt === "12" ? to12(p) : p;
-          }
         });
       });
     }
@@ -116,15 +151,16 @@
       hideError();
       var service = form.querySelector("[data-role=service]").value;
       var date = dateInput.value;
-      var time24 = parseTime(timeInput.value);
+      syncFromHour();
+      var time24 = pad(h24) + ":" + pad(mi);
       var name = form.querySelector("[data-role=name]").value.trim();
       var phone = form.querySelector("[data-role=phone]").value.trim();
       var email = form.querySelector("[data-role=email]").value.trim();
       var location = form.querySelector("[data-role=location]").value.trim();
       var notes = form.querySelector("[data-role=notes]").value.trim();
 
-      if (!service || !date || !time24) {
-        showError(t("Sila pilih perkhidmatan, tarikh dan masukkan masa.", "Please pick a service, a date and enter a time."));
+      if (!service || !date) {
+        showError(t("Sila pilih perkhidmatan dan tarikh.", "Please pick a service and a date."));
         return;
       }
       if (!name || !phone || !email) {
@@ -166,9 +202,12 @@
       }
       msg.style.display = "block";
       form.querySelectorAll("input, select, textarea").forEach(function (el) { el.value = ""; });
-      renderSlots();
+      h24 = 9;
+      mi = 0;
+      renderSelects();
     });
 
+    renderSelects();
     renderSlots();
     loadTaken();
   }
