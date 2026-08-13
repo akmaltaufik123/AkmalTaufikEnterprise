@@ -40,7 +40,7 @@
       <form id="booking-form" class="card booking-form">
         <div class="form-group">
           <label for="b-service">Perkhidmatan</label>
-          <select id="b-service">
+          <select id="b-service" data-role="service">
             <option>Pemasangan Server, Rack Server, WiFi &amp; CCTV</option>
             <option>Pemasangan Kabel Rangkaian</option>
             <option>Pemasangan Komputer &amp; Laptop</option>
@@ -51,21 +51,42 @@
         </div>
         <div class="form-group">
           <label for="b-date">Tarikh</label>
-          <input type="date" id="b-date" required>
+          <input type="date" id="b-date" data-role="date" required>
         </div>
         <div class="form-group">
-          <label>Masa (pilih slot)</label>
-          <div id="time-slots" class="time-slots"></div>
+          <label>Masa</label>
+          <div class="time-format">
+            <button type="button" class="time-fmt active" data-fmt="12">12 Jam (AM/PM)</button>
+            <button type="button" class="time-fmt" data-fmt="24">24 Jam</button>
+          </div>
+          <div class="ampm-row">
+            <button type="button" class="time-slot ampm active" data-ap="AM">AM</button>
+            <button type="button" class="time-slot ampm" data-ap="PM">PM</button>
+          </div>
+          <div class="time-slots" data-role="slots"></div>
+        </div>
+        <div class="form-group">
+          <label for="b-name">Nama Penuh</label>
+          <input type="text" id="b-name" data-role="name" maxlength="100" placeholder="Nama anda" required>
+        </div>
+        <div class="form-group">
+          <label for="b-phone">No. Telefon</label>
+          <input type="tel" id="b-phone" data-role="phone" maxlength="20" placeholder="cth: 018-9451570" required>
+        </div>
+        <div class="form-group">
+          <label for="b-email">E-mel</label>
+          <input type="email" id="b-email" data-role="email" maxlength="150" placeholder="cth: nama@email.com" required>
         </div>
         <div class="form-group">
           <label for="b-location">Kawasan / Lokasi</label>
-          <input type="text" id="b-location" maxlength="120" placeholder="cth: Bayan Lepas, Pulau Pinang" required>
+          <input type="text" id="b-location" data-role="location" maxlength="120" placeholder="cth: Bayan Lepas, Pulau Pinang" required>
         </div>
         <div class="form-group">
           <label for="b-notes">Nota (pilihan)</label>
-          <textarea id="b-notes" rows="3" maxlength="1000" placeholder="Terangkan keperluan anda"></textarea>
+          <textarea id="b-notes" data-role="notes" rows="3" maxlength="1000" placeholder="Terangkan keperluan anda"></textarea>
         </div>
         <p id="form-error" class="form-error" hidden></p>
+        <p id="booking-msg" class="alert ok" data-role="booking-msg" hidden>Tempahan dihantar! Admin akan menghubungi anda untuk pengesahan.</p>
         <button type="submit" class="btn btn-primary">Tempah Sekarang</button>
       </form>
 
@@ -79,111 +100,22 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>
   <script src="js/portal.js"></script>
+  <script src="js/booking-form.js"></script>
   <script src="js/customize.js"></script>
   <script>
     (function () {
-      var SLOTS = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"];
       var esc = window.portal.esc;
 
-      window.portal.requireAuth().then(async function (session) {
+      window.portal.requireAuth().then(function (session) {
         if (!session) return;
         var sb = window.portal.supabase;
-        var errorBox = document.getElementById("form-error");
-        var slotsBox = document.getElementById("time-slots");
-        var dateInput = document.getElementById("b-date");
-        var selectedSlot = null;
-        var takenSlots = [];
 
-        dateInput.min = new Date().toISOString().split("T")[0];
-        dateInput.addEventListener("change", loadTakenSlots);
-        dateInput.addEventListener("change", renderSlots);
+        window.bookingForm.init(document.getElementById("booking-form"), { session: session });
 
-        function renderSlots() {
-          slotsBox.innerHTML = SLOTS.map(function (s) {
-            var taken = takenSlots.indexOf(s) > -1;
-            return '<button type="button" class="time-slot' + (taken ? " taken" : "") + (selectedSlot === s ? " active" : "") + '" data-slot="' + s + '"' + (taken ? " disabled" : "") + ">" + s + "</button>";
-          }).join("");
-          slotsBox.querySelectorAll(".time-slot").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-              if (btn.disabled) return;
-              selectedSlot = btn.getAttribute("data-slot");
-              slotsBox.querySelectorAll(".time-slot").forEach(function (b) { b.classList.remove("active"); });
-              btn.classList.add("active");
-            });
-          });
-        }
-
-        async function loadTakenSlots() {
-          takenSlots = [];
-          var date = dateInput.value;
-          if (!date) return;
-          var { data } = await sb.from("bookings")
-            .select("booking_time")
-            .eq("booking_date", date)
-            .in("status", ["pending", "confirmed"]);
-          (data || []).forEach(function (b) { takenSlots.push(b.booking_time); });
-          if (selectedSlot && takenSlots.indexOf(selectedSlot) > -1) selectedSlot = null;
-          renderSlots();
-        }
-
-        renderSlots();
-
-        document.getElementById("booking-form").addEventListener("submit", async function (e) {
-          e.preventDefault();
-          var p = window.portal;
-          var service = document.getElementById("b-service").value;
-          var date = dateInput.value;
-          var location = p.sanitize(document.getElementById("b-location").value, 120);
-          var notes = p.sanitize(document.getElementById("b-notes").value, 1000);
-          if (!date) {
-            errorBox.textContent = "Sila pilih tarikh.";
-            errorBox.hidden = false;
-            return;
-          }
-          if (!selectedSlot) {
-            errorBox.textContent = "Sila pilih slot masa.";
-            errorBox.hidden = false;
-            return;
-          }
-          if (!location) {
-            errorBox.textContent = "Sila masukkan lokasi.";
-            errorBox.hidden = false;
-            return;
-          }
-          var { data: dup } = await sb.from("bookings")
-            .select("id")
-            .eq("booking_date", date)
-            .eq("booking_time", selectedSlot)
-            .in("status", ["pending", "confirmed"]);
-          if (dup && dup.length > 0) {
-            errorBox.textContent = "Slot ini sudah ditempah. Sila pilih masa lain.";
-            errorBox.hidden = false;
-            loadTakenSlots();
-            return;
-          }
-          var { error } = await sb.from("bookings").insert({
-            user_id: session.user.id,
-            service: service,
-            booking_date: date,
-            booking_time: selectedSlot,
-            location: location,
-            notes: notes,
-            status: "pending"
-          });
-          if (error) {
-            errorBox.textContent = error.message;
-            errorBox.hidden = false;
-            return;
-          }
-          errorBox.className = "alert ok";
-          errorBox.textContent = "Tempahan dihantar! Admin akan mengesahkan tempahan anda.";
-          errorBox.hidden = false;
-          e.target.reset();
-          selectedSlot = null;
-          dateInput.value = "";
-          takenSlots = [];
-          loadBookings();
-        });
+        var nameInput = document.getElementById("b-name");
+        var emailInput = document.getElementById("b-email");
+        nameInput.value = window.portal.getUserName(session) || "";
+        emailInput.value = session.user.email || "";
 
         async function loadBookings() {
           var { data, error } = await sb.from("bookings")

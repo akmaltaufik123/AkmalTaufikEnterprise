@@ -93,6 +93,65 @@
     </div>
   </section>
 
+  <section id="booking" class="section section-alt">
+    <div class="container">
+      <h2 class="glitch" data-i18n="booking-title" data-text="Tempah Sekarang">Tempah Sekarang</h2>
+      <p class="section-sub" data-i18n="booking-sub">Tiada pendaftaran diperlukan. Pilih tarikh dan masa, isi maklumat anda — kami akan hubungi anda untuk pengesahan.</p>
+      <form id="booking-form" class="card booking-form">
+        <div class="form-group">
+          <label for="lb-service" data-i18n="booking-service">Perkhidmatan</label>
+          <select id="lb-service" data-role="service">
+            <option>Pemasangan Server, Rack Server, WiFi &amp; CCTV</option>
+            <option>Pemasangan Kabel Rangkaian</option>
+            <option>Pemasangan Komputer &amp; Laptop</option>
+            <option>Kelas Asas Kecerdasan Buatan (AI)</option>
+            <option>Kelas Asas Komputer</option>
+            <option>Lain-lain</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="lb-date" data-i18n="booking-date">Tarikh</label>
+          <input type="date" id="lb-date" data-role="date" required>
+        </div>
+        <div class="form-group">
+          <label data-i18n="booking-time">Masa</label>
+          <div class="time-format">
+            <button type="button" class="time-fmt active" data-fmt="12">12 Jam (AM/PM)</button>
+            <button type="button" class="time-fmt" data-fmt="24">24 Jam</button>
+          </div>
+          <div class="ampm-row">
+            <button type="button" class="time-slot ampm active" data-ap="AM">AM</button>
+            <button type="button" class="time-slot ampm" data-ap="PM">PM</button>
+          </div>
+          <div class="time-slots" data-role="slots"></div>
+        </div>
+        <div class="form-group">
+          <label for="lb-name" data-i18n="booking-name">Nama Penuh</label>
+          <input type="text" id="lb-name" data-role="name" maxlength="100" placeholder="Nama anda" required>
+        </div>
+        <div class="form-group">
+          <label for="lb-phone" data-i18n="booking-phone">No. Telefon</label>
+          <input type="tel" id="lb-phone" data-role="phone" maxlength="20" placeholder="cth: 018-9451570" required>
+        </div>
+        <div class="form-group">
+          <label for="lb-email" data-i18n="booking-email">E-mel</label>
+          <input type="email" id="lb-email" data-role="email" maxlength="150" placeholder="cth: nama@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="lb-location" data-i18n="booking-location">Kawasan / Lokasi</label>
+          <input type="text" id="lb-location" data-role="location" maxlength="120" placeholder="cth: Bayan Lepas, Pulau Pinang" required>
+        </div>
+        <div class="form-group">
+          <label for="lb-notes" data-i18n="booking-notes">Nota (pilihan)</label>
+          <textarea id="lb-notes" data-role="notes" rows="3" maxlength="1000" placeholder="Terangkan keperluan anda"></textarea>
+        </div>
+        <p id="lb-error" class="form-error" hidden></p>
+        <p id="lb-msg" class="alert ok" data-role="booking-msg" hidden>Tempahan dihantar! Admin akan menghubungi anda untuk pengesahan.</p>
+        <button type="submit" class="btn btn-primary" data-i18n="booking-btn">Tempah Sekarang</button>
+      </form>
+    </div>
+  </section>
+
   <section id="coverage" class="section section-alt">
     <div class="container">
       <h2 class="glitch" data-i18n="coverage-title" data-text="Kawasan Liputan">Kawasan Liputan</h2>
@@ -194,6 +253,14 @@
   <script src="js/lang.js"></script>
   <script src="js/main.js"></script>
   <script src="js/visitor.js"></script>
+  <script src="js/booking-form.js"></script>
+  <script>
+    (function () {
+      var form = document.getElementById("booking-form");
+      var lang = document.documentElement.lang || "ms";
+      if (form) window.bookingForm.init(form, { session: null });
+    })();
+  </script>
   <script>
     (function () {
       var L = document.getElementById("loader");

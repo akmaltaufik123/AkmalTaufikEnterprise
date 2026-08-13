@@ -37,27 +37,21 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
 .glitch {
   position: relative;
   text-shadow:
-    0 0 8px rgba(220, 38, 38, 0.95),
-    0 0 18px rgba(220, 38, 38, 0.75),
-    0 0 38px rgba(220, 38, 38, 0.55),
-    0 0 72px rgba(220, 38, 38, 0.4);
+    0 0 5px rgba(220, 38, 38, 0.5),
+    0 0 14px rgba(220, 38, 38, 0.28);
   animation: glitchGlow 2.4s ease-in-out infinite;
 }
 
 @keyframes glitchGlow {
   0%, 100% {
     text-shadow:
-      0 0 8px rgba(220, 38, 38, 0.95),
-      0 0 18px rgba(220, 38, 38, 0.75),
-      0 0 38px rgba(220, 38, 38, 0.55),
-      0 0 72px rgba(220, 38, 38, 0.4);
+      0 0 5px rgba(220, 38, 38, 0.5),
+      0 0 14px rgba(220, 38, 38, 0.28);
   }
   50% {
     text-shadow:
-      0 0 12px rgba(239, 68, 68, 1),
-      0 0 26px rgba(220, 38, 38, 0.9),
-      0 0 52px rgba(220, 38, 38, 0.7),
-      0 0 96px rgba(220, 38, 38, 0.5);
+      0 0 8px rgba(239, 68, 68, 0.65),
+      0 0 20px rgba(220, 38, 38, 0.4);
   }
 }
 
@@ -75,19 +69,13 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
 
 .glitch::before {
   color: #22d3ee;
-  text-shadow:
-    0 0 8px rgba(34, 211, 238, 0.95),
-    0 0 22px rgba(34, 211, 238, 0.65),
-    0 0 44px rgba(34, 211, 238, 0.4);
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.55);
   animation: glitchA 3.4s infinite steps(1);
 }
 
 .glitch::after {
   color: #f43f5e;
-  text-shadow:
-    0 0 8px rgba(244, 63, 94, 0.95),
-    0 0 22px rgba(244, 63, 94, 0.65),
-    0 0 44px rgba(244, 63, 94, 0.4);
+  text-shadow: 0 0 8px rgba(244, 63, 94, 0.55);
   animation: glitchB 2.9s infinite steps(1);
 }
 
@@ -687,7 +675,9 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
   border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 1rem;
-  font-family: inherit;
+  font-family: "Chakra Petch", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   background: var(--bg);
   color: var(--text);
 }
@@ -1584,6 +1574,51 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
   margin: 0 auto;
 }
 
+.time-format {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.time-fmt {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Orbitron", sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.time-fmt:hover {
+  border-color: var(--accent);
+}
+
+.time-fmt.active {
+  background: rgba(220, 38, 38, 0.85);
+  border-color: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.45);
+}
+
+.ampm-row {
+  display: none;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ampm-row.visible {
+  display: flex;
+}
+
+.ampm-row .time-slot {
+  min-width: 74px;
+  text-align: center;
+}
+
 .time-slots {
   display: flex;
   flex-wrap: wrap;
@@ -1591,12 +1626,13 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
 }
 
 .time-slot {
-  padding: 8px 14px;
+  padding: 10px 16px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--bg);
   color: var(--text);
-  font-family: "Orbitron", sans-serif;
+  font-family: "Orbitron", "Chakra Petch", sans-serif;
+  font-weight: 700;
   font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.15s ease;
