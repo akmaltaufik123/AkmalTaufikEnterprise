@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>Dashboard — Portal Pelanggan</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -84,10 +85,11 @@
           box.innerHTML = '<p class="muted">Belum ada permohonan. <a href="request.html" class="red-link">Buat permohonan pertama anda</a>.</p>';
           return;
         }
+        var esc = window.portal.esc;
         box.innerHTML = '<table class="table"><thead><tr><th>Perkhidmatan</th><th>Tarikh</th><th>Status</th></tr></thead><tbody>' +
           data.map(function (r) {
-            return '<tr><td>' + r.service + '</td><td>' + new Date(r.created_at).toLocaleDateString("ms-MY") +
-              '</td><td><span class="badge ' + r.status + '">' + window.portal.badge(r.status) + '</span></td></tr>';
+            return '<tr><td>' + esc(r.service) + '</td><td>' + new Date(r.created_at).toLocaleDateString("ms-MY") +
+              '</td><td><span class="badge ' + esc(r.status) + '">' + window.portal.badge(r.status) + '</span></td></tr>';
           }).join("") + '</tbody></table>';
       });
     })();

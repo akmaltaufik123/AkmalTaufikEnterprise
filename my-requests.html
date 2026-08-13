@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>Permohonan Saya — Portal Pelanggan</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,8 +62,9 @@
           .select("id, service, location, description, status, created_at")
           .order("created_at", { ascending: false });
         var box = document.getElementById("requests-list");
+        var esc = window.portal.esc;
         if (error) {
-          box.innerHTML = '<p class="muted">Ralat memuatkan permohonan: ' + error.message + '</p>';
+          box.innerHTML = '<p class="muted">Ralat memuatkan permohonan: ' + esc(error.message) + '</p>';
           return;
         }
         if (!data || data.length === 0) {
@@ -71,9 +73,9 @@
         }
         box.innerHTML = '<table class="table"><thead><tr><th>Perkhidmatan</th><th>Lokasi</th><th>Tarikh</th><th>Status</th></tr></thead><tbody>' +
           data.map(function (r) {
-            var desc = r.description ? '<div class="table-desc">' + r.description + '</div>' : '';
-            return '<tr><td>' + r.service + desc + '</td><td>' + r.location + '</td><td>' +
-              new Date(r.created_at).toLocaleDateString("ms-MY") + '</td><td><span class="badge ' + r.status + '">' +
+            var desc = r.description ? '<div class="table-desc">' + esc(r.description) + '</div>' : '';
+            return '<tr><td>' + esc(r.service) + desc + '</td><td>' + esc(r.location) + '</td><td>' +
+              new Date(r.created_at).toLocaleDateString("ms-MY") + '</td><td><span class="badge ' + esc(r.status) + '">' +
               window.portal.badge(r.status) + '</span></td></tr>';
           }).join("") + '</tbody></table>';
       });

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>Permohonan Baru — Portal Pelanggan</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -83,11 +84,17 @@
         var errorBox = document.getElementById("form-error");
         form.addEventListener("submit", async function (e) {
           e.preventDefault();
+          var p = window.portal;
           var service = document.getElementById("service").value;
-          var location = document.getElementById("location").value.trim();
-          var description = document.getElementById("description").value.trim();
+          var location = p.sanitize(document.getElementById("location").value, 120);
+          var description = p.sanitize(document.getElementById("description").value, 1000);
           if (!service || !location) {
             errorBox.textContent = "Sila pilih perkhidmatan dan masukkan lokasi.";
+            errorBox.hidden = false;
+            return;
+          }
+          if (!["Pemasangan Server, Rack Server, WiFi & CCTV", "Pemasangan Kabel Rangkaian", "Pemasangan Komputer & Laptop", "Kelas Asas Kecerdasan Buatan (AI)", "Kelas Asas Komputer", "Lain-lain"].includes(service)) {
+            errorBox.textContent = "Perkhidmatan tidak sah.";
             errorBox.hidden = false;
             return;
           }

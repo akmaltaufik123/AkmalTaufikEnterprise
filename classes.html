@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>Kelas — Portal Pelanggan</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,8 +68,9 @@
 
         async function loadCourses() {
           var { data, error } = await sb.from("courses").select("*").eq("active", true).order("created_at");
+          var esc = window.portal.esc;
           if (error) {
-            gridBox.innerHTML = '<p class="muted">Ralat: ' + error.message + '</p>';
+            gridBox.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
             return;
           }
           if (!data || data.length === 0) {
@@ -76,15 +78,15 @@
             return;
           }
           gridBox.innerHTML = data.map(function (c, i) {
-            return '<div class="card" data-course="' + c.id + '">' +
-              '<h3>' + c.name + '</h3>' +
-              '<p>' + (c.description || "") + '</p>' +
+            return '<div class="card" data-course="' + esc(c.id) + '">' +
+              '<h3>' + esc(c.name) + '</h3>' +
+              '<p>' + esc(c.description || "") + '</p>' +
               '<div class="form-group"><label>Mod Kelas</label><select id="mode-' + i + '">' +
-              (c.mode.indexOf("Bersemuka") > -1 ? '<option>Bersemuka</option>' : "") +
-              (c.mode.indexOf("Online") > -1 ? '<option>Online</option>' : "") +
-              (c.mode.indexOf("Online") === -1 && c.mode.indexOf("Bersemuka") === -1 ? '<option>Online</option>' : "") +
+              (esc(c.mode).indexOf("Bersemuka") > -1 ? '<option>Bersemuka</option>' : "") +
+              (esc(c.mode).indexOf("Online") > -1 ? '<option>Online</option>' : "") +
+              (esc(c.mode).indexOf("Online") === -1 && esc(c.mode).indexOf("Bersemuka") === -1 ? '<option>Online</option>' : "") +
               "</select></div>" +
-              '<button class="btn btn-primary" data-enroll="' + i + '" data-name="' + c.name.replace(/"/g, "&quot;") + '">Daftar Kelas</button></div>';
+              '<button class="btn btn-primary" data-enroll="' + i + '" data-name="' + esc(c.name) + '">Daftar Kelas</button></div>';
           }).join("");
 
           gridBox.querySelectorAll("[data-enroll]").forEach(function (btn) {
@@ -120,8 +122,9 @@
           var { data, error } = await sb.from("class_enrollments")
             .select("class_name, mode, created_at")
             .order("created_at", { ascending: false });
+          var esc = window.portal.esc;
           if (error) {
-            listBox.innerHTML = '<p class="muted">Ralat: ' + error.message + '</p>';
+            listBox.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
             return;
           }
           if (!data || data.length === 0) {
@@ -130,7 +133,7 @@
           }
           listBox.innerHTML = '<table class="table"><thead><tr><th>Kelas</th><th>Mod</th><th>Tarikh Daftar</th></tr></thead><tbody>' +
             data.map(function (e) {
-              return '<tr><td>' + e.class_name + '</td><td>' + e.mode + '</td><td>' +
+              return '<tr><td>' + esc(e.class_name) + '</td><td>' + esc(e.mode) + '</td><td>' +
                 new Date(e.created_at).toLocaleDateString("ms-MY") + '</td></tr>';
             }).join("") + '</tbody></table>';
         }

@@ -20,11 +20,31 @@
     return map[status] || status;
   }
 
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function sanitize(s, maxLen) {
+    var out = String(s == null ? "" : s);
+    out = out.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "");
+    if (maxLen && out.length > maxLen) out = out.slice(0, maxLen);
+    return out.trim();
+  }
+
+  function isValidEmail(e) {
+    return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(e);
+  }
+
   window.portal = {
     configured: configured,
     supabase: supabase,
     getUserName: getUserName,
-    badge: badge
+    badge: badge,
+    esc: esc,
+    sanitize: sanitize,
+    isValidEmail: isValidEmail
   };
 
   async function requireAuth() {
