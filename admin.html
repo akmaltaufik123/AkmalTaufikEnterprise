@@ -217,6 +217,7 @@
         }
         document.getElementById("admin-content").hidden = false;
         var sb = window.portal.supabase;
+        var adminId = session.user.id;
 
         function esc(s) {
           return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -563,6 +564,7 @@
           var { data } = await sb.from("profiles").select("id, full_name, email");
           profiles = {};
           (data || []).forEach(function (p) {
+            if (p.id === adminId) return;
             profiles[p.id] = p.full_name || p.email || "Pelanggan";
           });
         }
@@ -779,6 +781,7 @@
             .select("id, full_name, email, created_at")
             .order("created_at", { ascending: false });
           var box = document.getElementById("customers-list");
+          data = (data || []).filter(function (p) { return p.id !== adminId; });
           if (error) {
             box.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
             return;
@@ -807,7 +810,7 @@
               await loadProfiles();
               loadCustomers();
               loadStats();
-              dash.profilesData = (await sb.from("profiles").select("id, created_at")).data || [];
+              dash.profilesData = ((await sb.from("profiles").select("id, created_at")).data || []).filter(function (p) { return p.id !== adminId; });
               dash.requestsData = (await sb.from("service_requests").select("id, status, created_at")).data || [];
               renderCharts();
               renderCalendar();
@@ -895,7 +898,7 @@
         });
 
         await loadProfiles();
-        dash.profilesData = (await sb.from("profiles").select("id, created_at")).data || [];
+        dash.profilesData = ((await sb.from("profiles").select("id, created_at")).data || []).filter(function (p) { return p.id !== adminId; });
         dash.requestsData = (await sb.from("service_requests").select("id, status, created_at")).data || [];
         initCalendar();
         renderCharts();
