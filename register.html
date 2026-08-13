@@ -58,7 +58,7 @@
       var errorBox = document.getElementById("form-error");
       var form = document.getElementById("register-form");
       if (!window.portal.supabase) {
-        errorBox.textContent = "Portal belum dikonfigurasi. Hubungi pentadbir.";
+        errorBox.textContent = "Log masuk belum dikonfigurasi. Hubungi pentadbir.";
         errorBox.hidden = false;
       }
       form.addEventListener("submit", async function (e) {
