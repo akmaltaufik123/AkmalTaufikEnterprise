@@ -8,15 +8,31 @@
     return hh + t.slice(2) + " " + ap;
   }
 
+  function parseTime(v) {
+    var s = v.trim().toUpperCase();
+    var m = s.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/);
+    if (!m) return null;
+    var h = parseInt(m[1], 10);
+    var mi = parseInt(m[2], 10);
+    if (mi > 59) return null;
+    var ap = m[3];
+    if (ap) {
+      if (h < 1 || h > 12) return null;
+      if (ap === "PM" && h !== 12) h += 12;
+      if (ap === "AM" && h === 12) h = 0;
+    } else {
+      if (h > 23) return null;
+    }
+    return String(h).padStart(2, "0") + ":" + String(mi).padStart(2, "0");
+  }
+
   function init(form, opts) {
     var fmt = "12";
-    var ap = "AM";
-    var selected = null;
     var taken = new Set();
 
     var dateInput = form.querySelector("[data-role=date]");
+    var timeInput = form.querySelector("[data-role=time-custom]");
     var fmtRow = form.querySelector(".time-format");
-    var ampmRow = form.querySelector(".ampm-row");
     var slotsBox = form.querySelector(".time-slots");
     var msg = form.querySelector("[data-role=booking-msg]");
     var errorBox = form.querySelector(".form-error");
@@ -59,7 +75,7 @@
       if (fmt === "12") {
         list = list.filter(function (s) {
           var h = parseInt(s.slice(0, 2), 10);
-          return ap === "AM" ? h < 12 : h >= 12;
+          return h >= 9 && h <= 17;
         });
       }
       slotsBox.innerHTML = "";
@@ -68,13 +84,10 @@
         btn.type = "button";
         btn.className = "time-slot";
         btn.textContent = fmt === "12" ? to12(s) : s;
-        if (selected === s) btn.classList.add("active");
         if (taken.has(s)) btn.classList.add("taken");
         btn.addEventListener("click", function () {
           if (btn.classList.contains("taken")) return;
-          selected = s;
-          slotsBox.querySelectorAll(".time-slot").forEach(function (b) { b.classList.remove("active"); });
-          btn.classList.add("active");
+          timeInput.value = fmt === "12" ? to12(s) : s;
           hideError();
         });
         slotsBox.appendChild(btn);
@@ -87,50 +100,31 @@
           fmt = b.getAttribute("data-fmt");
           fmtRow.querySelectorAll(".time-fmt").forEach(function (x) { x.classList.remove("active"); });
           b.classList.add("active");
-          if (fmt === "24") {
-            ampmRow.classList.remove("visible");
-          } else {
-            ampmRow.classList.add("visible");
-            if (!SLOTS.some(function (s) { return slotAp(s) === ap; })) ap = "AM";
+          renderSlots();
+          if (timeInput.value) {
+            var p = parseTime(timeInput.value);
+            if (p) timeInput.value = fmt === "12" ? to12(p) : p;
           }
-          renderSlots();
         });
       });
     }
 
-    function slotAp(s) {
-      return parseInt(s.slice(0, 2), 10) < 12 ? "AM" : "PM";
-    }
-
-    if (ampmRow) {
-      ampmRow.querySelectorAll(".time-slot").forEach(function (b) {
-        b.addEventListener("click", function () {
-          ap = b.getAttribute("data-ap");
-          ampmRow.querySelectorAll(".time-slot").forEach(function (x) { x.classList.remove("active"); });
-          b.classList.add("active");
-          renderSlots();
-        });
-      });
-    }
-
-    dateInput.addEventListener("change", function () {
-      selected = null;
-      loadTaken();
-    });
+    dateInput.addEventListener("change", loadTaken);
 
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
       hideError();
       var service = form.querySelector("[data-role=service]").value;
       var date = dateInput.value;
+      var time24 = parseTime(timeInput.value);
       var name = form.querySelector("[data-role=name]").value.trim();
       var phone = form.querySelector("[data-role=phone]").value.trim();
       var email = form.querySelector("[data-role=email]").value.trim();
       var location = form.querySelector("[data-role=location]").value.trim();
       var notes = form.querySelector("[data-role=notes]").value.trim();
 
-      if (!service || !date || !selected) {
-        showError(t("Sila pilih perkhidmatan, tarikh dan masa.", "Please pick a service, date and time."));
+      if (!service || !date || !time24) {
+        showError(t("Sila pilih perkhidmatan, tarikh dan masukkan masa.", "Please pick a service, a date and enter a time."));
         return;
       }
       if (!name || !phone || !email) {
@@ -145,8 +139,8 @@
         showError(t("Sila nyatakan lokasi servis.", "Please provide the service location."));
         return;
       }
-      if (taken.has(selected)) {
-        showError(t("Masa itu telah diambil.", "That slot is already taken."));
+      if (taken.has(time24)) {
+        showError(t("Masa itu telah diambil. Sila pilih masa lain.", "That time is already taken. Please choose another time."));
         return;
       }
 
@@ -155,7 +149,7 @@
       var payload = {
         service: service,
         booking_date: date,
-        booking_time: selected,
+        booking_time: time24,
         location: location,
         notes: notes || null,
         customer_name: name,
@@ -172,7 +166,6 @@
       }
       msg.style.display = "block";
       form.querySelectorAll("input, select, textarea").forEach(function (el) { el.value = ""; });
-      selected = null;
       renderSlots();
     });
 

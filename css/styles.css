@@ -1614,6 +1614,11 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
   display: flex;
 }
 
+.form-hint {
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
 .ampm-row .time-slot {
   min-width: 74px;
   text-align: center;

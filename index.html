@@ -114,15 +114,13 @@
           <input type="date" id="lb-date" data-role="date" required>
         </div>
         <div class="form-group">
-          <label data-i18n="booking-time">Masa</label>
+          <label for="lb-time" data-i18n="booking-time">Masa</label>
           <div class="time-format">
             <button type="button" class="time-fmt active" data-fmt="12">12 Jam (AM/PM)</button>
             <button type="button" class="time-fmt" data-fmt="24">24 Jam</button>
           </div>
-          <div class="ampm-row">
-            <button type="button" class="time-slot ampm active" data-ap="AM">AM</button>
-            <button type="button" class="time-slot ampm" data-ap="PM">PM</button>
-          </div>
+          <input type="text" id="lb-time" data-role="time-custom" maxlength="10" placeholder="Taip masa anda — cth: 10:30 AM atau 14:45" required>
+          <p class="muted form-hint">Atau pilih slot sedia ada di bawah (sekadar cepat, bukan wajib):</p>
           <div class="time-slots" data-role="slots"></div>
         </div>
         <div class="form-group">
