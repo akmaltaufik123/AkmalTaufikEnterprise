@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelas — Portal Pelanggan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <video class="bg-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+    <source src="assets/rain.mp4" type="video/mp4">
+  </video>
+
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="brand"><img src="https://plain-apac-prod-public.komododecks.com/202608/12/3HS3RGiBnGa12S29398i/image.png" alt="Logo" class="logo-img"></a>
+      <nav class="portal-nav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="request.html">Permohonan Baru</a>
+        <a href="my-requests.html">Permohonan Saya</a>
+        <a href="classes.html" class="active">Kelas</a>
+        <button id="signout-btn" class="btn btn-ghost btn-sm">Log Keluar</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="portal-main">
+    <div class="container">
+      <div class="portal-header">
+        <h2>Pendaftaran Kelas</h2>
+        <p class="muted">Daftar untuk kelas asas komputer atau kelas AI.</p>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card">
+          <h3>Kelas Asas Kecerdasan Buatan (AI)</h3>
+          <p>Belajar cara menggunakan alatan AI secara praktikal dan mudah.</p>
+          <div class="form-group">
+            <label for="mode-ai">Mod Kelas</label>
+            <select id="mode-ai">
+              <option>Online</option>
+              <option>Bersemuka</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" data-class="Kelas Asas Kecerdasan Buatan (AI)" data-mode="mode-ai">Daftar Kelas</button>
+        </div>
+        <div class="card">
+          <h3>Kelas Asas Komputer</h3>
+          <p>Asas komputer daripada tahap permulaan hingga kemahiran harian.</p>
+          <div class="form-group">
+            <label for="mode-computer">Mod Kelas</label>
+            <select id="mode-computer">
+              <option>Online</option>
+              <option>Bersemuka</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" data-class="Kelas Asas Komputer" data-mode="mode-computer">Daftar Kelas</button>
+        </div>
+      </div>
+
+      <h2 class="sub-title">Kelas Saya</h2>
+      <div class="card">
+        <div id="enrolled-list"><p class="muted">Memuatkan...</p></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/portal.js"></script>
+  <script>
+    (function () {
+      window.portal.requireAuth().then(async function (session) {
+        if (!session) return;
+        var sb = window.portal.supabase;
+        var listBox = document.getElementById("enrolled-list");
+
+        async function loadEnrolled() {
+          var { data, error } = await sb.from("class_enrollments")
+            .select("class_name, mode, created_at")
+            .order("created_at", { ascending: false });
+          if (error) {
+            listBox.innerHTML = '<p class="muted">Ralat: ' + error.message + '</p>';
+            return;
+          }
+          if (!data || data.length === 0) {
+            listBox.innerHTML = '<p class="muted">Belum mendaftar sebarang kelas.</p>';
+            return;
+          }
+          listBox.innerHTML = '<table class="table"><thead><tr><th>Kelas</th><th>Mod</th><th>Tarikh Daftar</th></tr></thead><tbody>' +
+            data.map(function (e) {
+              return '<tr><td>' + e.class_name + '</td><td>' + e.mode + '</td><td>' +
+                new Date(e.created_at).toLocaleDateString("ms-MY") + '</td></tr>';
+            }).join("") + '</tbody></table>';
+        }
+
+        document.querySelectorAll("[data-class]").forEach(function (btn) {
+          btn.addEventListener("click", async function () {
+            var className = btn.getAttribute("data-class");
+            var mode = document.getElementById(btn.getAttribute("data-mode")).value;
+            var existing = await sb.from("class_enrollments")
+              .select("id")
+              .eq("user_id", session.user.id)
+              .eq("class_name", className)
+              .eq("mode", mode);
+            if (existing.data && existing.data.length > 0) {
+              alert("Anda sudah mendaftar untuk kelas ini (" + mode + ").");
+              return;
+            }
+            var { error } = await sb.from("class_enrollments").insert({
+              user_id: session.user.id,
+              class_name: className,
+              mode: mode
+            });
+            if (error) {
+              alert("Ralat: " + error.message);
+              return;
+            }
+            alert("Pendaftaran berjaya: " + className + " (" + mode + ")");
+            loadEnrolled();
+          });
+        });
+
+        loadEnrolled();
+      });
+    })();
+  </script>
+</body>
+</html>

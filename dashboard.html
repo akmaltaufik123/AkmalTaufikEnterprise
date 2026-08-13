@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Portal Pelanggan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <video class="bg-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+    <source src="assets/rain.mp4" type="video/mp4">
+  </video>
+
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="brand"><img src="https://plain-apac-prod-public.komododecks.com/202608/12/3HS3RGiBnGa12S29398i/image.png" alt="Logo" class="logo-img"></a>
+      <nav class="portal-nav">
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="request.html">Permohonan Baru</a>
+        <a href="my-requests.html">Permohonan Saya</a>
+        <a href="classes.html">Kelas</a>
+        <button id="signout-btn" class="btn btn-ghost btn-sm">Log Keluar</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="portal-main">
+    <div class="container">
+      <div class="portal-header">
+        <h2>Salam, <span id="user-name">...</span></h2>
+        <p class="muted">Urus perkhidmatan dan kelas anda di sini.</p>
+      </div>
+
+      <div class="grid grid-3">
+        <a href="request.html" class="card portal-card">
+          <h3>Permohonan Baru</h3>
+          <p>Mohon perkhidmatan — pemasangan, pembaikan, sokongan dan banyak lagi.</p>
+        </a>
+        <a href="my-requests.html" class="card portal-card">
+          <h3>Permohonan Saya</h3>
+          <p>Semak status permohonan anda — menunggu, dalam proses atau selesai.</p>
+        </a>
+        <a href="classes.html" class="card portal-card">
+          <h3>Kelas</h3>
+          <p>Daftar untuk kelas asas komputer dan kelas AI — online atau bersemuka.</p>
+        </a>
+      </div>
+
+      <h2 class="sub-title">Permohonan Terkini</h2>
+      <div class="card">
+        <div id="recent-list"><p class="muted">Memuatkan...</p></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/portal.js"></script>
+  <script>
+    (function () {
+      window.portal.requireAuth().then(async function (session) {
+        if (!session) return;
+        var user = session.user;
+        document.getElementById("user-name").textContent = window.portal.getUserName(user);
+        var { data, error } = await window.portal.supabase
+          .from("service_requests")
+          .select("id, service, status, created_at")
+          .order("created_at", { ascending: false })
+          .limit(5);
+        var box = document.getElementById("recent-list");
+        if (error || !data || data.length === 0) {
+          box.innerHTML = '<p class="muted">Belum ada permohonan. <a href="request.html">Buat permohonan pertama anda</a>.</p>';
+          return;
+        }
+        box.innerHTML = '<table class="table"><thead><tr><th>Perkhidmatan</th><th>Tarikh</th><th>Status</th></tr></thead><tbody>' +
+          data.map(function (r) {
+            return '<tr><td>' + r.service + '</td><td>' + new Date(r.created_at).toLocaleDateString("ms-MY") +
+              '</td><td><span class="badge ' + r.status + '">' + window.portal.badge(r.status) + '</span></td></tr>';
+          }).join("") + '</tbody></table>';
+      });
+    })();
+  </script>
+</body>
+</html>

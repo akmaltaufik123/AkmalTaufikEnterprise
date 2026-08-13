@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar — Portal Pelanggan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <video class="bg-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+    <source src="assets/rain.mp4" type="video/mp4">
+  </video>
+
+  <main class="auth-body">
+    <div class="auth-card">
+      <a href="index.html" class="brand auth-brand"><img src="https://plain-apac-prod-public.komododecks.com/202608/12/3HS3RGiBnGa12S29398i/image.png" alt="Logo" class="logo-img"></a>
+      <h1>Daftar Akaun</h1>
+      <p class="muted">Buka akaun portal pelanggan percuma.</p>
+
+      <form id="register-form" novalidate>
+        <div class="form-group">
+          <label for="name">Nama Penuh</label>
+          <input type="text" id="name" placeholder="Nama anda" required>
+        </div>
+        <div class="form-group">
+          <label for="email">E-mel</label>
+          <input type="email" id="email" placeholder="anda@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Kata Laluan</label>
+          <input type="password" id="password" placeholder="Minimum 6 aksara" minlength="6" required>
+        </div>
+        <p id="form-error" class="form-error" hidden></p>
+        <button type="submit" class="btn btn-primary btn-block">Daftar</button>
+      </form>
+
+      <p class="auth-switch">Sudah ada akaun? <a href="login.html">Log Masuk</a></p>
+      <p class="auth-switch"><a href="index.html">&larr; Kembali ke laman utama</a></p>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/portal.js"></script>
+  <script>
+    (function () {
+      var errorBox = document.getElementById("form-error");
+      var form = document.getElementById("register-form");
+      if (!window.portal.supabase) {
+        errorBox.textContent = "Portal belum dikonfigurasi. Hubungi pentadbir.";
+        errorBox.hidden = false;
+      }
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var name = document.getElementById("name").value.trim();
+        var email = document.getElementById("email").value.trim().toLowerCase();
+        var password = document.getElementById("password").value;
+        if (password.length < 6) {
+          errorBox.textContent = "Kata laluan minimum 6 aksara.";
+          errorBox.hidden = false;
+          return;
+        }
+        var res = await window.portal.supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: { data: { full_name: name } }
+        });
+        if (res.error) {
+          errorBox.textContent = res.error.message;
+          errorBox.hidden = false;
+          return;
+        }
+        if (res.data.session) {
+          window.location.href = "dashboard.html";
+        } else {
+          errorBox.className = "alert ok";
+          errorBox.textContent = "Pendaftaran berjaya! Sila sahkan e-mel anda sebelum log masuk.";
+          errorBox.hidden = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

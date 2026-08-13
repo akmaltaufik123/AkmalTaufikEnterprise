@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Permohonan Saya — Portal Pelanggan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <video class="bg-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+    <source src="assets/rain.mp4" type="video/mp4">
+  </video>
+
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="brand"><img src="https://plain-apac-prod-public.komododecks.com/202608/12/3HS3RGiBnGa12S29398i/image.png" alt="Logo" class="logo-img"></a>
+      <nav class="portal-nav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="request.html">Permohonan Baru</a>
+        <a href="my-requests.html" class="active">Permohonan Saya</a>
+        <a href="classes.html">Kelas</a>
+        <button id="signout-btn" class="btn btn-ghost btn-sm">Log Keluar</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="portal-main">
+    <div class="container">
+      <div class="portal-header">
+        <h2>Permohonan Saya</h2>
+        <p class="muted">Semak status setiap permohonan anda.</p>
+      </div>
+
+      <div class="card">
+        <div id="requests-list"><p class="muted">Memuatkan...</p></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/portal.js"></script>
+  <script>
+    (function () {
+      window.portal.requireAuth().then(async function (session) {
+        if (!session) return;
+        var { data, error } = await window.portal.supabase
+          .from("service_requests")
+          .select("id, service, location, description, status, created_at")
+          .order("created_at", { ascending: false });
+        var box = document.getElementById("requests-list");
+        if (error) {
+          box.innerHTML = '<p class="muted">Ralat memuatkan permohonan: ' + error.message + '</p>';
+          return;
+        }
+        if (!data || data.length === 0) {
+          box.innerHTML = '<p class="muted">Belum ada permohonan. <a href="request.html">Buat permohonan pertama anda</a>.</p>';
+          return;
+        }
+        box.innerHTML = '<table class="table"><thead><tr><th>Perkhidmatan</th><th>Lokasi</th><th>Tarikh</th><th>Status</th></tr></thead><tbody>' +
+          data.map(function (r) {
+            var desc = r.description ? '<div class="table-desc">' + r.description + '</div>' : '';
+            return '<tr><td>' + r.service + desc + '</td><td>' + r.location + '</td><td>' +
+              new Date(r.created_at).toLocaleDateString("ms-MY") + '</td><td><span class="badge ' + r.status + '">' +
+              window.portal.badge(r.status) + '</span></td></tr>';
+          }).join("") + '</tbody></table>';
+      });
+    })();
+  </script>
+</body>
+</html>
