@@ -816,6 +816,68 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
   border: 1px solid rgba(34, 197, 94, 0.4);
 }
 
+.stats-row {
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  text-align: center;
+}
+
+.stat-card h3 {
+  font-size: 2rem;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--text);
+  border-color: rgba(220, 38, 38, 0.5);
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  color: #fff;
+  border-color: transparent;
+}
+
+.status-select {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
+}
+
+@media (max-width: 640px) {
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    flex: 1;
+  }
+}
+
 @media (max-width: 900px) {
   .portal-nav {
     justify-content: flex-end;

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Panel Pentadbir</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <video class="bg-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+    <source src="assets/rain.mp4" type="video/mp4">
+  </video>
+
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="brand"><img src="https://plain-apac-prod-public.komododecks.com/202608/12/3HS3RGiBnGa12S29398i/image.png" alt="Logo" class="logo-img"></a>
+      <nav class="portal-nav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="request.html">Permohonan Baru</a>
+        <a href="my-requests.html">Permohonan Saya</a>
+        <a href="classes.html">Kelas</a>
+        <a href="admin.html" class="active">Admin</a>
+        <button id="signout-btn" class="btn btn-ghost btn-sm">Log Keluar</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="portal-main">
+    <div class="container">
+      <div class="portal-header">
+        <h2>Panel Pentadbir</h2>
+        <p class="muted">Urus semua permohonan dan pendaftaran kelas pelanggan.</p>
+      </div>
+
+      <div id="denied" hidden>
+        <div class="card">
+          <h3>Akses Ditolak</h3>
+          <p class="muted">Akaun anda tidak mempunyai kebenaran pentadbir.</p>
+          <a href="dashboard.html" class="btn btn-outline btn-sm">Kembali ke Dashboard</a>
+        </div>
+      </div>
+
+      <div id="admin-content" hidden>
+        <div class="grid grid-3 stats-row">
+          <div class="card stat-card">
+            <h3 id="stat-total">0</h3>
+            <p class="muted">Jumlah Permohonan</p>
+          </div>
+          <div class="card stat-card">
+            <h3 id="stat-pending">0</h3>
+            <p class="muted">Menunggu</p>
+          </div>
+          <div class="card stat-card">
+            <h3 id="stat-enroll">0</h3>
+            <p class="muted">Pendaftaran Kelas</p>
+          </div>
+        </div>
+
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="requests">Permohonan</button>
+          <button class="tab-btn" data-tab="classes">Kelas</button>
+        </div>
+
+        <div id="tab-requests" class="tab-panel">
+          <div class="card">
+            <div id="requests-list"><p class="muted">Memuatkan...</p></div>
+          </div>
+        </div>
+
+        <div id="tab-classes" class="tab-panel" hidden>
+          <div class="card">
+            <div id="classes-list"><p class="muted">Memuatkan...</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/portal.js"></script>
+  <script>
+    (function () {
+      window.portal.requireAuth().then(async function (session) {
+        if (!session) return;
+        var isAdmin = !!(session.user.app_metadata && session.user.app_metadata.is_admin);
+        if (!isAdmin) {
+          document.getElementById("denied").hidden = false;
+          return;
+        }
+        document.getElementById("admin-content").hidden = false;
+        var sb = window.portal.supabase;
+
+        document.querySelectorAll(".tab-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
+            btn.classList.add("active");
+            document.getElementById("tab-requests").hidden = btn.getAttribute("data-tab") !== "requests";
+            document.getElementById("tab-classes").hidden = btn.getAttribute("data-tab") !== "classes";
+          });
+        });
+
+        async function loadRequests() {
+          var { data, error } = await sb.from("service_requests")
+            .select("id, service, location, description, status, created_at, user_id")
+            .order("created_at", { ascending: false });
+          var box = document.getElementById("requests-list");
+          if (error) {
+            box.innerHTML = '<p class="muted">Ralat: ' + error.message + '</p>';
+            return;
+          }
+          if (!data || data.length === 0) {
+            box.innerHTML = '<p class="muted">Belum ada permohonan.</p>';
+            return;
+          }
+          var statuses = ["pending", "in_progress", "done"];
+          var labels = { pending: "Menunggu", in_progress: "Dalam Proses", done: "Selesai" };
+          box.innerHTML = '<table class="table"><thead><tr><th>Perkhidmatan</th><th>Lokasi</th><th>Tarikh</th><th>Status</th><th>Tindakan</th></tr></thead><tbody>' +
+            data.map(function (r) {
+              var desc = r.description ? '<div class="table-desc">' + r.description + '</div>' : '';
+              var opts = statuses.map(function (s) {
+                return '<option value="' + s + '"' + (s === r.status ? " selected" : "") + '>' + labels[s] + '</option>';
+              }).join("");
+              return '<tr data-id="' + r.id + '"><td>' + r.service + desc + '</td><td>' + r.location + '</td><td>' +
+                new Date(r.created_at).toLocaleDateString("ms-MY") +
+                '</td><td><span class="badge ' + r.status + '">' + window.portal.badge(r.status) +
+                '</span></td><td><select class="status-select" data-status>' + opts + '</select></td></tr>';
+            }).join("") + '</tbody></table>';
+
+          document.querySelectorAll("[data-status]").forEach(function (sel) {
+            sel.addEventListener("change", async function () {
+              var id = sel.closest("tr").getAttribute("data-id");
+              var { error } = await sb.from("service_requests").update({ status: sel.value }).eq("id", id);
+              if (error) {
+                alert("Ralat: " + error.message);
+              }
+              loadRequests();
+              loadStats();
+            });
+          });
+        }
+
+        async function loadClasses() {
+          var { data, error } = await sb.from("class_enrollments")
+            .select("class_name, mode, created_at, user_id")
+            .order("created_at", { ascending: false });
+          var box = document.getElementById("classes-list");
+          if (error) {
+            box.innerHTML = '<p class="muted">Ralat: ' + error.message + '</p>';
+            return;
+          }
+          if (!data || data.length === 0) {
+            box.innerHTML = '<p class="muted">Belum ada pendaftaran kelas.</p>';
+            return;
+          }
+          box.innerHTML = '<table class="table"><thead><tr><th>Kelas</th><th>Mod</th><th>Tarikh Daftar</th></tr></thead><tbody>' +
+            data.map(function (e) {
+              return '<tr><td>' + e.class_name + '</td><td>' + e.mode + '</td><td>' +
+                new Date(e.created_at).toLocaleDateString("ms-MY") + '</td></tr>';
+            }).join("") + '</tbody></table>';
+        }
+
+        async function loadStats() {
+          var total = await sb.from("service_requests").select("id", { count: "exact" });
+          var pending = await sb.from("service_requests").select("id", { count: "exact" }).eq("status", "pending");
+          var enroll = await sb.from("class_enrollments").select("id", { count: "exact" });
+          document.getElementById("stat-total").textContent = total.count || 0;
+          document.getElementById("stat-pending").textContent = pending.count || 0;
+          document.getElementById("stat-enroll").textContent = enroll.count || 0;
+        }
+
+        loadStats();
+        loadRequests();
+        loadClasses();
+      });
+    })();
+  </script>
+</body>
+</html>

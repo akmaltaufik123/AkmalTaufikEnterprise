@@ -48,4 +48,14 @@
       window.location.href = "login.html";
     });
   }
+
+  var adminLink = document.getElementById("admin-link");
+  if (adminLink && supabase) {
+    supabase.auth.getSession().then(function (s) {
+      var u = s.data.session && s.data.session.user;
+      if (u && u.app_metadata && u.app_metadata.is_admin) {
+        adminLink.hidden = false;
+      }
+    });
+  }
 })();
