@@ -1458,3 +1458,40 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
   object-fit: cover;
   display: block;
 }
+
+/* ---------- Edit Webpage ---------- */
+.web-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 28px;
+  margin-top: 14px;
+}
+
+.path-input {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.8rem;
+  min-width: 180px;
+}
+
+.code-area {
+  width: 100%;
+  font-family: "Courier New", monospace;
+  font-size: 0.82rem;
+  background: #0b0b10;
+  color: #f4f4f5;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.code-area:focus {
+  outline: none;
+  border-color: var(--accent);
+}
