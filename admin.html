@@ -74,6 +74,7 @@
           <button class="tab-btn" data-tab="bookings">Tempahan</button>
           <button class="tab-btn" data-tab="classes">Kelas</button>
           <button class="tab-btn" data-tab="customers">Pelanggan</button>
+          <button class="tab-btn" data-tab="report">Laporan</button>
           <button class="tab-btn" data-tab="web">Edit Webpage</button>
         </div>
 
@@ -210,6 +211,40 @@
           </div>
         </div>
 
+        <div id="tab-report" class="tab-panel" hidden>
+          <div class="card">
+            <h3>Muat Turun Laporan</h3>
+            <div class="form-group">
+              <label for="report-scope">Jenis Laporan</label>
+              <select id="report-scope">
+                <option value="semua">Laporan Lengkap (Semua)</option>
+                <option value="requests">Permohonan Perkhidmatan</option>
+                <option value="bookings">Tempahan</option>
+                <option value="enrollments">Pendaftaran Kelas</option>
+                <option value="customers">Pelanggan</option>
+                <option value="transactions">Transaksi</option>
+              </select>
+            </div>
+            <div class="report-range">
+              <div class="form-group">
+                <label for="report-from">Dari Tarikh (pilihan)</label>
+                <input type="date" id="report-from">
+              </div>
+              <div class="form-group">
+                <label for="report-to">Hingga Tarikh (pilihan)</label>
+                <input type="date" id="report-to">
+              </div>
+            </div>
+            <div class="report-btns">
+              <button class="btn btn-primary" id="report-pdf">PDF</button>
+              <button class="btn btn-primary" id="report-excel">Excel</button>
+              <button class="btn btn-primary" id="report-word">Word</button>
+              <button class="btn btn-primary" id="report-csv">CSV</button>
+            </div>
+            <p class="muted form-hint">Semua format (PDF, Excel, Word, CSV) mengandungi kandungan yang sama. Kosongkan tarikh untuk laporan penuh.</p>
+          </div>
+        </div>
+
         <div id="tab-web" class="tab-panel" hidden>
           <div class="card">
             <div class="card-toolbar">
@@ -319,6 +354,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>
   <script src="js/portal.js"></script>
@@ -363,7 +401,7 @@
           btn.addEventListener("click", function () {
             document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
             btn.classList.add("active");
-            ["dashboard", "requests", "bookings", "classes", "customers", "web"].forEach(function (t) {
+            ["dashboard", "requests", "bookings", "classes", "customers", "report", "web"].forEach(function (t) {
               document.getElementById("tab-" + t).hidden = btn.getAttribute("data-tab") !== t;
             });
           });
@@ -1293,6 +1331,199 @@ var pageSelect = document.getElementById("page-select");
           alert("Tetapan dipadam.");
         });
 
+        var REPORT_SCOPES = {
+          semua: "Laporan Lengkap",
+          requests: "Permohonan Perkhidmatan",
+          bookings: "Tempahan",
+          enrollments: "Pendaftaran Kelas",
+          customers: "Pelanggan",
+          transactions: "Transaksi"
+        };
+
+        function reportDate(ts) {
+          return ts ? new Date(ts).toLocaleString("ms-MY", { dateStyle: "short", timeStyle: "short" }) : "";
+        }
+        function reportInRange(ts, from, to) {
+          if (!ts) return true;
+          var t = new Date(ts).getTime();
+          if (from && t < new Date(from + "T00:00:00").getTime()) return false;
+          if (to && t > new Date(to + "T23:59:59").getTime()) return false;
+          return true;
+        }
+        function csvCell(v) {
+          v = String(v == null ? "" : v);
+          return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+        }
+        function escHtml(v) {
+          return String(v == null ? "" : v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+        function reportDownload(blob, name) {
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = name;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 600);
+        }
+
+        async function buildReport() {
+          var scope = document.getElementById("report-scope").value;
+          var from = document.getElementById("report-from").value;
+          var to = document.getElementById("report-to").value;
+          var sb = window.portal.supabase;
+
+          var profRes = await sb.from("profiles").select("id, full_name, email");
+          var pMap = {};
+          (profRes.data || []).forEach(function (r) { pMap[r.id] = r.full_name || r.email || "—"; });
+          function who(u) { return u && pMap[u] ? pMap[u] : "—"; }
+
+          var sections = [];
+          function add(name, headers, rows) {
+            if (rows.length) sections.push({ name: name, headers: headers, rows: rows });
+          }
+
+          if (scope === "semua" || scope === "requests") {
+            var { data: reqs } = await sb.from("service_requests").select("user_id, service, location, description, status, created_at");
+            var rows = [];
+            (reqs || []).forEach(function (r) {
+              if (!reportInRange(r.created_at, from, to)) return;
+              rows.push([who(r.user_id), r.service, r.location, r.description || "—", window.portal.badge(r.status), reportDate(r.created_at)]);
+            });
+            add("Permohonan Perkhidmatan", ["Pelanggan", "Perkhidmatan", "Lokasi", "Penerangan", "Status", "Tarikh"], rows);
+          }
+
+          if (scope === "semua" || scope === "bookings") {
+            var { data: bks } = await sb.from("bookings")
+              .select("user_id, service, booking_date, booking_time, location, notes, status, customer_name, phone, email, image_url, video_url, created_at");
+            var rows = [];
+            (bks || []).forEach(function (b) {
+              if (!reportInRange(b.created_at, from, to)) return;
+              rows.push([b.customer_name || who(b.user_id), b.phone || "—", b.email || "—", b.service, b.booking_date, b.booking_time, b.location, b.notes || "—", window.portal.badge(b.status), b.image_url || "—", b.video_url || "—"]);
+            });
+            add("Tempahan", ["Pelanggan", "Telefon", "E-mel", "Perkhidmatan", "Tarikh", "Masa", "Lokasi", "Nota", "Status", "Gambar", "Video"], rows);
+          }
+
+          if (scope === "semua" || scope === "enrollments") {
+            var { data: ens } = await sb.from("class_enrollments").select("user_id, class_name, mode, created_at");
+            var rows = [];
+            (ens || []).forEach(function (e) {
+              if (!reportInRange(e.created_at, from, to)) return;
+              rows.push([who(e.user_id), e.class_name, e.mode, reportDate(e.created_at)]);
+            });
+            add("Pendaftaran Kelas", ["Pelajar", "Kelas", "Mod", "Tarikh"], rows);
+          }
+
+          if (scope === "semua" || scope === "customers") {
+            var rows = [];
+            (profRes.data || []).forEach(function (c) {
+              if (c.id === adminId) return;
+              if (!reportInRange(c.created_at, from, to)) return;
+              rows.push([c.full_name || "—", c.email || "—", reportDate(c.created_at)]);
+            });
+            add("Pelanggan", ["Nama", "E-mel", "Tarikh Daftar"], rows);
+          }
+
+          if (scope === "semua" || scope === "transactions") {
+            var { data: trs } = await sb.from("transactions").select("label, amount, type, created_at");
+            var rows = [];
+            (trs || []).forEach(function (x) {
+              if (!reportInRange(x.created_at, from, to)) return;
+              rows.push([x.label, "RM " + Number(x.amount).toFixed(2), x.type === "income" ? "Pendapatan" : "Perbelanjaan", reportDate(x.created_at)]);
+            });
+            add("Transaksi", ["Label", "Jumlah", "Jenis", "Tarikh"], rows);
+          }
+
+          return { title: REPORT_SCOPES[scope], sections: sections, range: from || to ? "Dari " + (from || "awal") + " hingga " + (to || "kini") : "Semua tarikh" };
+        }
+
+        function reportPDF(data) {
+          var doc = new jspdf.jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+          data.sections.forEach(function (s, i) {
+            if (i > 0) doc.addPage();
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.setTextColor(220, 38, 38);
+            doc.text("AkmalTaufikEnterprise - " + data.title, 40, 42);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.setTextColor(90, 90, 90);
+            doc.text(data.range + "  |  Dijana: " + new Date().toLocaleString("ms-MY"), 40, 60);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(13);
+            doc.setTextColor(10, 10, 10);
+            doc.text(s.name, 40, 82);
+            doc.autoTable({
+              startY: 92,
+              head: [s.headers],
+              body: s.rows,
+              margin: { left: 40, right: 40 },
+              styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
+              headStyles: { fillColor: [220, 38, 38] }
+            });
+          });
+          doc.save("AkmalTaufikEnterprise-" + data.title + ".pdf");
+        }
+
+        function reportExcel(data) {
+          var wb = XLSX.utils.book_new();
+          data.sections.forEach(function (s) {
+            var ws = XLSX.utils.aoa_to_sheet([s.headers].concat(s.rows));
+            ws["!cols"] = s.headers.map(function () { return { wch: 24 }; });
+            XLSX.utils.book_append_sheet(wb, ws, s.name.slice(0, 31));
+          });
+          XLSX.writeFile(wb, "AkmalTaufikEnterprise-" + data.title + ".xlsx");
+        }
+
+        function reportWord(data) {
+          var html = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><title>" + escHtml(data.title) + "</title></head><body>";
+          html += "<h1>AkmalTaufikEnterprise - " + escHtml(data.title) + "</h1>";
+          html += "<p>" + escHtml(data.range) + " | Dijana: " + escHtml(new Date().toLocaleString("ms-MY")) + "</p>";
+          data.sections.forEach(function (s) {
+            html += "<h2>" + escHtml(s.name) + "</h2>";
+            html += "<table border='1' cellpadding='6' style='border-collapse:collapse;width:100%;font-family:Arial;font-size:11px'><tr>" +
+              s.headers.map(function (h) { return "<th style='background:#dc2626;color:#ffffff'>" + escHtml(h) + "</th>"; }).join("") + "</tr>";
+            s.rows.forEach(function (r) {
+              html += "<tr>" + r.map(function (c) { return "<td>" + escHtml(c) + "</td>"; }).join("") + "</tr>";
+            });
+            html += "</table><br>";
+          });
+          html += "</body></html>";
+          reportDownload(new Blob(["\ufeff", html], { type: "application/msword;charset=utf-8" }), "AkmalTaufikEnterprise-" + data.title + ".doc");
+        }
+
+        function reportCSV(data) {
+          var lines = ["AkmalTaufikEnterprise - " + data.title, data.range + " | Dijana: " + new Date().toLocaleString("ms-MY")];
+          data.sections.forEach(function (s) {
+            lines.push("");
+            lines.push(s.name);
+            lines.push(s.headers.map(csvCell).join(","));
+            s.rows.forEach(function (r) { lines.push(r.map(csvCell).join(",")); });
+          });
+          reportDownload(new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" }), "AkmalTaufikEnterprise-" + data.title + ".csv");
+        }
+
+        function wireReport() {
+          var jobs = { pdf: reportPDF, excel: reportExcel, word: reportWord, csv: reportCSV };
+          Object.keys(jobs).forEach(function (f) {
+            document.getElementById("report-" + f).addEventListener("click", async function () {
+              var btn = this;
+              btn.disabled = true;
+              try {
+                var data = await buildReport();
+                if (!data.sections.length) {
+                  alert("Tiada data untuk laporan ini.");
+                  return;
+                }
+                jobs[f](data);
+              } catch (err) {
+                alert("Ralat menjana laporan: " + err.message);
+              } finally {
+                btn.disabled = false;
+              }
+            });
+          });
+        }
+
         await loadProfiles();
         dash.profilesData = ((await sb.from("profiles").select("id, created_at")).data || []).filter(function (p) { return p.id !== adminId; });
         dash.requestsData = (await sb.from("service_requests").select("id, status, created_at")).data || [];
@@ -1308,6 +1539,7 @@ var pageSelect = document.getElementById("page-select");
         loadWebPage();
         loadWebTheme();
         loadTx();
+        wireReport();
       });
     })();
   </script>

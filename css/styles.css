@@ -1581,6 +1581,25 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
   opacity: 0.6;
 }
 
+/* ---------- Reports ---------- */
+.report-range {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.report-range .form-group {
+  flex: 1;
+  min-width: 180px;
+}
+
+.report-btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
 /* ---------- Bookings ---------- */
 .booking-thumb {
   width: 72px;
