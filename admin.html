@@ -60,10 +60,71 @@
         </div>
 
         <div class="tab-bar">
-          <button class="tab-btn active" data-tab="requests">Permohonan</button>
+          <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+          <button class="tab-btn" data-tab="requests">Permohonan</button>
           <button class="tab-btn" data-tab="courses">Kursus</button>
           <button class="tab-btn" data-tab="classes">Kelas</button>
           <button class="tab-btn" data-tab="customers">Pelanggan</button>
+        </div>
+
+        <div id="tab-dashboard" class="tab-panel">
+          <div class="grid grid-3 stats-row">
+            <div class="card stat-card">
+              <h3 id="dash-customers">0</h3>
+              <p class="muted">Jumlah Pelanggan</p>
+            </div>
+            <div class="card stat-card">
+              <h3 id="dash-requests">0</h3>
+              <p class="muted">Jumlah Permohonan</p>
+            </div>
+            <div class="card stat-card">
+              <h3 id="dash-income">RM 0</h3>
+              <p class="muted">Jumlah Pendapatan</p>
+            </div>
+            <div class="card stat-card">
+              <h3 id="dash-pending">0</h3>
+              <p class="muted">Permohonan Menunggu</p>
+            </div>
+          </div>
+
+          <div class="charts-grid">
+            <div class="card">
+              <h3>Permohonan Mengikut Status</h3>
+              <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
+            </div>
+            <div class="card">
+              <h3>Pendaftaran Pelanggan (14 Hari)</h3>
+              <div class="chart-wrap"><canvas id="chart-daily"></canvas></div>
+            </div>
+          </div>
+
+          <div class="charts-grid">
+            <div class="card">
+              <h3>Pendapatan Bulanan (12 Bulan)</h3>
+              <div class="chart-wrap"><canvas id="chart-income"></canvas></div>
+            </div>
+            <div class="card">
+              <h3>Rekod Pendapatan</h3>
+              <form id="income-form">
+                <div class="form-group">
+                  <label for="in-label">Penerangan</label>
+                  <input id="in-label" placeholder="cth: Pemasangan CCTV Bayan Lepas" required>
+                </div>
+                <div class="form-group">
+                  <label for="in-amount">Amaun (RM)</label>
+                  <input id="in-amount" type="number" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                <div class="form-group">
+                  <label for="in-type">Jenis</label>
+                  <select id="in-type">
+                    <option value="income">Pendapatan</option>
+                    <option value="expense">Perbelanjaan</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Tambah Rekod</button>
+              </form>
+            </div>
+          </div>
         </div>
 
         <div id="tab-requests" class="tab-panel">
@@ -108,6 +169,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>
   <script src="js/portal.js"></script>
@@ -150,13 +212,138 @@
           btn.addEventListener("click", function () {
             document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
             btn.classList.add("active");
-            ["requests", "courses", "classes", "customers"].forEach(function (t) {
+            ["dashboard", "requests", "courses", "classes", "customers"].forEach(function (t) {
               document.getElementById("tab-" + t).hidden = btn.getAttribute("data-tab") !== t;
             });
           });
         });
 
         var profiles = {};
+
+        var charts = {};
+
+        function makeChart(id, config) {
+          if (charts[id]) charts[id].destroy();
+          charts[id] = new Chart(document.getElementById(id), config);
+        }
+
+        function gridStyle() {
+          return {
+            ticks: { color: "#a1a1aa", font: { family: "Chakra Petch" } },
+            grid: { color: "rgba(38,38,46,0.7)" }
+          };
+        }
+
+        function lastNDays(n) {
+          var labels = [], counts = [];
+          var now = new Date();
+          for (var i = n - 1; i >= 0; i--) {
+            var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+            labels.push(d.getDate() + "/" + (d.getMonth() + 1));
+            counts.push(0);
+          }
+          return { labels: labels, counts: counts };
+        }
+
+        function lastNMonths(n) {
+          var labels = [], sums = [];
+          var now = new Date();
+          for (var i = n - 1; i >= 0; i--) {
+            var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            labels.push(d.toLocaleDateString("ms-MY", { month: "short", year: "2-digit" }));
+            sums.push(0);
+          }
+          return { labels: labels, sums: sums };
+        }
+
+        function keyOfDate(d) {
+          return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+        }
+
+        async function loadDash(profilesData, requestsData, txData) {
+          var daily = lastNDays(14);
+          (profilesData || []).forEach(function (p) {
+            var d = new Date(p.created_at);
+            var idx = daily.labels.indexOf(d.getDate() + "/" + (d.getMonth() + 1));
+            if (idx > -1) daily.counts[idx]++;
+          });
+
+          var statusCounts = { pending: 0, in_progress: 0, done: 0 };
+          (requestsData || []).forEach(function (r) {
+            if (statusCounts[r.status] != null) statusCounts[r.status]++;
+          });
+
+          var monthly = lastNMonths(12);
+          var totalIncome = 0;
+          (txData || []).forEach(function (t) {
+            var d = new Date(t.created_at);
+            var label = d.toLocaleDateString("ms-MY", { month: "short", year: "2-digit" });
+            var idx = monthly.labels.indexOf(label);
+            var amt = parseFloat(t.amount) || 0;
+            if (t.type === "expense") amt = -amt;
+            if (idx > -1) monthly.sums[idx] += amt;
+            totalIncome += amt;
+          });
+
+          document.getElementById("dash-customers").textContent = (profilesData || []).length;
+          document.getElementById("dash-requests").textContent = (requestsData || []).length;
+          document.getElementById("dash-income").textContent = "RM " + totalIncome.toFixed(2);
+          document.getElementById("dash-pending").textContent = statusCounts.pending;
+
+          makeChart("chart-status", {
+            type: "doughnut",
+            data: {
+              labels: ["Menunggu", "Dalam Proses", "Selesai"],
+              datasets: [{
+                data: [statusCounts.pending, statusCounts.in_progress, statusCounts.done],
+                backgroundColor: ["#f59e0b", "#3b82f6", "#22c55e"],
+                borderColor: "#16161c",
+                borderWidth: 2
+              }]
+            },
+            options: { plugins: { legend: { labels: { color: "#f4f4f5", font: { family: "Chakra Petch" } } } } }
+          });
+
+          makeChart("chart-daily", {
+            type: "bar",
+            data: {
+              labels: daily.labels,
+              datasets: [{
+                label: "Pendaftaran",
+                data: daily.counts,
+                backgroundColor: "rgba(220,38,38,0.75)",
+                borderColor: "#ef4444",
+                borderWidth: 1,
+                borderRadius: 4
+              }]
+            },
+            options: {
+              scales: { x: gridStyle(), y: { beginAtZero: true, ticks: { color: "#a1a1aa" }, grid: { color: "rgba(38,38,46,0.7)" } } },
+              plugins: { legend: { display: false } }
+            }
+          });
+
+          makeChart("chart-income", {
+            type: "bar",
+            data: {
+              labels: monthly.labels,
+              datasets: [{
+                label: "Pendapatan (RM)",
+                data: monthly.sums,
+                backgroundColor: monthly.sums.map(function (v) {
+                  return v >= 0 ? "rgba(220,38,38,0.75)" : "rgba(38,38,46,0.8)";
+                }),
+                borderColor: "#ef4444",
+                borderWidth: 1,
+                borderRadius: 4
+              }]
+            },
+            options: {
+              scales: { x: gridStyle(), y: { beginAtZero: true, ticks: { color: "#a1a1aa" }, grid: { color: "rgba(38,38,46,0.7)" } } },
+              plugins: { legend: { display: false } }
+            }
+          });
+        }
 
         async function loadProfiles() {
           var { data } = await sb.from("profiles").select("id, full_name, email");
@@ -390,11 +577,42 @@
         }
 
         await loadProfiles();
+        var allRequests = await sb.from("service_requests").select("id, status, created_at");
+        var allTx = await sb.from("transactions").select("id, label, amount, type, created_at");
+        var allProfiles = await sb.from("profiles").select("id, created_at");
+        loadDash(allProfiles.data, allRequests.data, allTx.data);
         loadStats();
         loadRequests();
         loadCourses();
         loadEnrollments();
         loadCustomers();
+
+        var incomeForm = document.getElementById("income-form");
+        if (incomeForm) {
+          incomeForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            var label = document.getElementById("in-label").value.trim();
+            var amount = parseFloat(document.getElementById("in-amount").value);
+            var type = document.getElementById("in-type").value;
+            if (!label || isNaN(amount) || amount <= 0) {
+              alert("Sila isi penerangan dan amaun yang sah.");
+              return;
+            }
+            var { error } = await sb.from("transactions").insert({
+              label: label,
+              amount: amount,
+              type: type
+            });
+            if (error) {
+              alert("Ralat: " + error.message);
+              return;
+            }
+            incomeForm.reset();
+            var tx = await sb.from("transactions").select("id, label, amount, type, created_at");
+            loadDash(allProfiles.data, allRequests.data, tx.data);
+            alert("Rekod ditambah.");
+          });
+        }
       });
     })();
   </script>
