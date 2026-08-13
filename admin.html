@@ -71,7 +71,6 @@
         <div class="tab-bar">
           <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
           <button class="tab-btn" data-tab="requests">Permohonan</button>
-          <button class="tab-btn" data-tab="courses">Kursus</button>
           <button class="tab-btn" data-tab="classes">Kelas</button>
           <button class="tab-btn" data-tab="customers">Pelanggan</button>
         </div>
@@ -175,18 +174,24 @@
           </div>
         </div>
 
-        <div id="tab-courses" class="tab-panel" hidden>
-          <div class="card">
-            <div class="card-toolbar">
-              <h3>Senarai Kursus</h3>
-              <button id="add-course-btn" class="btn btn-primary btn-sm">+ Tambah Kursus</button>
-            </div>
-            <div id="courses-list"><p class="muted">Memuatkan...</p></div>
-          </div>
-        </div>
-
         <div id="tab-classes" class="tab-panel" hidden>
           <div class="card">
+            <div class="card-toolbar">
+              <h3>Kategori &amp; Kelas</h3>
+              <div class="toolbar-actions">
+                <span class="muted hint">Seret kad untuk susun semula</span>
+                <button id="add-cat-btn" class="btn btn-primary btn-sm">+ Tambah Kategori</button>
+              </div>
+            </div>
+            <div id="cat-grid" class="cat-grid">
+              <p class="muted">Memuatkan...</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-toolbar">
+              <h3>Pendaftaran Kelas</h3>
+            </div>
             <div id="classes-list"><p class="muted">Memuatkan...</p></div>
           </div>
         </div>
@@ -255,7 +260,7 @@
           btn.addEventListener("click", function () {
             document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
             btn.classList.add("active");
-            ["dashboard", "requests", "courses", "classes", "customers"].forEach(function (t) {
+            ["dashboard", "requests", "classes", "customers"].forEach(function (t) {
               document.getElementById("tab-" + t).hidden = btn.getAttribute("data-tab") !== t;
             });
           });
@@ -673,87 +678,213 @@
           });
         }
 
-        async function loadCourses() {
-          var { data, error } = await sb.from("courses").select("*").order("created_at");
-          var box = document.getElementById("courses-list");
-          if (error) {
-            box.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
-            return;
-          }
-          if (!data || data.length === 0) {
-            box.innerHTML = '<p class="muted">Belum ada kursus. Tekan "+ Tambah Kursus".</p>';
-            return;
-          }
-          box.innerHTML = '<table class="table"><thead><tr><th>Nama</th><th>Penerangan</th><th>Mod</th><th>Status</th><th>Tindakan</th></tr></thead><tbody>' +
-            data.map(function (c) {
-              return '<tr data-id="' + c.id + '"><td>' + esc(c.name) + '</td><td>' + esc(c.description) + "</td><td>" + esc(c.mode) +
-                '</td><td><span class="badge ' + (c.active ? "done" : "pending") + '">' + (c.active ? "Aktif" : "Tidak Aktif") +
-                '</span></td><td><button class="action-btn" data-toggle-course="' + c.id + '">' + (c.active ? "Nyahaktif" : "Aktifkan") +
-                '</button> <button class="action-btn" data-edit-course="' + c.id + '">Edit</button> ' +
-                '<button class="action-btn danger" data-delete-course="' + c.id + '">Padam</button></td></tr>';
-            }).join("") + "</tbody></table>";
+        var FONT_OPTIONS = ["Orbitron", "Chakra Petch", "Arial", "Verdana", "Georgia", "Courier New", "Impact"];
+        var FONT_SIZES = { "kecil": "0.9rem", "sederhana": "1.15rem", "besar": "1.45rem" };
+        var FONT_SIZE_LABELS = { "kecil": "Kecil", "sederhana": "Sederhana", "besar": "Besar" };
+        var catData = [];
 
-          box.querySelectorAll("[data-edit-course]").forEach(function (btn) {
+        function fontPreview(f) {
+          var map = { "Orbitron": "'Orbitron', sans-serif", "Chakra Petch": "'Chakra Petch', sans-serif" };
+          return map[f] || f;
+        }
+
+        function fileToDataUrl(file, cb) {
+          var r = new FileReader();
+          r.onload = function () { cb(r.result); };
+          r.readAsDataURL(file);
+        }
+
+        async function uploadCourseImage(file) {
+          var ext = (file.name.split(".").pop() || "png").toLowerCase();
+          var path = "course-" + Date.now() + "-" + Math.floor(Math.random() * 9999) + "." + ext;
+          var { error } = await sb.storage.from("course-images").upload(path, file, { contentType: file.type });
+          if (error) throw new Error(error.message);
+          return sb.storage.from("course-images").getPublicUrl(path).data.publicUrl;
+        }
+
+        function catCard(c) {
+          var style = 'style="background:' + esc(c.bg_color || "#16161c") + ';color:' + esc(c.color || "#f4f4f5") + ';font-family:' + fontPreview(c.font_family) + '"';
+          var titleStyle = 'style="font-size:' + (FONT_SIZES[c.font_size] || "1.15rem") + '"';
+          var img = c.image_url
+            ? '<div class="cat-img-wrap"><img class="cat-img" src="' + esc(c.image_url) + '" alt=""></div>'
+            : "";
+          return '<div class="cat-card" draggable="true" data-cat-id="' + esc(c.id) + '" ' + style + '>' +
+            '<div class="cat-drag-hint">&#8942;&#8942;</div>' + img +
+            '<h3 class="cat-title" ' + titleStyle + '>' + esc(c.name) + "</h3>" +
+            '<p class="cat-desc">' + esc(c.description || "") + "</p>" +
+            '<div class="cat-meta"><span class="badge ' + (c.active ? "done" : "pending") + '">' + (c.active ? "Aktif" : "Tidak Aktif") +
+            '</span><span class="badge in_progress">' + esc(c.mode) + "</span></div>" +
+            '<div class="cat-actions">' +
+            '<button class="action-btn" data-edit-cat="' + esc(c.id) + '">Edit</button> ' +
+            '<button class="action-btn" data-toggle-cat="' + esc(c.id) + '">' + (c.active ? "Nyahaktif" : "Aktifkan") + "</button> " +
+            '<button class="action-btn danger" data-delete-cat="' + esc(c.id) + '">Padam</button></div></div>';
+        }
+
+        function bindCatActions(grid) {
+          grid.querySelectorAll("[data-edit-cat]").forEach(function (btn) {
             btn.addEventListener("click", function () {
-              var c = data.find(function (x) { return x.id === btn.getAttribute("data-edit-course"); });
-              courseModal(c);
+              var c = catData.find(function (x) { return x.id === btn.getAttribute("data-edit-cat"); });
+              categoryModal(c);
             });
           });
-
-          box.querySelectorAll("[data-toggle-course]").forEach(function (btn) {
+          grid.querySelectorAll("[data-toggle-cat]").forEach(function (btn) {
             btn.addEventListener("click", async function () {
-              var c = data.find(function (x) { return x.id === btn.getAttribute("data-toggle-course"); });
+              var c = catData.find(function (x) { return x.id === btn.getAttribute("data-toggle-cat"); });
               await sb.from("courses").update({ active: !c.active }).eq("id", c.id);
-              loadCourses();
+              loadCategories();
             });
           });
-
-          box.querySelectorAll("[data-delete-course]").forEach(function (btn) {
+          grid.querySelectorAll("[data-delete-cat]").forEach(function (btn) {
             btn.addEventListener("click", async function () {
-              var id = btn.getAttribute("data-delete-course");
-              if (!confirm("Padam kursus ini? Pendaftaran sedia ada akan kekal.")) return;
+              var id = btn.getAttribute("data-delete-cat");
+              if (!confirm("Padam kategori ini? Pendaftaran sedia ada akan kekal.")) return;
               var { error } = await sb.from("courses").delete().eq("id", id);
               if (error) alert("Ralat: " + error.message);
-              loadCourses();
+              loadCategories();
             });
           });
         }
 
-        function courseModal(c) {
+        var dragId = null;
+
+        function bindDragDrop(grid) {
+          grid.querySelectorAll(".cat-card").forEach(function (card) {
+            card.addEventListener("dragstart", function () {
+              dragId = card.getAttribute("data-cat-id");
+              card.classList.add("dragging");
+            });
+            card.addEventListener("dragend", function () {
+              card.classList.remove("dragging");
+              grid.querySelectorAll(".cat-card").forEach(function (c) { c.classList.remove("drop-target"); });
+            });
+            card.addEventListener("dragover", function (e) {
+              e.preventDefault();
+              grid.querySelectorAll(".cat-card").forEach(function (c) { c.classList.remove("drop-target"); });
+              card.classList.add("drop-target");
+            });
+            card.addEventListener("drop", async function (e) {
+              e.preventDefault();
+              if (!dragId || dragId === card.getAttribute("data-cat-id")) return;
+              var ids = Array.prototype.map.call(grid.querySelectorAll(".cat-card"), function (c) {
+                return c.getAttribute("data-cat-id");
+              });
+              var from = ids.indexOf(dragId);
+              var to = ids.indexOf(card.getAttribute("data-cat-id"));
+              ids.splice(to, 0, ids.splice(from, 1)[0]);
+              for (var i = 0; i < ids.length; i++) {
+                await sb.from("courses").update({ position: i }).eq("id", ids[i]);
+              }
+              loadCategories();
+            });
+          });
+        }
+
+        async function loadCategories() {
+          var { data, error } = await sb.from("courses").select("*").order("position").order("created_at");
+          var grid = document.getElementById("cat-grid");
+          if (error) {
+            grid.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
+            return;
+          }
+          catData = data || [];
+          if (catData.length === 0) {
+            grid.innerHTML = '<p class="muted">Belum ada kategori. Tekan "+ Tambah Kategori".</p>';
+            return;
+          }
+          grid.innerHTML = catData.map(catCard).join("");
+          bindCatActions(grid);
+          bindDragDrop(grid);
+        }
+
+        function categoryModal(c) {
           var editing = !!c;
-          openModal(editing ? "Edit Kursus" : "Tambah Kursus",
-            '<div class="form-group"><label>Nama Kursus</label><input id="c-name" value="' + (editing ? esc(c.name) : "") + '"></div>' +
+          openModal(editing ? "Edit Kategori" : "Tambah Kategori",
+            '<div class="form-group"><label>Nama Kategori</label><input id="c-name" value="' + (editing ? esc(c.name) : "") + '"></div>' +
             '<div class="form-group"><label>Penerangan</label><textarea id="c-desc" rows="3">' + (editing ? esc(c.description) : "") + "</textarea></div>" +
-            '<div class="form-group"><label>Mod</label><select id="c-mode">' +
+            '<div class="form-group"><label>Mod Kelas</label><select id="c-mode">' +
             ["Online", "Bersemuka", "Online & Bersemuka"].map(function (m) {
               return '<option' + (editing && c.mode === m ? " selected" : "") + ">" + m + "</option>";
             }).join("") + "</select></div>" +
-            '<div class="switch-row"><input type="checkbox" id="c-active" class="checkbox"' + (editing && c.active ? " checked" : "") + '><label for="c-active">Kursus aktif (dipaparkan kepada pelanggan)</label></div>');
+            '<div class="switch-row"><input type="checkbox" id="c-active" class="checkbox"' + (editing && c.active ? " checked" : "") + '><label for="c-active">Aktif (dipaparkan kepada pelanggan)</label></div>' +
+            '<div class="color-row">' +
+            '<div class="form-group"><label>Warna Teks</label><input type="color" id="c-color" value="' + (editing && c.color ? esc(c.color) : "#f4f4f5") + '"></div>' +
+            '<div class="form-group"><label>Warna Latar</label><input type="color" id="c-bg" value="' + (editing && c.bg_color ? esc(c.bg_color) : "#16161c") + '"></div>' +
+            "</div>" +
+            '<div class="form-group"><label>Gaya Font</label><select id="c-font">' +
+            FONT_OPTIONS.map(function (f) {
+              return '<option' + (editing && c.font_family === f ? " selected" : "") + ">" + f + "</option>";
+            }).join("") + "</select></div>" +
+            '<div class="form-group"><label>Saiz Tajuk</label><select id="c-fontsize">' +
+            Object.keys(FONT_SIZES).map(function (s) {
+              return '<option value="' + s + '"' + (editing && c.font_size === s ? " selected" : "") + ">" + FONT_SIZE_LABELS[s] + "</option>";
+            }).join("") + "</select></div>" +
+            '<div class="form-group"><label>Gambar / GIF (URL)</label><input id="c-imgurl" placeholder="https://... (atau muat naik fail di bawah)" value="' + (editing ? esc(c.image_url || "") : "") + '"></div>' +
+            '<div class="form-group"><label>Muat Naik Fail (.gif / .png / .jpg)</label><input type="file" id="c-imgfile" accept="image/gif,image/png,image/jpeg,image/webp"></div>' +
+            (editing && c.image_url ? '<p class="muted"><img id="c-imgprev" class="modal-preview" src="' + esc(c.image_url) + '" alt=""> <button type="button" class="action-btn danger" id="c-imgclear">Buang Gambar</button></p>' : ""));
+          var prev = document.getElementById("c-imgprev");
+          if (prev) {
+            document.getElementById("c-imgclear").addEventListener("click", function () {
+              prev.remove();
+              document.getElementById("c-imgurl").value = "";
+            });
+          }
+          var fileInput = document.getElementById("c-imgfile");
+          fileInput.addEventListener("change", function () {
+            var f = fileInput.files && fileInput.files[0];
+            if (!f) return;
+            fileToDataUrl(f, function (dataUrl) {
+              var box = document.getElementById("c-imgurl");
+              box.value = "";
+              var wrap = document.getElementById("modal-body");
+              var old = wrap.querySelector(".modal-preview");
+              if (old) old.remove();
+              var im = document.createElement("img");
+              im.className = "modal-preview";
+              im.src = dataUrl;
+              wrap.insertBefore(im, box.parentNode.nextSibling || null);
+            });
+          });
           modalSave.onclick = async function () {
             var payload = {
               name: document.getElementById("c-name").value.trim(),
               description: document.getElementById("c-desc").value.trim(),
               mode: document.getElementById("c-mode").value,
-              active: document.getElementById("c-active").checked
+              active: document.getElementById("c-active").checked,
+              color: document.getElementById("c-color").value,
+              bg_color: document.getElementById("c-bg").value,
+              font_family: document.getElementById("c-font").value,
+              font_size: document.getElementById("c-fontsize").value
             };
             if (!payload.name) {
-              alert("Nama kursus diperlukan.");
+              alert("Nama kategori diperlukan.");
               return;
             }
-            var { error } = editing
-              ? await sb.from("courses").update(payload).eq("id", c.id)
-              : await sb.from("courses").insert(payload);
-            if (error) alert("Ralat: " + error.message);
+            var file = fileInput.files && fileInput.files[0];
+            try {
+              if (file) {
+                payload.image_url = await uploadCourseImage(file);
+              } else {
+                var urlVal = document.getElementById("c-imgurl").value.trim();
+                payload.image_url = urlVal ? urlVal : (editing ? c.image_url : null);
+              }
+              var { error } = editing
+                ? await sb.from("courses").update(payload).eq("id", c.id)
+                : await sb.from("courses").insert(Object.assign({ position: catData.length }, payload));
+              if (error) alert("Ralat: " + error.message);
+            } catch (err) {
+              alert("Gagal muat naik gambar: " + err.message);
+              return;
+            }
             closeModal();
-            loadCourses();
+            loadCategories();
           };
         }
 
-        document.getElementById("add-course-btn").addEventListener("click", function () {
-          courseModal(null);
+        document.getElementById("add-cat-btn").addEventListener("click", function () {
+          categoryModal(null);
         });
 
-        async function loadEnrollments() {
+async function loadEnrollments() {
           var { data, error } = await sb.from("class_enrollments")
             .select("id, class_name, mode, created_at, user_id")
             .order("created_at", { ascending: false });
@@ -914,7 +1045,7 @@
         renderCalendar();
         loadStats();
         loadRequests();
-        loadCourses();
+        loadCategories();
         loadEnrollments();
         loadCustomers();
         loadTx();

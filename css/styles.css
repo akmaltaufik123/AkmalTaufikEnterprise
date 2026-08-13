@@ -1337,3 +1337,124 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
 .red-link:hover {
   color: #f87171;
 }
+
+/* ---------- Category manager (Kelas tab) ---------- */
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hint {
+  font-size: 0.75rem;
+}
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 18px;
+}
+
+.cat-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  position: relative;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  cursor: grab;
+}
+
+.cat-card.dragging {
+  opacity: 0.45;
+  border-style: dashed;
+}
+
+.cat-card.drop-target {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.5);
+}
+
+.cat-drag-hint {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  color: rgba(244, 244, 245, 0.35);
+  font-size: 1rem;
+  letter-spacing: 2px;
+}
+
+.cat-img-wrap {
+  margin: -14px -14px 12px -14px;
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+}
+
+.cat-img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  display: block;
+}
+
+.cat-title {
+  margin-bottom: 6px;
+}
+
+.cat-desc {
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+  opacity: 0.85;
+}
+
+.cat-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.cat-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.color-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-end;
+}
+
+.color-row input[type="color"] {
+  width: 100%;
+  height: 38px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  cursor: pointer;
+}
+
+.modal-preview {
+  max-width: 160px;
+  max-height: 120px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  display: block;
+  margin: 8px 0;
+}
+
+/* ---------- Customer course cards ---------- */
+.course-img-wrap {
+  margin: -24px -24px 16px -24px;
+  border-radius: 14px 14px 0 0;
+  overflow: hidden;
+}
+
+.course-img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}

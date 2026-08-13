@@ -66,8 +66,16 @@
         var listBox = document.getElementById("enrolled-list");
         var gridBox = document.getElementById("courses-grid");
 
+        var FONT_OPTIONS = ["Orbitron", "Chakra Petch", "Arial", "Verdana", "Georgia", "Courier New", "Impact"];
+        var FONT_SIZES = { "kecil": "0.9rem", "sederhana": "1.15rem", "besar": "1.45rem" };
+
+        function fontPreview(f) {
+          var map = { "Orbitron": "'Orbitron', sans-serif", "Chakra Petch": "'Chakra Petch', sans-serif" };
+          return map[f] || f;
+        }
+
         async function loadCourses() {
-          var { data, error } = await sb.from("courses").select("*").eq("active", true).order("created_at");
+          var { data, error } = await sb.from("courses").select("*").eq("active", true).order("position").order("created_at");
           var esc = window.portal.esc;
           if (error) {
             gridBox.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
@@ -78,8 +86,14 @@
             return;
           }
           gridBox.innerHTML = data.map(function (c, i) {
-            return '<div class="card" data-course="' + esc(c.id) + '">' +
-              '<h3>' + esc(c.name) + '</h3>' +
+            var cardStyle = 'style="background:' + esc(c.bg_color || "#16161c") + ';color:' + esc(c.color || "#f4f4f5") + ';font-family:' + fontPreview(c.font_family) + '"';
+            var titleStyle = 'style="font-size:' + (FONT_SIZES[c.font_size] || "1.15rem") + '"';
+            var img = c.image_url
+              ? '<div class="course-img-wrap"><img class="course-img" src="' + esc(c.image_url) + '" alt=""></div>'
+              : "";
+            return '<div class="card" data-course="' + esc(c.id) + '" ' + cardStyle + '>' +
+              img +
+              '<h3 ' + titleStyle + '>' + esc(c.name) + '</h3>' +
               '<p>' + esc(c.description || "") + '</p>' +
               '<div class="form-group"><label>Mod Kelas</label><select id="mode-' + i + '">' +
               (esc(c.mode).indexOf("Bersemuka") > -1 ? '<option>Bersemuka</option>' : "") +
