@@ -67,66 +67,99 @@
           <button class="tab-btn" data-tab="customers">Pelanggan</button>
         </div>
 
-        <div id="tab-dashboard" class="tab-panel">
-          <div class="grid grid-3 stats-row">
-            <div class="card stat-card">
-              <h3 id="dash-customers">0</h3>
-              <p class="muted">Jumlah Pelanggan</p>
-            </div>
-            <div class="card stat-card">
-              <h3 id="dash-requests">0</h3>
-              <p class="muted">Jumlah Permohonan</p>
-            </div>
-            <div class="card stat-card">
-              <h3 id="dash-income">RM 0</h3>
-              <p class="muted">Jumlah Pendapatan</p>
-            </div>
-            <div class="card stat-card">
-              <h3 id="dash-pending">0</h3>
-              <p class="muted">Permohonan Menunggu</p>
-            </div>
-          </div>
+<div id="tab-dashboard" class="tab-panel">
+  <div class="grid grid-3 stats-row">
+    <div class="card stat-card">
+      <h3 id="dash-customers">0</h3>
+      <p class="muted">Pelanggan (Tempoh)</p>
+    </div>
+    <div class="card stat-card">
+      <h3 id="dash-requests">0</h3>
+      <p class="muted">Permohonan (Tempoh)</p>
+    </div>
+    <div class="card stat-card">
+      <h3 id="dash-income">RM 0</h3>
+      <p class="muted">Pendapatan (Tempoh)</p>
+    </div>
+    <div class="card stat-card">
+      <h3 id="dash-pending">0</h3>
+      <p class="muted">Menunggu (Tempoh)</p>
+    </div>
+  </div>
 
-          <div class="charts-grid">
-            <div class="card">
-              <h3>Permohonan Mengikut Status</h3>
-              <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
-            </div>
-            <div class="card">
-              <h3>Pendaftaran Pelanggan (14 Hari)</h3>
-              <div class="chart-wrap"><canvas id="chart-daily"></canvas></div>
-            </div>
-          </div>
+  <div class="card">
+    <div class="card-toolbar">
+      <h3>Kalendar Aktiviti</h3>
+      <div class="cal-nav">
+        <button id="cal-prev" class="action-btn">◀</button>
+        <select id="cal-month"></select>
+        <select id="cal-year"></select>
+        <button id="cal-next" class="action-btn">▶</button>
+        <button id="cal-today" class="action-btn">Hari Ini</button>
+      </div>
+    </div>
+    <div id="calendar" class="calendar"></div>
+    <p class="muted cal-legend"><span class="cal-badge reg">N daftar</span> pendaftaran pelanggan &middot; <span class="cal-badge inc">RM</span> pendapatan hari tersebut. Klik mana-mana tarikh untuk menapis graf ke hari itu.</p>
+    <p id="cal-info" class="muted"></p>
+  </div>
 
-          <div class="charts-grid">
-            <div class="card">
-              <h3>Pendapatan Bulanan (12 Bulan)</h3>
-              <div class="chart-wrap"><canvas id="chart-income"></canvas></div>
-            </div>
-            <div class="card">
-              <h3>Rekod Pendapatan</h3>
-              <form id="income-form">
-                <div class="form-group">
-                  <label for="in-label">Penerangan</label>
-                  <input id="in-label" placeholder="cth: Pemasangan CCTV Bayan Lepas" required>
-                </div>
-                <div class="form-group">
-                  <label for="in-amount">Amaun (RM)</label>
-                  <input id="in-amount" type="number" step="0.01" min="0" placeholder="0.00" required>
-                </div>
-                <div class="form-group">
-                  <label for="in-type">Jenis</label>
-                  <select id="in-type">
-                    <option value="income">Pendapatan</option>
-                    <option value="expense">Perbelanjaan</option>
-                  </select>
-                </div>
-                <button type="submit" class="btn btn-primary btn-sm">Tambah Rekod</button>
-              </form>
-            </div>
-          </div>
-        </div>
+  <div class="card">
+    <div class="card-toolbar">
+      <h3>Penapis Graf &amp; Tempoh</h3>
+      <div class="filter-row">
+        <label>Pelanggan</label>
+        <select id="filter-cust">
+          <option value="7d">7 Hari</option>
+          <option value="14d" selected>14 Hari</option>
+          <option value="30d">30 Hari</option>
+          <option value="8w">8 Minggu</option>
+          <option value="12m">12 Bulan</option>
+          <option value="5y">5 Tahun</option>
+          <option value="custom">Tempoh Pilihan</option>
+        </select>
+        <label>Pendapatan</label>
+        <select id="filter-income">
+          <option value="14d">14 Hari</option>
+          <option value="12w">12 Minggu</option>
+          <option value="12m" selected>12 Bulan</option>
+          <option value="5y">5 Tahun</option>
+          <option value="custom">Tempoh Pilihan</option>
+        </select>
+        <label>Dari</label>
+        <input type="datetime-local" id="range-from">
+        <label>Hingga</label>
+        <input type="datetime-local" id="range-to">
+        <button id="btn-apply" class="action-btn">Guna</button>
+        <button id="btn-reset" class="action-btn danger">Reset</button>
+      </div>
+    </div>
+  </div>
 
+  <div class="charts-grid">
+    <div class="card">
+      <h3 id="title-cust">Pendaftaran Pelanggan</h3>
+      <div class="chart-wrap"><canvas id="chart-cust"></canvas></div>
+    </div>
+    <div class="card">
+      <h3 id="title-income">Pendapatan</h3>
+      <div class="chart-wrap"><canvas id="chart-income"></canvas></div>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="card">
+      <h3>Permohonan Mengikut Status</h3>
+      <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-toolbar">
+        <h3>Rekod Pendapatan</h3>
+        <button id="add-tx-btn" class="btn btn-primary btn-sm">+ Rekod Baru</button>
+      </div>
+      <div id="tx-list"><p class="muted">Memuatkan...</p></div>
+    </div>
+  </div>
+</div>
         <div id="tab-requests" class="tab-panel">
           <div class="card">
             <div id="requests-list"><p class="muted">Memuatkan...</p></div>
@@ -174,7 +207,7 @@
   <script src="js/supabase-config.js"></script>
   <script src="js/portal.js"></script>
   <script>
-    (function () {
+(function () {
       window.portal.requireAuth().then(async function (session) {
         if (!session) return;
         var isAdmin = !!(session.user.app_metadata && session.user.app_metadata.is_admin);
@@ -219,7 +252,6 @@
         });
 
         var profiles = {};
-
         var charts = {};
 
         function makeChart(id, config) {
@@ -234,62 +266,132 @@
           };
         }
 
-        function lastNDays(n) {
-          var labels = [], counts = [];
-          var now = new Date();
-          for (var i = n - 1; i >= 0; i--) {
-            var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-            labels.push(d.getDate() + "/" + (d.getMonth() + 1));
-            counts.push(0);
+        function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+        function startOfWeek(d) {
+          var x = startOfDay(d);
+          x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+          return x;
+        }
+        function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+        function startOfYear(d) { return new Date(d.getFullYear(), 0, 1); }
+        function startOfG(d, g) {
+          return g === "week" ? startOfWeek(d) : g === "month" ? startOfMonth(d) : g === "year" ? startOfYear(d) : startOfDay(d);
+        }
+        function addDays(d, n) { var x = new Date(d); x.setDate(x.getDate() + n); return x; }
+        function p2(n) { return (n < 10 ? "0" : "") + n; }
+        function fmtDay(d) { return d.getDate() + "/" + (d.getMonth() + 1); }
+        function fmtWeek(d) { return fmtDay(startOfWeek(d)); }
+        function fmtMonth(d) { return d.toLocaleDateString("ms-MY", { month: "short", year: "2-digit" }); }
+        function fmtYear(d) { return String(d.getFullYear()); }
+        function toLocalInput(d) {
+          var x = new Date(d);
+          return x.getFullYear() + "-" + p2(x.getMonth() + 1) + "-" + p2(x.getDate()) + "T" + p2(x.getHours()) + ":" + p2(x.getMinutes());
+        }
+
+        var dash = {
+          profilesData: [],
+          requestsData: [],
+          txData: [],
+          calY: new Date().getFullYear(),
+          calM: new Date().getMonth(),
+          selDay: null
+        };
+
+        function specFromValue(v) {
+          if (v === "custom") {
+            var f = document.getElementById("range-from").value;
+            var t = document.getElementById("range-to").value;
+            if (!f || !t) return null;
+            return { gran: "auto", from: new Date(f), to: new Date(t) };
           }
-          return { labels: labels, counts: counts };
+          var n = parseInt(v, 10);
+          var g = v.charAt(v.length - 1);
+          return { gran: g === "d" ? "day" : g === "w" ? "week" : g === "y" ? "year" : "month", count: n };
         }
 
-        function lastNMonths(n) {
-          var labels = [], sums = [];
-          var now = new Date();
-          for (var i = n - 1; i >= 0; i--) {
-            var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-            labels.push(d.toLocaleDateString("ms-MY", { month: "short", year: "2-digit" }));
-            sums.push(0);
+        function buildSeries(items, getDate, spec, acc) {
+          var buckets = [], map = {}, g;
+          function push(b) { b.value = 0; buckets.push(b); map[b.key] = b; }
+          if (spec.gran === "auto") {
+            var from = startOfDay(spec.from), to = startOfDay(spec.to);
+            if (to < from) to = from;
+            g = (Math.round((to - from) / 86400000) + 1) > 62 ? "month" : "day";
+            if (g === "day") {
+              for (var d = from; d.getTime() <= to.getTime(); d = addDays(d, 1)) push({ key: d.getTime(), label: fmtDay(d) });
+            } else {
+              for (var m = startOfMonth(from); m.getTime() <= to.getTime(); m = new Date(m.getFullYear(), m.getMonth() + 1, 1)) push({ key: m.getTime(), label: fmtMonth(m) });
+            }
+          } else {
+            g = spec.gran;
+            var now = new Date();
+            for (var i = spec.count - 1; i >= 0; i--) {
+              var t = g === "day" ? addDays(now, -i) : g === "week" ? addDays(startOfWeek(now), -7 * i) : g === "month" ? new Date(now.getFullYear(), now.getMonth() - i, 1) : new Date(now.getFullYear() - i, 0, 1);
+              push({
+                key: startOfG(t, g).getTime(),
+                label: g === "day" ? fmtDay(t) : g === "week" ? fmtWeek(t) : g === "month" ? fmtMonth(t) : fmtYear(t)
+              });
+            }
           }
-          return { labels: labels, sums: sums };
-        }
-
-        function keyOfDate(d) {
-          return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
-        }
-
-        async function loadDash(profilesData, requestsData, txData) {
-          var daily = lastNDays(14);
-          (profilesData || []).forEach(function (p) {
-            var d = new Date(p.created_at);
-            var idx = daily.labels.indexOf(d.getDate() + "/" + (d.getMonth() + 1));
-            if (idx > -1) daily.counts[idx]++;
+          if (!buckets.length) return { buckets: buckets, min: 0, max: 0 };
+          var min = buckets[0].key;
+          var max = buckets[buckets.length - 1].key + 86400000 - 1;
+          (items || []).forEach(function (it) {
+            var d = getDate(it);
+            if (!d) return;
+            var k = startOfG(d, g).getTime();
+            if (k < min || k > max) return;
+            var b = map[k];
+            if (!b) return;
+            if (acc) acc(it, b); else b.value++;
           });
+          return { buckets: buckets, min: min, max: max };
+        }
+
+        function incAcc(item, b) {
+          var amt = parseFloat(item.amount) || 0;
+          if (item.type === "expense") amt = -amt;
+          b.value += amt;
+        }
+
+        function renderCharts() {
+          var custSpec = specFromValue(document.getElementById("filter-cust").value);
+          var incSpec = specFromValue(document.getElementById("filter-income").value);
+          if (!custSpec || !incSpec) return;
+          var reg = buildSeries(dash.profilesData, function (p) { return new Date(p.created_at); }, custSpec, null);
+          var inc = buildSeries(dash.txData, function (t) { return new Date(t.created_at); }, incSpec, incAcc);
+
+          var r = 0, pend = 0;
+          dash.requestsData.forEach(function (x) {
+            var t = new Date(x.created_at).getTime();
+            if (t >= reg.min && t <= reg.max) {
+              r++;
+              if (x.status === "pending") pend++;
+            }
+          });
+          var incTotal = 0;
+          dash.txData.forEach(function (x) {
+            var t = new Date(x.created_at).getTime();
+            if (t >= inc.min && t <= inc.max) {
+              var a = parseFloat(x.amount) || 0;
+              if (x.type === "expense") a = -a;
+              incTotal += a;
+            }
+          });
+
+          var totalCustomers = 0;
+          reg.buckets.forEach(function (b) { totalCustomers += b.value; });
+          document.getElementById("dash-customers").textContent = totalCustomers;
+          document.getElementById("dash-requests").textContent = r;
+          document.getElementById("dash-pending").textContent = pend;
+          document.getElementById("dash-income").textContent = "RM " + incTotal.toFixed(2);
+
+          document.getElementById("title-cust").textContent = "Pendaftaran Pelanggan — " + document.getElementById("filter-cust").selectedOptions[0].text;
+          document.getElementById("title-income").textContent = "Pendapatan — " + document.getElementById("filter-income").selectedOptions[0].text;
 
           var statusCounts = { pending: 0, in_progress: 0, done: 0 };
-          (requestsData || []).forEach(function (r) {
-            if (statusCounts[r.status] != null) statusCounts[r.status]++;
+          dash.requestsData.forEach(function (x) {
+            if (statusCounts[x.status] != null) statusCounts[x.status]++;
           });
-
-          var monthly = lastNMonths(12);
-          var totalIncome = 0;
-          (txData || []).forEach(function (t) {
-            var d = new Date(t.created_at);
-            var label = d.toLocaleDateString("ms-MY", { month: "short", year: "2-digit" });
-            var idx = monthly.labels.indexOf(label);
-            var amt = parseFloat(t.amount) || 0;
-            if (t.type === "expense") amt = -amt;
-            if (idx > -1) monthly.sums[idx] += amt;
-            totalIncome += amt;
-          });
-
-          document.getElementById("dash-customers").textContent = (profilesData || []).length;
-          document.getElementById("dash-requests").textContent = (requestsData || []).length;
-          document.getElementById("dash-income").textContent = "RM " + totalIncome.toFixed(2);
-          document.getElementById("dash-pending").textContent = statusCounts.pending;
-
           makeChart("chart-status", {
             type: "doughnut",
             data: {
@@ -304,13 +406,13 @@
             options: { plugins: { legend: { labels: { color: "#f4f4f5", font: { family: "Chakra Petch" } } } } }
           });
 
-          makeChart("chart-daily", {
+          makeChart("chart-cust", {
             type: "bar",
             data: {
-              labels: daily.labels,
+              labels: reg.buckets.map(function (b) { return b.label; }),
               datasets: [{
                 label: "Pendaftaran",
-                data: daily.counts,
+                data: reg.buckets.map(function (b) { return b.value; }),
                 backgroundColor: "rgba(220,38,38,0.75)",
                 borderColor: "#ef4444",
                 borderWidth: 1,
@@ -326,12 +428,12 @@
           makeChart("chart-income", {
             type: "bar",
             data: {
-              labels: monthly.labels,
+              labels: inc.buckets.map(function (b) { return b.label; }),
               datasets: [{
                 label: "Pendapatan (RM)",
-                data: monthly.sums,
-                backgroundColor: monthly.sums.map(function (v) {
-                  return v >= 0 ? "rgba(220,38,38,0.75)" : "rgba(38,38,46,0.8)";
+                data: inc.buckets.map(function (b) { return b.value; }),
+                backgroundColor: inc.buckets.map(function (b) {
+                  return b.value >= 0 ? "rgba(220,38,38,0.75)" : "rgba(38,38,46,0.8)";
                 }),
                 borderColor: "#ef4444",
                 borderWidth: 1,
@@ -342,6 +444,118 @@
               scales: { x: gridStyle(), y: { beginAtZero: true, ticks: { color: "#a1a1aa" }, grid: { color: "rgba(38,38,46,0.7)" } } },
               plugins: { legend: { display: false } }
             }
+          });
+        }
+
+        var MS_MONTHS = ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September", "Oktober", "November", "Disember"];
+
+        function renderCalendar() {
+          var grid = document.getElementById("calendar");
+          var y = dash.calY, m = dash.calM;
+          document.getElementById("cal-month").value = String(m);
+          document.getElementById("cal-year").value = String(y);
+          var offset = (new Date(y, m, 1).getDay() + 6) % 7;
+          var dim = new Date(y, m + 1, 0).getDate();
+          var regByDay = {}, incByDay = {};
+          dash.profilesData.forEach(function (p) {
+            var d = new Date(p.created_at);
+            var k = fmtDay(d);
+            regByDay[k] = (regByDay[k] || 0) + 1;
+          });
+          dash.txData.forEach(function (t) {
+            var d = new Date(t.created_at);
+            var k = fmtDay(d);
+            var a = parseFloat(t.amount) || 0;
+            if (t.type === "expense") a = -a;
+            incByDay[k] = (incByDay[k] || 0) + a;
+          });
+          var html = '<div class="cal-grid">';
+          ["Isn", "Sel", "Rab", "Kha", "Jum", "Sab", "Aha"].forEach(function (dd) {
+            html += '<div class="cal-dow">' + dd + "</div>";
+          });
+          for (var i = 0; i < offset; i++) html += '<div class="cal-day empty"></div>';
+          var today = new Date();
+          for (var day = 1; day <= dim; day++) {
+            var k = day + "/" + (m + 1);
+            var cls = "cal-day";
+            if (today.getFullYear() === y && today.getMonth() === m && today.getDate() === day) cls += " today";
+            if (dash.selDay === k) cls += " selected";
+            var ds = y + "-" + p2(m + 1) + "-" + p2(day);
+            html += '<div class="' + cls + '" data-day="' + k + '" data-date="' + ds + '">';
+            html += '<span class="cal-num">' + day + "</span>";
+            if (regByDay[k]) html += '<span class="cal-badge reg">' + regByDay[k] + ' daftar</span>';
+            if (incByDay[k] != null) html += '<span class="cal-badge inc">RM ' + incByDay[k].toFixed(0) + "</span>";
+            html += "</div>";
+          }
+          html += "</div>";
+          grid.innerHTML = html;
+          grid.querySelectorAll(".cal-day[data-date]").forEach(function (cell) {
+            cell.addEventListener("click", function () {
+              dash.selDay = cell.getAttribute("data-day");
+              var ds = cell.getAttribute("data-date");
+              document.getElementById("range-from").value = ds + "T00:00";
+              document.getElementById("range-to").value = ds + "T23:59";
+              document.getElementById("filter-cust").value = "custom";
+              document.getElementById("filter-income").value = "custom";
+              renderCharts();
+              renderCalendar();
+              var reg = regByDay[dash.selDay] || 0;
+              var inc = incByDay[dash.selDay];
+              document.getElementById("cal-info").textContent = "Tarikh dipilih: " + ds +
+                " — Pendaftaran: " + reg +
+                (inc != null ? ", Pendapatan: RM " + inc.toFixed(2) : ", Tiada rekod pendapatan");
+            });
+          });
+        }
+
+        function initCalendar() {
+          var monthSel = document.getElementById("cal-month");
+          MS_MONTHS.forEach(function (n, i) { monthSel.add(new Option(n, String(i))); });
+          var yearSel = document.getElementById("cal-year");
+          var y = new Date().getFullYear();
+          for (var i = y - 3; i <= y + 3; i++) yearSel.add(new Option(String(i), String(i)));
+          monthSel.addEventListener("change", function () { dash.calM = parseInt(monthSel.value, 10); renderCalendar(); });
+          yearSel.addEventListener("change", function () { dash.calY = parseInt(yearSel.value, 10); renderCalendar(); });
+          document.getElementById("cal-prev").addEventListener("click", function () {
+            if (dash.calM === 0) { dash.calM = 11; dash.calY--; } else dash.calM--;
+            renderCalendar();
+          });
+          document.getElementById("cal-next").addEventListener("click", function () {
+            if (dash.calM === 11) { dash.calM = 0; dash.calY++; } else dash.calM++;
+            renderCalendar();
+          });
+          document.getElementById("cal-today").addEventListener("click", function () {
+            var n = new Date();
+            dash.calY = n.getFullYear();
+            dash.calM = n.getMonth();
+            renderCalendar();
+          });
+          document.getElementById("range-from").addEventListener("change", function () {
+            document.getElementById("filter-cust").value = "custom";
+            document.getElementById("filter-income").value = "custom";
+          });
+          document.getElementById("range-to").addEventListener("change", function () {
+            document.getElementById("filter-cust").value = "custom";
+            document.getElementById("filter-income").value = "custom";
+          });
+          document.getElementById("btn-apply").addEventListener("click", function () {
+            if (!document.getElementById("range-from").value || !document.getElementById("range-to").value) {
+              alert("Sila isi tarikh mula dan akhir (atau klik tarikh dalam kalendar).");
+              return;
+            }
+            renderCharts();
+          });
+          document.getElementById("btn-reset").addEventListener("click", function () {
+            document.getElementById("filter-cust").value = "14d";
+            document.getElementById("filter-income").value = "12m";
+            document.getElementById("range-from").value = "";
+            document.getElementById("range-to").value = "";
+            dash.selDay = null;
+            var n = new Date();
+            dash.calY = n.getFullYear();
+            dash.calM = n.getMonth();
+            renderCharts();
+            renderCalendar();
           });
         }
 
@@ -428,6 +642,8 @@
                 closeModal();
                 loadRequests();
                 loadStats();
+                dash.requestsData = (await sb.from("service_requests").select("id, status, created_at")).data || [];
+                renderCharts();
               };
             });
           });
@@ -440,6 +656,8 @@
               if (error) alert("Ralat: " + error.message);
               loadRequests();
               loadStats();
+              dash.requestsData = (await sb.from("service_requests").select("id, status, created_at")).data || [];
+              renderCharts();
             });
           });
         }
@@ -569,50 +787,125 @@
             box.innerHTML = '<p class="muted">Belum ada pelanggan berdaftar.</p>';
             return;
           }
-          box.innerHTML = '<table class="table"><thead><tr><th>Nama</th><th>E-mel</th><th>Tarikh Daftar</th></tr></thead><tbody>' +
+          box.innerHTML = '<table class="table"><thead><tr><th>Nama</th><th>E-mel</th><th>Tarikh Daftar</th><th>Tindakan</th></tr></thead><tbody>' +
             data.map(function (p) {
               return "<tr><td>" + esc(p.full_name || "-") + "</td><td>" + esc(p.email) + "</td><td>" +
-                new Date(p.created_at).toLocaleDateString("ms-MY") + "</td></tr>";
+                new Date(p.created_at).toLocaleDateString("ms-MY") +
+                '</td><td><button class="action-btn danger" data-delete-customer="' + p.id + '">Padam</button></td></tr>';
             }).join("") + "</tbody></table>";
+
+          box.querySelectorAll("[data-delete-customer]").forEach(function (btn) {
+            btn.addEventListener("click", async function () {
+              var uid = btn.getAttribute("data-delete-customer");
+              var nm = customerName(uid);
+              if (!confirm("Padam semua data pelanggan '" + nm + "'? Permohonan, pendaftaran kelas dan rekod pendapatan pelanggan ini turut dipadam.")) return;
+              await sb.from("class_enrollments").delete().eq("user_id", uid);
+              await sb.from("service_requests").delete().eq("user_id", uid);
+              await sb.from("transactions").delete().eq("user_id", uid);
+              var { error } = await sb.from("profiles").delete().eq("id", uid);
+              if (error) alert("Ralat: " + error.message);
+              await loadProfiles();
+              loadCustomers();
+              loadStats();
+              dash.profilesData = (await sb.from("profiles").select("id, created_at")).data || [];
+              dash.requestsData = (await sb.from("service_requests").select("id, status, created_at")).data || [];
+              renderCharts();
+              renderCalendar();
+            });
+          });
         }
 
+        async function loadTx() {
+          var { data, error } = await sb.from("transactions")
+            .select("id, label, amount, type, created_at")
+            .order("created_at", { ascending: false });
+          var box = document.getElementById("tx-list");
+          if (error) {
+            box.innerHTML = '<p class="muted">Ralat: ' + esc(error.message) + '</p>';
+            return;
+          }
+          dash.txData = data || [];
+          renderCharts();
+          renderCalendar();
+          if (!dash.txData.length) {
+            box.innerHTML = '<p class="muted">Belum ada rekod pendapatan. Tekan "+ Rekod Baru".</p>';
+            return;
+          }
+          box.innerHTML = '<table class="table"><thead><tr><th>Tarikh</th><th>Penerangan</th><th>Jenis</th><th>Amaun</th><th>Tindakan</th></tr></thead><tbody>' +
+            dash.txData.map(function (t) {
+              var amt = parseFloat(t.amount) || 0;
+              var cls = t.type === "expense" ? "neg" : "pos";
+              var sign = t.type === "expense" ? "-" : "+";
+              return '<tr><td>' + new Date(t.created_at).toLocaleString("ms-MY") +
+                '</td><td>' + esc(t.label) + "</td><td>" + (t.type === "expense" ? "Perbelanjaan" : "Pendapatan") +
+                '</td><td class="record-amount ' + cls + '">' + sign + " RM " + amt.toFixed(2) + "</td>" +
+                '<td><button class="action-btn" data-edit-tx="' + t.id + '">Edit</button> ' +
+                '<button class="action-btn danger" data-delete-tx="' + t.id + '">Padam</button></td></tr>';
+            }).join("") + "</tbody></table>";
+
+          box.querySelectorAll("[data-edit-tx]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var t = dash.txData.find(function (x) { return x.id === btn.getAttribute("data-edit-tx"); });
+              txModal(t);
+            });
+          });
+
+          box.querySelectorAll("[data-delete-tx]").forEach(function (btn) {
+            btn.addEventListener("click", async function () {
+              var id = btn.getAttribute("data-delete-tx");
+              if (!confirm("Padam rekod ini?")) return;
+              var { error } = await sb.from("transactions").delete().eq("id", id);
+              if (error) alert("Ralat: " + error.message);
+              loadTx();
+            });
+          });
+        }
+
+        function txModal(t) {
+          var editing = !!t;
+          openModal(editing ? "Edit Rekod" : "Rekod Baru",
+            '<div class="form-group"><label>Penerangan</label><input id="t-label" value="' + (editing ? esc(t.label) : "") + '"></div>' +
+            '<div class="form-group"><label>Amaun (RM)</label><input id="t-amount" type="number" step="0.01" min="0" value="' + (editing ? t.amount : "") + '"></div>' +
+            '<div class="form-group"><label>Jenis</label><select id="t-type">' +
+            '<option value="income"' + (editing && t.type === "income" ? " selected" : "") + ">Pendapatan</option>" +
+            '<option value="expense"' + (editing && t.type === "expense" ? " selected" : "") + ">Perbelanjaan</option>" +
+            "</select></div>" +
+            '<div class="form-group"><label>Tarikh &amp; Masa</label><input id="t-date" type="datetime-local" value="' + (editing ? toLocalInput(t.created_at) : toLocalInput(new Date())) + '"></div>');
+          modalSave.onclick = async function () {
+            var label = document.getElementById("t-label").value.trim();
+            var amount = parseFloat(document.getElementById("t-amount").value);
+            var type = document.getElementById("t-type").value;
+            var dt = new Date(document.getElementById("t-date").value);
+            if (!label || isNaN(amount) || amount <= 0 || isNaN(dt.getTime())) {
+              alert("Sila isi semua ruangan dengan betul.");
+              return;
+            }
+            var payload = { label: label, amount: amount, type: type, created_at: dt.toISOString() };
+            var { error } = editing
+              ? await sb.from("transactions").update(payload).eq("id", t.id)
+              : await sb.from("transactions").insert(payload);
+            if (error) alert("Ralat: " + error.message);
+            closeModal();
+            loadTx();
+          };
+        }
+
+        document.getElementById("add-tx-btn").addEventListener("click", function () {
+          txModal(null);
+        });
+
         await loadProfiles();
-        var allRequests = await sb.from("service_requests").select("id, status, created_at");
-        var allTx = await sb.from("transactions").select("id, label, amount, type, created_at");
-        var allProfiles = await sb.from("profiles").select("id, created_at");
-        loadDash(allProfiles.data, allRequests.data, allTx.data);
+        dash.profilesData = (await sb.from("profiles").select("id, created_at")).data || [];
+        dash.requestsData = (await sb.from("service_requests").select("id, status, created_at")).data || [];
+        initCalendar();
+        renderCharts();
+        renderCalendar();
         loadStats();
         loadRequests();
         loadCourses();
         loadEnrollments();
         loadCustomers();
-
-        var incomeForm = document.getElementById("income-form");
-        if (incomeForm) {
-          incomeForm.addEventListener("submit", async function (e) {
-            e.preventDefault();
-            var label = document.getElementById("in-label").value.trim();
-            var amount = parseFloat(document.getElementById("in-amount").value);
-            var type = document.getElementById("in-type").value;
-            if (!label || isNaN(amount) || amount <= 0) {
-              alert("Sila isi penerangan dan amaun yang sah.");
-              return;
-            }
-            var { error } = await sb.from("transactions").insert({
-              label: label,
-              amount: amount,
-              type: type
-            });
-            if (error) {
-              alert("Ralat: " + error.message);
-              return;
-            }
-            incomeForm.reset();
-            var tx = await sb.from("transactions").select("id, label, amount, type, created_at");
-            loadDash(allProfiles.data, allRequests.data, tx.data);
-            alert("Rekod ditambah.");
-          });
-        }
+        loadTx();
       });
     })();
   </script>
