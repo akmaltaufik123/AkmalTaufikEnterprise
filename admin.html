@@ -1404,6 +1404,17 @@ var pageSelect = document.getElementById("page-select");
           setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 600);
         }
 
+        function showToast(msg, ok) {
+          var t = document.createElement("div");
+          t.className = "toast" + (ok ? " ok" : "");
+          t.textContent = msg;
+          document.body.appendChild(t);
+          setTimeout(function () {
+            t.classList.add("out");
+            setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 320);
+          }, 5000);
+        }
+
         async function buildReport() {
           var scope = document.getElementById("report-scope").value;
           var from = document.getElementById("report-from").value;
@@ -1475,7 +1486,12 @@ var pageSelect = document.getElementById("page-select");
         }
 
         function reportPDF(data) {
-          var doc = new jspdf.jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+          var jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+          if (!jsPDFCtor) {
+            showToast("Pustaka PDF tidak dimuat. Semak sambungan internet dan cuba lagi.");
+            return;
+          }
+          var doc = new jsPDFCtor({ orientation: "landscape", unit: "pt", format: "a4" });
           data.sections.forEach(function (s, i) {
             if (i > 0) doc.addPage();
             doc.setFont("helvetica", "bold");
@@ -1549,12 +1565,13 @@ var pageSelect = document.getElementById("page-select");
               try {
                 var data = await buildReport();
                 if (!data.sections.length) {
-                  alert("Tiada data untuk laporan ini.");
+                  showToast("Tiada data untuk laporan ini.");
                   return;
                 }
                 jobs[f](data);
+                showToast("Laporan dimuat turun: " + data.title, true);
               } catch (err) {
-                alert("Ralat menjana laporan: " + err.message);
+                showToast("Ralat menjana laporan: " + err.message);
               } finally {
                 btn.disabled = false;
               }
@@ -1580,12 +1597,13 @@ var pageSelect = document.getElementById("page-select");
                 document.getElementById("report-to").value = document.getElementById("gr-to").value;
                 var data = await buildReport();
                 if (!data.sections.length) {
-                  alert("Tiada data untuk laporan ini.");
+                  showToast("Tiada data untuk laporan ini.");
                   return;
                 }
                 jobs[f](data);
+                showToast("Laporan dimuat turun: " + data.title, true);
               } catch (err) {
-                alert("Ralat menjana laporan: " + err.message);
+                showToast("Ralat menjana laporan: " + err.message);
               } finally {
                 btn.disabled = false;
               }
