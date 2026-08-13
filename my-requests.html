@@ -10,6 +10,14 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <div id="loader" class="loader-overlay">
+    <div class="loader-inner">
+      <div class="loader-ring"><div class="loader-spin"></div></div>
+      <div class="loader-dot"></div>
+      <div class="loader-text">Please wait...</div>
+    </div>
+  </div>
+
   <video class="bg-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
     <source src="assets/rain.mp4" type="video/mp4">
   </video>
@@ -69,6 +77,20 @@
               window.portal.badge(r.status) + '</span></td></tr>';
           }).join("") + '</tbody></table>';
       });
+    })();
+  </script>
+  <script>
+    (function () {
+      var L = document.getElementById("loader");
+      if (!L) return;
+      function done() {
+        if (L.dataset.done) return;
+        L.dataset.done = "1";
+        L.classList.add("loader-hide");
+        setTimeout(function () { if (L.parentNode) L.parentNode.removeChild(L); }, 700);
+      }
+      window.addEventListener("load", done);
+      setTimeout(done, 4000);
     })();
   </script>
 </body>
