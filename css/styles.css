@@ -602,7 +602,7 @@ h1, h2, h3, .slogan, .slogan-mini, .brand, .step-num, .nav-links a, .btn, .lang-
 .auth-card {
   width: 100%;
   max-width: 420px;
-  background: var(--surface);
+  background: #16161c;
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 36px 32px;
