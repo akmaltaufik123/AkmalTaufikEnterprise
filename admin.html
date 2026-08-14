@@ -888,7 +888,7 @@
           var { error } = await sb.storage.from("course-images").upload(path, file, { contentType: type || "image/png" });
           if (error) throw new Error(error.message);
           return sb.storage.from("course-images").getPublicUrl(path).data.publicUrl;
-
+        }
 
         async function uploadCourseVideo(file) {
           var type = (file.type || "").toLowerCase();
@@ -899,24 +899,6 @@
           var { error } = await sb.storage.from("course-images").upload(path, file, { contentType: type || "video/mp4" });
           if (error) throw new Error(error.message);
           return sb.storage.from("course-images").getPublicUrl(path).data.publicUrl;
-        }        }
-
-        function catCard(c) {
-          var style = 'style="background:' + esc(c.bg_color || "#16161c") + ';color:' + esc(c.color || "#f4f4f5") + ';font-family:' + fontPreview(c.font_family) + '"';
-          var titleStyle = 'style="font-size:' + (FONT_SIZES[c.font_size] || "1.15rem") + '"';
-          var img = c.image_url
-            ? '<div class="cat-img-wrap"><img class="cat-img" src="' + esc(c.image_url) + '" alt=""></div>'
-            : "";
-          return '<div class="cat-card" draggable="true" data-cat-id="' + esc(c.id) + '" ' + style + '>' +
-            '<div class="cat-drag-hint">&#8942;&#8942;</div>' + img +
-            '<h3 class="cat-title" ' + titleStyle + '>' + esc(c.name) + "</h3>" +
-            '<p class="cat-desc">' + esc(c.description || "") + "</p>" +
-            '<div class="cat-meta"><span class="badge ' + (c.active ? "done" : "pending") + '">' + (c.active ? "Aktif" : "Tidak Aktif") +
-            '</span><span class="badge in_progress">' + esc(c.mode) + "</span></div>" +
-            '<div class="cat-actions">' +
-            '<button class="action-btn" data-edit-cat="' + esc(c.id) + '">' + adminI18n.t("btn-edit") + '</button> ' +
-            '<button class="action-btn" data-toggle-cat="' + esc(c.id) + '">' + (c.active ? "Nyahaktif" : "Aktifkan") + "</button> " +
-            '<button class="action-btn danger" data-delete-cat="' + esc(c.id) + '">Padam</button></div></div>';
         }
 
         function bindCatActions(grid) {
@@ -1291,6 +1273,16 @@ async function loadEnrollments() {
               await sb.from("transactions").delete().eq("user_id", uid);
               var { error } = await sb.from("profiles").delete().eq("id", uid);
               if (error) showToast("Ralat: " + error.message);
+              loadCustomers();
+              loadStats();
+              dash.profilesData = ((await sb.from("profiles").select("id, created_at")).data || []).filter(function (p) { return p.id !== adminId; });
+              dash.requestsData = (await sb.from("service_requests").select("id, status, created_at")).data || [];
+              renderCharts();
+              renderCalendar();
+            });
+          });
+        }
+
         async function loadBookings() {
           var { data, error } = await sb.from("bookings")
             .select("id, user_id, service, booking_date, booking_time, location, notes, status, created_at, customer_name, phone, email, image_url, video_url")
@@ -1351,17 +1343,6 @@ async function loadEnrollments() {
               var { error } = await sb.from("bookings").delete().eq("id", bid);
               if (error) showToast("Ralat: " + error.message);
               loadBookings();
-            });
-          });
-        }
-
-        await loadProfiles();
-              loadCustomers();
-              loadStats();
-              dash.profilesData = ((await sb.from("profiles").select("id, created_at")).data || []).filter(function (p) { return p.id !== adminId; });
-              dash.requestsData = (await sb.from("service_requests").select("id, status, created_at")).data || [];
-              renderCharts();
-              renderCalendar();
             });
           });
         }
