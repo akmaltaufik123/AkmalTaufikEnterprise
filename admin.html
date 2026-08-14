@@ -1429,7 +1429,7 @@ var REPORT_SCOPES = {
 
           var sections = [];
           function add(name, headers, rows) {
-            if (rows.length) sections.push({ name: name, headers: headers, rows: rows });
+            sections.push({ name: name, headers: headers, rows: rows || [] });
           }
 
           if (scope === "semua" || scope === "requests") {
@@ -1565,10 +1565,6 @@ var REPORT_SCOPES = {
               btn.disabled = true;
               try {
                 var data = await buildReport();
-                if (!data.sections.length) {
-                  showToast(adminI18n.t("report-empty"));
-                  return;
-                }
                 jobs[f](data);
                 showToast(adminI18n.t("report-done") + data.title, true);
               } catch (err) {
@@ -1597,10 +1593,6 @@ var REPORT_SCOPES = {
                 document.getElementById("report-from").value = document.getElementById("gr-from").value;
                 document.getElementById("report-to").value = document.getElementById("gr-to").value;
                 var data = await buildReport();
-                if (!data.sections.length) {
-                  showToast(adminI18n.t("report-empty"));
-                  return;
-                }
                 jobs[f](data);
                 showToast(adminI18n.t("report-done") + data.title, true);
               } catch (err) {
