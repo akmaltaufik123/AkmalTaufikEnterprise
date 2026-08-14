@@ -80,7 +80,6 @@
           <button class="tab-btn" data-tab="classes" data-i18n="tab-classes">Kelas</button>
           <button class="tab-btn" data-tab="customers" data-i18n="tab-customers">Pelanggan</button>
           <button class="tab-btn" data-tab="report" data-i18n="tab-report">Laporan</button>
-          <button class="tab-btn" data-tab="web" data-i18n="tab-web">Edit Webpage</button>
         </div>
 
 <div id="tab-dashboard" class="tab-panel">
@@ -288,117 +287,7 @@
           </div>
         </div>
 
-         <div id="tab-web" class="tab-panel" hidden>
-           <div class="card" style="margin-bottom:18px">
-             <div class="card-toolbar">
-               <h3>Editor Visual — Seret &amp; Lepas</h3>
-               <div class="toolbar-actions">
-                 <select id="pe-page">
-                   <option value="index.html">index.html (Laman Utama)</option>
-                   <option value="dashboard.html">dashboard.html (Portal)</option>
-                   <option value="bookings.html">bookings.html (Tempahan)</option>
-                   <option value="classes.html">classes.html (Kelas)</option>
-                 </select>
-                 <button id="pe-open" class="btn btn-primary btn-sm">Buka Editor Penuh</button>
-               </div>
-             </div>
-             <p class="muted">Editor dibuka dalam tab baharu (seluruh laman boleh diseret). Susun kotak, ubah teks, kemudian tekan "Simpan Susunan" di dalam editor itu sendiri. Tiada iframe — jadi tiada sebarang sekatan.</p>
-           </div>
 
-           <div class="card">
-            <div class="card-toolbar">
-              <h3 data-i18n="tab-web">Edit Webpage</h3>
-              <div class="toolbar-actions">
-                <select id="page-select">
-                  <option value="/">/ (index.html)</option>
-                  <option value="index.html">/index.html</option>
-                  <option value="login.html">/login.html</option>
-                  <option value="register.html">/register.html</option>
-                  <option value="dashboard.html">/dashboard.html</option>
-                  <option value="request.html">/request.html</option>
-                  <option value="my-requests.html">/my-requests.html</option>
-                  <option value="classes.html">/classes.html</option>
-                  <option value="admin.html">/admin.html</option>
-                  <option value="__custom__" data-i18n="web-custom">+ Halaman tersuai...</option>
-                </select>
-                <input id="page-custom" class="path-input" placeholder="cth: /promosi.html" hidden>
-                <button id="web-save" class="btn btn-primary btn-sm" data-i18n="web-save">Simpan</button>
-                <button id="web-reset" class="btn btn-ghost btn-sm" data-i18n="web-delete">Padam Tetapan</button>
-                <a id="web-open" class="btn btn-outline btn-sm" target="_blank" rel="noopener" data-i18n="web-open">Buka Halaman</a>
-              </div>
-            </div>
-
-            <div class="web-grid">
-              <div>
-                <h4 class="sub-title" data-i18n="web-page">Halaman</h4>
-                <div class="form-group">
-                  <label for="web-title" data-i18n="web-title">Judul Tab</label>
-                  <input id="web-title" placeholder="Kosongkan untuk guna tajuk sedia ada">
-                </div>
-                <div class="form-group">
-                  <label for="web-meta" data-i18n="web-meta">Penerangan Meta (SEO)</label>
-                  <input id="web-meta" placeholder="Kosongkan untuk guna sedia ada">
-                </div>
-                <h4 class="sub-title" data-i18n="web-pagecode">Kod Tersuai (halaman ini sahaja)</h4>
-                <div class="form-group">
-                  <label for="web-css" data-i18n="web-css">CSS Tersuai</label>
-                  <textarea id="web-css" class="code-area" rows="9" placeholder="body { background: #000; }&#10;.hero h1 { font-size: 3rem; }"></textarea>
-                </div>
-                <div class="form-group">
-                  <label for="web-js" data-i18n="web-js">JS Tersuai</label>
-                  <textarea id="web-js" class="code-area" rows="9" placeholder="console.log('Halaman dimuat');"></textarea>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="sub-title" data-i18n="web-theme">Tema Global (semua halaman)</h4>
-                <div class="color-row">
-                  <div class="form-group">
-                    <label for="theme-accent" data-i18n="web-accent">Warna Utama</label>
-                    <input type="color" id="theme-accent" value="#dc2626">
-                  </div>
-                  <div class="form-group">
-                    <label for="theme-bg" data-i18n="web-bg">Warna Latar</label>
-                    <input type="color" id="theme-bg" value="#07070a">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="theme-heading" data-i18n="web-fhead">Font Tajuk</label>
-                  <select id="theme-heading">
-                    <option value="" data-i18n="web-fhead-def">Default (Orbitron)</option>
-                    <option>Orbitron</option>
-                    <option>Chakra Petch</option>
-                    <option>Arial</option>
-                    <option>Verdana</option>
-                    <option>Georgia</option>
-                    <option>Courier New</option>
-                    <option>Impact</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="theme-body" data-i18n="web-fbody">Font Isi Kandungan</label>
-                  <select id="theme-body">
-                    <option value="" data-i18n="web-fbody-def">Default (Chakra Petch)</option>
-                    <option>Orbitron</option>
-                    <option>Chakra Petch</option>
-                    <option>Arial</option>
-                    <option>Verdana</option>
-                    <option>Georgia</option>
-                    <option>Courier New</option>
-                    <option>Impact</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="theme-logo" data-i18n="web-logo">URL Logo (seluruh laman)</label>
-                  <input id="theme-logo" placeholder="https://... (kosongkan = logo sedia ada)">
-                </div>
-                <p class="muted">Pilih halaman di atas, taip CSS/JS tersuai, kemudian tekan Simpan. Tetapan disimpan dalam pangkalan data dan digunakan serta-merta pada semua pelawat.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </main>
 
   <div id="modal" class="modal-overlay" hidden>
@@ -1481,96 +1370,7 @@ async function loadEnrollments() {
           txModal(null);
         });
 
-var pageSelect = document.getElementById("page-select");
-        var pageCustom = document.getElementById("page-custom");
-        var webOpen = document.getElementById("web-open");
-
-        function currentPagePath() {
-          if (pageSelect.value === "__custom__") {
-            var p = pageCustom.value.trim().replace(/^\//, "");
-            return p || null;
-          }
-          return pageSelect.value === "/" ? "/" : pageSelect.value;
-        }
-
-        pageSelect.addEventListener("change", function () {
-          pageCustom.hidden = pageSelect.value !== "__custom__";
-          if (pageSelect.value === "__custom__") pageCustom.focus();
-          else loadWebPage();
-        });
-        pageCustom.addEventListener("change", loadWebPage);
-
-        async function loadWebPage() {
-          var path = currentPagePath();
-          if (!path) return;
-          var { data } = await sb.from("site_pages").select("*").eq("path", path).maybeSingle();
-          var p = data || {};
-          document.getElementById("web-title").value = p.title || "";
-          document.getElementById("web-meta").value = p.meta_desc || "";
-          document.getElementById("web-css").value = p.custom_css || "";
-          document.getElementById("web-js").value = p.custom_js || "";
-          webOpen.href = path === "/" ? "/" : "/" + path.replace(/^\//, "");
-        }
-
-        async function loadWebTheme() {
-          var { data } = await sb.from("site_theme").select("*").limit(1);
-          var t = data && data[0];
-          if (t) {
-            if (t.accent) document.getElementById("theme-accent").value = t.accent;
-            if (t.bg) document.getElementById("theme-bg").value = t.bg;
-            if (t.font_heading) document.getElementById("theme-heading").value = t.font_heading;
-            if (t.font_body) document.getElementById("theme-body").value = t.font_body;
-            if (t.logo_url) document.getElementById("theme-logo").value = t.logo_url;
-          }
-        }
-
-        document.getElementById("web-save").addEventListener("click", async function () {
-          var path = currentPagePath();
-          if (!path) {
-            alert("Sila masukkan laluan halaman tersuai.");
-            return;
-          }
-          var pagePayload = {
-            path: path,
-            title: document.getElementById("web-title").value.trim(),
-            meta_desc: document.getElementById("web-meta").value.trim(),
-            custom_css: document.getElementById("web-css").value,
-            custom_js: document.getElementById("web-js").value
-          };
-          var themePayload = {
-            id: 1,
-            accent: document.getElementById("theme-accent").value,
-            bg: document.getElementById("theme-bg").value,
-            font_heading: document.getElementById("theme-heading").value || null,
-            font_body: document.getElementById("theme-body").value || null,
-            logo_url: document.getElementById("theme-logo").value.trim() || null
-          };
-          var err1 = (await sb.from("site_pages").upsert(pagePayload, { onConflict: "path" })).error;
-          var err2 = (await sb.from("site_theme").upsert(themePayload, { onConflict: "id" })).error;
-          if (err1 || err2) {
-            alert("Ralat: " + ((err1 && err1.message) || (err2 && err2.message)));
-            return;
-          }
-          alert("Tetapan disimpan! Buka halaman untuk lihat perubahan.");
-        });
-
-        document.getElementById("web-reset").addEventListener("click", async function () {
-          var path = currentPagePath();
-          if (!path) return;
-          if (!confirm(adminI18n.t("c-del-web"))) return;
-          await sb.from("site_pages").delete().eq("path", path);
-          await sb.from("site_theme").delete().eq("id", 1);
-          loadWebPage();
-          loadWebTheme();
-          document.getElementById("theme-accent").value = "#dc2626";
-          document.getElementById("theme-bg").value = "#07070a";
-          document.getElementById("theme-heading").value = "";
-          document.getElementById("theme-body").value = "";
-          document.getElementById("theme-logo").value = "";
-          showToast(adminI18n.t("deleted"), true);
-        });
-
-        var REPORT_SCOPES = {
+var REPORT_SCOPES = {
           semua: adminI18n.t("report-all"),
           requests: adminI18n.t("scope-requests"),
           bookings: adminI18n.t("scope-bookings"),
@@ -1838,17 +1638,7 @@ var pageSelect = document.getElementById("page-select");
       });
     })();
 
-    (function () {
-      var pePage = document.getElementById("pe-page");
-      var peOpen = document.getElementById("pe-open");
-      if (!peOpen) return;
-
-      peOpen.addEventListener("click", function () {
-        var path = pePage ? pePage.value : "index.html";
-        window.open(path + "?edit=1", "_blank");
-      });
-    })();
-  </script>
+</script>
   <script>
     (function () {
       var L = document.getElementById("loader");
