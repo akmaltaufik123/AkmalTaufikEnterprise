@@ -288,8 +288,25 @@
           </div>
         </div>
 
-        <div id="tab-web" class="tab-panel" hidden>
-          <div class="card">
+         <div id="tab-web" class="tab-panel" hidden>
+           <div class="card" style="margin-bottom:18px">
+             <div class="card-toolbar">
+               <h3>Editor Visual — Seret &amp; Lepas</h3>
+               <div class="toolbar-actions">
+                 <select id="pe-page">
+                   <option value="index.html">index.html (Laman Utama)</option>
+                   <option value="classes.html">classes.html (Kelas)</option>
+                 </select>
+                 <button id="pe-toggle" class="btn btn-primary btn-sm">Edit Mode</button>
+                 <button id="pe-save" class="btn btn-primary btn-sm">Simpan Susunan</button>
+                 <button id="pe-reset" class="btn btn-ghost btn-sm">Reset Susunan</button>
+               </div>
+             </div>
+             <p class="muted" style="margin-bottom:10px">Klik "Edit Mode", kemudian seret mana-mana kotak ke tempat lain (kotak lain akan ganti slot kosong), guna anak panah 4 arah, atau klik teks untuk ubah. Tekan "Simpan Susunan" untuk simpan ke seluruh laman.</p>
+             <iframe id="pe-frame" src="index.html?edit=1" title="Editor Visual"></iframe>
+           </div>
+
+           <div class="card">
             <div class="card-toolbar">
               <h3 data-i18n="tab-web">Edit Webpage</h3>
               <div class="toolbar-actions">
@@ -1819,6 +1836,70 @@ var pageSelect = document.getElementById("page-select");
         loadTx();
         wireReport();
         wireGraphReport();
+      });
+    })();
+
+    (function () {
+      var peFrame = document.getElementById("pe-frame");
+      var pePage = document.getElementById("pe-page");
+      var peToggle = document.getElementById("pe-toggle");
+      var peSave = document.getElementById("pe-save");
+      var peReset = document.getElementById("pe-reset");
+      if (!peFrame) return;
+      var peEditing = false;
+
+      function iframeWin() {
+        try { return peFrame.contentWindow; } catch (e) { return null; }
+      }
+
+      pePage.addEventListener("change", function () {
+        peEditing = false;
+        peToggle.textContent = "Edit Mode";
+        peFrame.src = pePage.value + "?edit=1";
+      });
+
+      peToggle.addEventListener("click", function () {
+        var w = iframeWin();
+        if (!w) return;
+        peEditing = !peEditing;
+        if (peEditing) {
+          w.document.dispatchEvent(new w.CustomEvent("pe:edit-on"));
+          peToggle.textContent = "Selesai Edit";
+        } else {
+          w.document.dispatchEvent(new w.CustomEvent("pe:edit-off"));
+          peToggle.textContent = "Edit Mode";
+        }
+      });
+
+      peSave.addEventListener("click", async function () {
+        var w = iframeWin();
+        if (!w || !w.__pageEditor) {
+          showToast("Sila tunggu halaman dimuat dahulu.");
+          return;
+        }
+        var layout = w.__pageEditor.collect();
+        if (!layout || !layout.sections.length) {
+          showToast("Ralat: tiada kotak ditemui.");
+          return;
+        }
+        var path = pePage.value;
+        var json = JSON.stringify(layout);
+        var { data, error } = await sb.from("site_pages").select("path").eq("path", path).maybeSingle();
+        if (!error && data) {
+          await sb.from("site_pages").update({ layout_json: json }).eq("path", path);
+        } else {
+          await sb.from("site_pages").insert({ path: path, layout_json: json });
+        }
+        showToast("Susunan laman disimpan!");
+      });
+
+      peReset.addEventListener("click", async function () {
+        if (!confirm("Padam semua susunan tersuai untuk halaman ini?")) return;
+        var path = pePage.value;
+        await sb.from("site_pages").update({ layout_json: null }).eq("path", path);
+        var w = iframeWin();
+        if (w) w.location.reload();
+        showToast("Susunan dipadamkan.");
       });
     })();
   </script>
