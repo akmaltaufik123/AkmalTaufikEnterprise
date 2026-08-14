@@ -1616,14 +1616,12 @@ var REPORT_SCOPES = {
         loadCategories();
         loadEnrollments();
         loadCustomers();
-        loadWebPage();
 
         setTimeout(function () {
           document.querySelectorAll("[data-i18n=loading]").forEach(function (el) {
             if ((el.textContent || "").trim() === "Memuatkan...") el.textContent = adminI18n.t("no-data");
           });
         }, 6000);
-        loadWebTheme();
         loadTx();
         wireReport();
         wireGraphReport();
