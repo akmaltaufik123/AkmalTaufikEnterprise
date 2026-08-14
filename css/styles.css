@@ -1969,3 +1969,125 @@ body.radial-bg::before {
   max-height: 260px;
   background: #000;
 }
+
+.auth-card-split {
+  max-width: 920px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(220, 38, 38, 0.08);
+  animation: cardIn 0.5s ease both;
+}
+
+.auth-left {
+  flex: 1.1;
+  padding: 46px 44px;
+  background: #16161c;
+}
+
+.auth-left h1 {
+  font-size: 1.9rem;
+  text-align: left;
+  margin-bottom: 4px;
+}
+
+.auth-left > .muted {
+  text-align: left;
+  margin-bottom: 26px;
+}
+
+.auth-left .form-group label {
+  font-size: 0.85rem;
+}
+
+.auth-left input {
+  padding: 13px 14px;
+  font-size: 1rem;
+}
+
+.btn-lg {
+  padding: 13px 22px;
+  font-size: 1.02rem;
+}
+
+.auth-right {
+  flex: 1;
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(220, 38, 38, 0.28) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 90%, rgba(220, 38, 38, 0.14) 0%, transparent 55%),
+    #0b0b10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 34px;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-right::before {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(220, 38, 38, 0.16) 0%, transparent 70%);
+  animation: glowPulse 3.5s ease-in-out infinite;
+}
+
+.auth-right-inner {
+  position: relative;
+  text-align: center;
+  z-index: 1;
+}
+
+.auth-logo {
+  width: 200px;
+  max-width: 70%;
+  height: auto;
+  filter: drop-shadow(0 0 18px rgba(220, 38, 38, 0.45));
+  animation: glowPulse 3.5s ease-in-out infinite;
+  margin-bottom: 22px;
+}
+
+.auth-right h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.35rem;
+  color: #f4f4f5;
+  margin-bottom: 8px;
+}
+
+.auth-right .muted {
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.auth-right-sub {
+  font-size: 0.85rem;
+  color: #a1a1aa;
+  line-height: 1.6;
+  max-width: 260px;
+  margin: 0 auto;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@media (max-width: 760px) {
+  .auth-card-split {
+    flex-direction: column;
+  }
+  .auth-left {
+    padding: 30px 24px;
+  }
+  .auth-right {
+    padding: 34px 24px;
+  }
+  .auth-logo {
+    width: 150px;
+  }
+}

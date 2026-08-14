@@ -26,27 +26,37 @@
   
 
   <main class="auth-body">
-    <div class="auth-card">
-      <a href="index.html" class="brand auth-brand"><img src="https://plain-apac-prod-public.komododecks.com/202608/12/3HS3RGiBnGa12S29398i/image.png" alt="Logo" class="logo-img"></a>
-      <h1>Log Masuk</h1>
-      <p class="muted">Masuk ke portal pelanggan anda.</p>
+    <div class="auth-card auth-card-split">
+      <div class="auth-left">
+        <h1>Log Masuk</h1>
+        <p class="muted">Masuk ke portal pelanggan anda.</p>
 
-      <form id="login-form" novalidate>
-        <div class="hp-field" aria-hidden="true"><input type="text" id="lg-hp" tabindex="-1" autocomplete="off"></div>
-        <div class="form-group">
-          <label for="email">E-mel</label>
-          <input type="email" id="email" placeholder="anda@email.com" required>
-        </div>
-        <div class="form-group">
-          <label for="password">Kata Laluan</label>
-          <input type="password" id="password" placeholder="••••••••" required>
-        </div>
-        <p id="form-error" class="form-error" hidden></p>
-        <button type="submit" class="btn btn-primary btn-block">Log Masuk</button>
-      </form>
+        <form id="login-form" novalidate>
+          <div class="hp-field" aria-hidden="true"><input type="text" id="lg-hp" tabindex="-1" autocomplete="off"></div>
+          <div class="form-group">
+            <label for="email">E-mel</label>
+            <input type="email" id="email" placeholder="anda@email.com" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Kata Laluan</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+          </div>
+          <p id="form-error" class="form-error" hidden></p>
+          <button type="submit" class="btn btn-primary btn-block btn-lg">Log Masuk</button>
+        </form>
 
-      <p class="auth-switch">Tiada akaun? <a href="register.html">Daftar Sekarang</a></p>
-      <p class="auth-switch"><a href="index.html">&larr; Kembali ke laman utama</a></p>
+        <p class="auth-switch">Tiada akaun? <a href="register.html">Daftar Sekarang</a></p>
+        <p class="auth-switch"><a href="index.html">&larr; Kembali ke laman utama</a></p>
+      </div>
+
+      <div class="auth-right">
+        <div class="auth-right-inner">
+          <img src="https://plain-apac-prod-public.komododecks.com/202608/12/3HS3RGiBnGa12S29398i/image.png" alt="Logo" class="auth-logo">
+          <h2>Akmal Taufik Enterprise</h2>
+          <p class="muted">Server &middot; Rack Server &middot; WiFi &middot; CCTV &middot; Komputer</p>
+          <p class="auth-right-sub">Portal Pelanggan — Tempah, mohon perkhidmatan dan daftar kelas dalam satu tempat.</p>
+        </div>
+      </div>
     </div>
   </main>
 
