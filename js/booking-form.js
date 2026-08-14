@@ -168,8 +168,7 @@
         showError(t("Gagal muat naik " + (kind === "image" ? "gambar" : "video") + ": ", "Failed to upload " + (kind === "image" ? "image" : "video") + ": ") + error.message);
         return null;
       }
-      var { data } = sb.storage.from("booking-files").getPublicUrl(path);
-      return data.publicUrl;
+      return path;
     }
 
     var lastSubmit = 0;

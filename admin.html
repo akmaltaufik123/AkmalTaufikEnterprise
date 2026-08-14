@@ -1296,28 +1296,67 @@ async function loadEnrollments() {
             box.innerHTML = '<p class="muted">' + adminI18n.t("e-bookings") + '</p>';
             return;
           }
+          function toPath(urlOrPath) {
+            if (!urlOrPath) return "";
+            if (urlOrPath.indexOf("http") === 0) {
+              var i = urlOrPath.indexOf("/booking-files/");
+              if (i > -1) return urlOrPath.slice(i + "/booking-files/".length);
+            }
+            return urlOrPath;
+          }
+          async function fileLink(urlOrPath, kind) {
+            var path = toPath(urlOrPath);
+            if (!path) return "";
+            try {
+              var { data, error } = await sb.storage.from("booking-files").createSignedUrl(path, 3600);
+              if (error || !data || !data.signedUrl) return "";
+              var href = data.signedUrl;
+              return kind === "img"
+                ? '<a href="' + esc(href) + '" target="_blank" rel="noopener"><img src="' + esc(href) + '" class="booking-thumb" alt="Gambar"></a>'
+                : '<a class="btn btn-ghost btn-sm" href="' + esc(href) + '" target="_blank" rel="noopener">Video</a>';
+            } catch (e) {
+              return "";
+            }
+          }
+          var rows = data.map(function (b) {
+            var notes = b.notes ? '<div class="table-desc">' + esc(b.notes) + '</div>' : "";
+            var who = esc(b.customer_name || customerName(b.user_id) || "—");
+            var contact = b.phone ? esc(b.phone) + (b.email ? "<br>" + esc(b.email) : "") : (b.email ? esc(b.email) : "—");
+            var acts = "";
+            if (b.status === "pending") {
+              acts += '<button class="action-btn" data-confirm-booking="' + b.id + '">' + adminI18n.t("btn-ok") + '</button> ';
+            }
+            if (b.status === "pending" || b.status === "confirmed") {
+              acts += '<button class="action-btn" data-done-booking="' + b.id + '">' + adminI18n.t("btn-done") + '</button> ';
+              acts += '<button class="action-btn" data-cancel-booking="' + b.id + '">' + adminI18n.t("btn-cancel") + '</button> ';
+            }
+            acts += '<button class="action-btn danger" data-delete-booking="' + b.id + '">Padam</button>';
+            return {
+              who: who,
+              contact: contact,
+              service: esc(b.service) + notes,
+              date: esc(b.booking_date),
+              time: esc(b.booking_time),
+              location: esc(b.location),
+              image: b.image_url,
+              video: b.video_url,
+              status: b.status,
+              acts: acts
+            };
+          });
+          for (var i = 0; i < rows.length; i++) {
+            var r = rows[i];
+            var files = [];
+            if (r.image) files.push(await fileLink(r.image, "img"));
+            if (r.video) files.push(await fileLink(r.video, "vid"));
+            r.files = files.length ? files.join(" ") : "—";
+          }
           box.innerHTML = '<table class="table"><thead><tr><th>' + adminI18n.t("th-user") + '</th><th>' + adminI18n.t("th-contact") + '</th><th>' + adminI18n.t("th-service") + '</th><th>' + adminI18n.t("th-date") + '</th><th>' + adminI18n.t("th-time") + '</th><th>' + adminI18n.t("th-location") + '</th><th>' + adminI18n.t("th-files") + '</th><th>' + adminI18n.t("th-status") + '</th><th>' + adminI18n.t("th-action") + '</th></tr></thead><tbody>' +
-            data.map(function (b) {
-              var notes = b.notes ? '<div class="table-desc">' + esc(b.notes) + '</div>' : "";
-              var who = esc(b.customer_name || customerName(b.user_id) || "—");
-              var contact = b.phone ? esc(b.phone) + (b.email ? "<br>" + esc(b.email) : "") : (b.email ? esc(b.email) : "—");
-              var files = [];
-              if (b.image_url) files.push('<a href="' + esc(b.image_url) + '" target="_blank" rel="noopener"><img src="' + esc(b.image_url) + '" class="booking-thumb" alt="Gambar"></a>');
-              if (b.video_url) files.push('<a class="btn btn-ghost btn-sm" href="' + esc(b.video_url) + '" target="_blank" rel="noopener">Video</a>');
-              var fileCell = files.length ? files.join(" ") : "—";
-              var acts = "";
-              if (b.status === "pending") {
-                acts += '<button class="action-btn" data-confirm-booking="' + b.id + '">' + adminI18n.t("btn-ok") + '</button> ';
-              }
-              if (b.status === "pending" || b.status === "confirmed") {
-                acts += '<button class="action-btn" data-done-booking="' + b.id + '">' + adminI18n.t("btn-done") + '</button> ';
-                acts += '<button class="action-btn" data-cancel-booking="' + b.id + '">' + adminI18n.t("btn-cancel") + '</button> ';
-              }
-              acts += '<button class="action-btn danger" data-delete-booking="' + b.id + '">Padam</button>';
-              return '<tr><td>' + who + '</td><td>' + contact + '</td><td>' + esc(b.service) + notes + '</td><td>' + esc(b.booking_date) +
-                "</td><td>" + esc(b.booking_time) + "</td><td>" + esc(b.location) + "</td><td>" + fileCell +
-                '</td><td><span class="badge ' + esc(b.status) + '">' + window.portal.badge(b.status) +
-                "</span></td><td>" + acts + "</td></tr>";
+            rows.map(function (r) {
+              return '<tr><td>' + r.who + '</td><td>' + r.contact + '</td><td>' + r.service + '</td><td>' + r.date +
+                "</td><td>" + r.time + "</td><td>" + r.location + "</td><td>" + r.files +
+                '</td><td><span class="badge ' + esc(r.status) + '">' + window.portal.badge(r.status) +
+                "</span></td><td>" + r.acts + "</td></tr>";
             }).join("") + "</tbody></table>";
 
           function bind(id, action) {
