@@ -80,6 +80,7 @@
           <button class="tab-btn" data-tab="classes" data-i18n="tab-classes">Kelas</button>
           <button class="tab-btn" data-tab="customers" data-i18n="tab-customers">Pelanggan</button>
           <button class="tab-btn" data-tab="report" data-i18n="tab-report">Laporan</button>
+          <button class="tab-btn" data-tab="home" data-i18n="tab-home">Edit Homepage</button>
         </div>
 
 <div id="tab-dashboard" class="tab-panel">
@@ -284,6 +285,18 @@
               <button class="btn btn-primary" id="report-csv">CSV</button>
             </div>
             <p class="muted form-hint" data-i18n="fmt-hint">Semua format (PDF, Excel, Word, CSV) mengandungi kandungan yang sama. Kosongkan tarikh untuk laporan penuh.</p>
+          </div>
+        </div>
+
+        <div id="tab-home" class="tab-panel" hidden>
+          <div class="card">
+            <h3 data-i18n="home-title">Edit Halaman Utama</h3>
+            <p class="muted form-hint" data-i18n="home-hint">Ubah tajuk, keterangan dan gambar kotak pada halaman utama. Perubahan disimpan serta-merta dan kelihatan kepada semua pelawat selepas muat semula.</p>
+            <div id="home-boxes"></div>
+            <div class="home-actions">
+              <button id="home-add" class="btn btn-primary btn-sm" data-i18n="home-add">+ Tambah Kotak Baru</button>
+              <button id="home-save" class="btn btn-primary btn-sm" data-i18n="home-save">Simpan Semua Perubahan</button>
+            </div>
           </div>
         </div>
 
@@ -1621,9 +1634,123 @@ var REPORT_SCOPES = {
           document.querySelectorAll("[data-i18n=loading]").forEach(function (el) {
             if ((el.textContent || "").trim() === "Memuatkan...") el.textContent = adminI18n.t("no-data");          });
         }, 6000);
+
+        var HOME_DEFAULTS = [
+          { id: "svc-1", zone: "services", title: "Pemasangan Server, Rack Server, WiFi & CCTV", desc: "Pemasangan dan konfigurasi server, rack server, sistem CCTV, dan liputan WiFi untuk rumah dan pejabat.", image_url: "" },
+          { id: "svc-2", zone: "services", title: "Pemasangan Kabel Rangkaian", desc: "Pemasangan kabel rangkaian di rumah dan pejabat dengan kemasan yang kemas dan sambungan yang stabil.", image_url: "" },
+          { id: "svc-3", zone: "services", title: "Pemasangan Komputer & Laptop", desc: "Pemasangan dan penyediaan komputer dan laptop di rumah dan pejabat, termasuk pemasangan perisian dan persediaan awal.", image_url: "" },
+          { id: "svc-4", zone: "services", title: "Kelas Asas Kecerdasan Buatan (AI)", desc: "Kelas asasi AI secara online atau bersemuka — belajar cara menggunakan alatan AI secara praktikal dan mudah.", image_url: "" },
+          { id: "svc-5", zone: "services", title: "Kelas Asas Komputer", desc: "Kelas online atau bersemuka untuk asas komputer, daripada tahap permulaan hingga kemahiran harian.", image_url: "" },
+          { id: "svc-6", zone: "services", title: "Dan Banyak Lagi Perkhidmatan", desc: "Perkhidmatan lain tersedia mengikut permintaan. Hubungi kami untuk maklumat lanjut.", image_url: "" },
+          { id: "why-1", zone: "why", title: "Tindak Balas Pantas", desc: "Kami bertindak balas dengan cepat supaya peranti, rangkaian dan sistem anda kembali berfungsi tanpa masa menunggu yang lama.", image_url: "" },
+          { id: "why-2", zone: "why", title: "Harga Telus & Berpatutan", desc: "Tiada caj tersembunyi. Anda mengetahui kos sebelum sebarang kerja dimulakan.", image_url: "" },
+          { id: "why-3", zone: "why", title: "Remote & On-Site", desc: "Daripada pembaikan jauh yang pantas kepada pemasangan bersemuka penuh, kami mengikut jadual anda.", image_url: "" }
+        ];
+        var homeBoxes = [];
+        var homeBoxSeq = 1;
+
+        async function loadHomeBoxes() {
+          var cont = document.getElementById("home-boxes");
+          if (!cont) return;
+          var { data, error } = await sb.from("site_pages").select("layout_json").eq("path", "index.html").maybeSingle();
+          if (error) { showToast(adminI18n.t("home-load-err") + error.message); return; }
+          var layout = null;
+          try { layout = data && data.layout_json ? JSON.parse(data.layout_json) : null; } catch (e) {}
+          if (layout && layout.version === 3 && Array.isArray(layout.boxes) && layout.boxes.length) {
+            homeBoxes = layout.boxes;
+          } else {
+            homeBoxes = HOME_DEFAULTS.map(function (b) { return { id: b.id, zone: b.zone, title: b.title, desc: b.desc, image_url: b.image_url || "" }; });
+          }
+          renderHomeBoxes();
+        }
+
+        function renderHomeBoxes() {
+          var cont = document.getElementById("home-boxes");
+          if (!cont) return;
+          cont.innerHTML = "";
+          homeBoxes.forEach(function (b, i) {
+            cont.appendChild(homeBoxRow(b, i));
+          });
+        }
+
+        function homeBoxRow(b, i) {
+          var row = document.createElement("div");
+          row.className = "home-box";
+          row.style.cssText = "border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;background:rgba(255,255,255,0.02);";
+          row.innerHTML =
+            '<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">' +
+              '<select data-f="zone" style="width:auto;flex:0 0 auto;">' +
+                '<option value="services"' + (b.zone === "services" ? " selected" : "") + ">" + adminI18n.t("home-zone-services") + "</option>" +
+                '<option value="why"' + (b.zone === "why" ? " selected" : "") + ">" + adminI18n.t("home-zone-why") + "</option>" +
+              "</select>" +
+              '<span style="color:#8a8a93;font-size:0.8rem;letter-spacing:0.05em;">' + esc(b.id || "") + "</span>" +
+              '<span style="flex:1"></span>' +
+              '<button type="button" class="btn btn-ghost btn-sm" data-act="del">' + adminI18n.t("home-del") + "</button>" +
+            "</div>" +
+            '<div class="form-group"><label>' + adminI18n.t("home-title-label") + '</label><input data-f="title" value="' + esc(b.title || "") + '"></div>' +
+            '<div class="form-group"><label>' + adminI18n.t("home-desc-label") + '</label><textarea data-f="desc" rows="2">' + esc(b.desc || "") + "</textarea></div>" +
+            '<div class="form-group"><label>' + adminI18n.t("home-img-label") + "</label>" +
+              '<div style="display:flex;gap:8px;">' +
+                '<input data-f="image_url" style="flex:1" value="' + esc(b.image_url || "") + '" placeholder="https://...">' +
+                '<button type="button" class="btn btn-outline btn-sm" data-act="up">' + adminI18n.t("home-img-upload") + "</button>" +
+              "</div>" +
+              '<p class="muted form-hint">' + adminI18n.t("home-img-hint") + "</p>" +
+            "</div>";
+          row._i = i;
+          row.querySelector('[data-act="del"]').addEventListener("click", function () {
+            homeBoxes.splice(row._i, 1);
+            renderHomeBoxes();
+          });
+          row.querySelector('[data-act="up"]').addEventListener("click", function () {
+            var fi = document.createElement("input");
+            fi.type = "file";
+            fi.accept = "image/*";
+            fi.onchange = async function () {
+              var file = fi.files[0];
+              if (!file) return;
+              var path = "home/" + Date.now() + "-" + String(file.name).replace(/[^a-zA-Z0-9._-]/g, "_");
+              var { error } = await sb.storage.from("site-images").upload(path, file, { cacheControl: "3600", upsert: true });
+              if (error) { showToast("Ralat muat naik: " + error.message); return; }
+              var pub = sb.storage.from("site-images").getPublicUrl(path).data.publicUrl;
+              row.querySelector('[data-f="image_url"]').value = pub;
+              showToast("OK", true);
+            };
+            fi.click();
+          });
+          return row;
+        }
+
+        document.getElementById("home-add").addEventListener("click", function () {
+          homeBoxes.push({ id: "bx-" + Date.now(), zone: "services", title: "", desc: "", image_url: "" });
+          renderHomeBoxes();
+        });
+
+        document.getElementById("home-save").addEventListener("click", async function () {
+          var rows = document.querySelectorAll("#home-boxes .home-box");
+          var boxes = Array.prototype.map.call(rows, function (r, i) {
+            var prev = homeBoxes[i];
+            return {
+              id: (prev && prev.id) || "bx-" + Date.now(),
+              zone: r.querySelector('[data-f="zone"]').value,
+              title: r.querySelector('[data-f="title"]').value.trim(),
+              desc: r.querySelector('[data-f="desc"]').value.trim(),
+              image_url: r.querySelector('[data-f="image_url"]').value.trim()
+            };
+          });
+          homeBoxes = boxes;
+          var payload = { version: 3, boxes: boxes };
+          var { data: existing } = await sb.from("site_pages").select("path").eq("path", "index.html").maybeSingle();
+          var res = existing
+            ? await sb.from("site_pages").update({ layout_json: JSON.stringify(payload) }).eq("path", "index.html")
+            : await sb.from("site_pages").insert({ path: "index.html", layout_json: JSON.stringify(payload) });
+          if (res.error) { showToast(adminI18n.t("home-err") + res.error.message); return; }
+          showToast(adminI18n.t("home-saved"), true);
+        });
+
         loadTx();
         wireReport();
         wireGraphReport();
+        loadHomeBoxes();
       });
     })();
 

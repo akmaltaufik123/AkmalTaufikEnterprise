@@ -78,9 +78,85 @@
     }).catch(function () {});
   }
 
+  function applyLayout() {
+    var sb = getSb();
+    if (!sb) return;
+    var path = window.location.pathname.split("/").pop();
+    if (!path) path = "index.html";
+    sb.from("site_pages").select("layout_json").eq("path", path).maybeSingle()
+      .then(function (res) {
+        var page = res.data;
+        if (page && page.layout_json) {
+          try {
+            var layout = JSON.parse(page.layout_json);
+            if (layout.version === 3 && layout.boxes) {
+              applyBoxes(layout.boxes);
+            }
+          } catch (e) {
+            if (window.console) console.error("Layout apply error:", e);
+          }
+        }
+      }).catch(function () {});
+  }
+
+  function applyBoxes(boxes) {
+    var byZone = { services: document.getElementById("services-grid"), why: document.getElementById("why-steps") };
+    var seen = {};
+    boxes.forEach(function (b) {
+      var zone = b.zone || "services";
+      var container = byZone[zone];
+      if (!container) return;
+      var existing = container.querySelector('[data-box="' + b.id + '"]');
+      if (existing) {
+        if (b.title) {
+          var h = existing.querySelector("h3");
+          h.textContent = b.title;
+          h.removeAttribute("data-i18n");
+        }
+        if (b.desc) {
+          var pd = existing.querySelector("p");
+          pd.textContent = b.desc;
+          pd.removeAttribute("data-i18n");
+        }
+        if (b.image_url) {
+          var img = existing.querySelector("img.box-img");
+          if (!img) {
+            img = document.createElement("img");
+            img.className = "box-img";
+            img.style.cssText = "width:100%;height:160px;object-fit:cover;border-radius:8px 8px 0 0;margin-bottom:12px;";
+            existing.insertBefore(img, existing.firstChild);
+          }
+          img.src = b.image_url;
+        }
+        seen[b.id] = true;
+      } else if (!seen[b.id]) {
+        var template = container.querySelector(".card, .step");
+        if (template) {
+          var clone = template.cloneNode(true);
+          clone.dataset.box = b.id;
+          var ch = clone.querySelector("h3");
+          var cp = clone.querySelector("p");
+          if (ch) ch.removeAttribute("data-i18n");
+          if (cp) cp.removeAttribute("data-i18n");
+          if (b.title) ch.textContent = b.title;
+          if (b.desc) cp.textContent = b.desc;
+          if (b.image_url) {
+            var img = document.createElement("img");
+            img.className = "box-img";
+            img.style.cssText = "width:100%;height:160px;object-fit:cover;border-radius:8px 8px 0 0;margin-bottom:12px;";
+            img.src = b.image_url;
+            clone.insertBefore(img, clone.firstChild);
+          }
+          container.appendChild(clone);
+          seen[b.id] = true;
+        }
+      }
+    });
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", apply);
+    document.addEventListener("DOMContentLoaded", applyLayout);
   } else {
-    apply();
+    applyLayout();
   }
 })();
