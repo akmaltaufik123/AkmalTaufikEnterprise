@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; frame-src 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="permissions-policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=()">
+
   <title>Kelas — Portal Pelanggan</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -74,6 +78,15 @@
           return map[f] || f;
         }
 
+        function fmt12(t) {
+          if (!t) return "";
+          var h = parseInt(t.slice(0, 2), 10);
+          var mi = t.slice(3, 5);
+          var ap = h >= 12 ? "PM" : "AM";
+          var hh = h % 12 || 12;
+          return hh + ":" + mi + " " + ap;
+        }
+
         async function loadCourses() {
           var { data, error } = await sb.from("courses").select("*").eq("active", true).order("position").order("created_at");
           var esc = window.portal.esc;
@@ -91,18 +104,48 @@
             var img = c.image_url
               ? '<div class="course-img-wrap"><img class="course-img" src="' + esc(c.image_url) + '" alt=""></div>'
               : "";
-            return '<div class="card" data-course="' + esc(c.id) + '" ' + cardStyle + '>' +
+            var price = c.price != null && c.price !== ""
+              ? '<p class="class-price">RM ' + esc(Number(c.price).toFixed(2)) + '</p>'
+              : "";
+            var badges = "";
+            if (c.class_time) badges += '<span class="badge in_progress">' + esc(fmt12(c.class_time)) + '</span>';
+            badges += '<span class="badge done">' + esc(c.mode) + '</span>';
+            if (c.instructor_name) {
+              badges += '<span class="badge confirmed">' + esc(c.instructor_name) + '</span>';
+              if (c.instructor_type) badges += '<span class="badge pending">' + esc(c.instructor_type) + '</span>';
+            }
+            var dets = [];
+            if (c.region) dets.push('<div class="det"><span class="det-label">Wilayah</span><span>' + esc(c.region) + '</span></div>');
+            if (c.nation) dets.push('<div class="det"><span class="det-label">Negara</span><span>' + esc(c.nation) + '</span></div>');
+            if (c.ssm) dets.push('<div class="det"><span class="det-label">No. SSM</span><span>' + esc(c.ssm) + '</span></div>');
+            var detHtml = dets.length
+              ? '<div class="class-dets" id="dets-' + i + '" hidden>' + dets.join("") + '</div>'
+              : "";
+            return '<div class="card class-card" data-course="' + esc(c.id) + '" ' + cardStyle + '>' +
               img +
               '<h3 ' + titleStyle + '>' + esc(c.name) + '</h3>' +
+              price +
               '<p>' + esc(c.description || "") + '</p>' +
+              '<div class="class-badges">' + badges + '</div>' +
+              detHtml +
               '<div class="form-group"><label>Mod Kelas</label><select id="mode-' + i + '">' +
               (esc(c.mode).indexOf("Bersemuka") > -1 ? '<option>Bersemuka</option>' : "") +
               (esc(c.mode).indexOf("Online") > -1 ? '<option>Online</option>' : "") +
               (esc(c.mode).indexOf("Online") === -1 && esc(c.mode).indexOf("Bersemuka") === -1 ? '<option>Online</option>' : "") +
               "</select></div>" +
-              '<button class="btn btn-primary" data-enroll="' + i + '" data-name="' + esc(c.name) + '">Daftar Kelas</button></div>';
+              '<div class="class-cta">' +
+              '<button class="btn btn-ghost btn-sm" data-toggledets="' + i + '"' + (dets.length ? "" : " hidden") + '>Butiran</button> ' +
+              '<button class="btn btn-primary" data-enroll="' + i + '" data-name="' + esc(c.name) + '">Daftar Kelas</button></div></div>';
           }).join("");
 
+          gridBox.querySelectorAll("[data-toggledets]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var box = document.getElementById("dets-" + btn.getAttribute("data-toggledets"));
+              if (!box) return;
+              box.hidden = !box.hidden;
+              btn.textContent = box.hidden ? "Butiran" : "Tutup";
+            });
+          });
           gridBox.querySelectorAll("[data-enroll]").forEach(function (btn) {
             btn.addEventListener("click", async function () {
               var idx = btn.getAttribute("data-enroll");

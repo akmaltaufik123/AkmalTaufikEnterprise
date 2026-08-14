@@ -1,4 +1,10 @@
 (function () {
+  function h(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
   function detectDevice() {
     var ua = navigator.userAgent || "";
     var uaData = navigator.userAgentData;
@@ -23,11 +29,11 @@
   function render(el, info) {
     if (!el) return;
     var parts = [];
-    if (info.flag) parts.push('<span class="vi-item"><span class="vi-flag">' + info.flag + '</span> ' + info.country + '</span>');
-    if (info.city) parts.push('<span class="vi-item">' + info.city + '</span>');
-    parts.push('<span class="vi-item">' + info.device + "</span>");
-    if (info.browser) parts.push('<span class="vi-item">' + info.browser + "</span>");
-    if (info.os) parts.push('<span class="vi-item">' + info.os + "</span>");
+    if (info.flag) parts.push('<span class="vi-item"><span class="vi-flag">' + h(info.flag) + '</span> ' + h(info.country) + '</span>');
+    if (info.city) parts.push('<span class="vi-item">' + h(info.city) + '</span>');
+    parts.push('<span class="vi-item">' + h(info.device) + "</span>");
+    if (info.browser) parts.push('<span class="vi-item">' + h(info.browser) + "</span>");
+    if (info.os) parts.push('<span class="vi-item">' + h(info.os) + "</span>");
     el.innerHTML = parts.join('<span class="vi-dot"></span>');
     el.hidden = false;
   }

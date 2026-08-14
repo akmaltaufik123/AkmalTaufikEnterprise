@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; frame-src 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="permissions-policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=()">
+
   <title>Daftar — Portal Pelanggan</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,6 +32,7 @@
       <p class="muted">Buka akaun portal pelanggan percuma.</p>
 
       <form id="register-form" novalidate>
+        <div class="hp-field" aria-hidden="true"><input type="text" id="rg-hp" tabindex="-1" autocomplete="off"></div>
         <div class="form-group">
           <label for="name">Nama Penuh</label>
           <input type="text" id="name" placeholder="Nama anda" required>
@@ -63,12 +68,13 @@
       }
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
+        if (document.getElementById("rg-hp").value) return;
         var p = window.portal;
         var name = p.sanitize(document.getElementById("name").value, 60);
         var email = document.getElementById("email").value.trim().toLowerCase();
         var password = document.getElementById("password").value;
-        if (name.length < 2) {
-          errorBox.textContent = "Sila masukkan nama penuh (minimum 2 aksara).";
+        if (name.length < 2 || !/^[A-Za-z\u00C0-\u024F' .-]+$/.test(name)) {
+          errorBox.textContent = "Sila masukkan nama penuh yang sah (huruf sahaja).";
           errorBox.hidden = false;
           return;
         }

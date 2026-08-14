@@ -1815,3 +1815,83 @@ body.radial-bg::before {
   background: rgba(34, 197, 94, 0.15);
   color: #4ade80;
 }
+
+.class-card, .cat-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  border: 1px solid var(--border);
+  animation: cardIn 0.45s ease both;
+}
+.class-card:nth-child(2), .cat-card:nth-child(2) { animation-delay: 0.05s; }
+.class-card:nth-child(3), .cat-card:nth-child(3) { animation-delay: 0.1s; }
+.class-card:nth-child(4), .cat-card:nth-child(4) { animation-delay: 0.15s; }
+.class-card:nth-child(5), .cat-card:nth-child(5) { animation-delay: 0.2s; }
+.class-card:nth-child(6), .cat-card:nth-child(6) { animation-delay: 0.25s; }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.class-card:hover, .cat-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 30px rgba(220, 38, 38, 0.22), var(--shadow);
+  border-color: rgba(220, 38, 38, 0.55);
+}
+.course-img-wrap, .cat-img-wrap {
+  overflow: hidden;
+  border-radius: 10px;
+}
+.course-img, .cat-img {
+  transition: transform 0.4s ease;
+}
+.class-card:hover .course-img, .cat-card:hover .cat-img {
+  transform: scale(1.07);
+}
+.class-price {
+  color: #f87171;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 4px 0 8px;
+}
+.class-badges, .cat-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+.class-dets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 14px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 8px 0;
+  background: rgba(0, 0, 0, 0.35);
+  animation: cardIn 0.3s ease both;
+}
+.det { display: flex; flex-direction: column; gap: 2px; font-size: 0.88rem; }
+.det-label {
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.cat-price {
+  color: #f87171;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-left: 8px;
+}
+.cat-details { font-size: 0.82rem; color: var(--muted); margin: 4px 0 0; }
+.class-cta { display: flex; gap: 8px; align-items: center; }
+
+.hp-field {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}

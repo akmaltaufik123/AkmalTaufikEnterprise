@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https: blob:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https: blob:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; frame-src 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="permissions-policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=()">
+
   <title>Admin — Panel Pentadbir</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -876,9 +880,12 @@
         }
 
         async function uploadCourseImage(file) {
-          var ext = (file.name.split(".").pop() || "png").toLowerCase();
-          var path = "course-" + Date.now() + "-" + Math.floor(Math.random() * 9999) + "." + ext;
-          var { error } = await sb.storage.from("course-images").upload(path, file, { contentType: file.type });
+          var type = (file.type || "").toLowerCase();
+          var ext = (file.name.split(".").pop() || "").toLowerCase();
+          var imgExt = ["gif", "png", "jpg", "jpeg", "webp"];
+          var safeExt = imgExt.indexOf(ext) > -1 ? ext : "png";
+          var path = "course-" + Date.now() + "-" + Math.floor(Math.random() * 9999) + "." + safeExt;
+          var { error } = await sb.storage.from("course-images").upload(path, file, { contentType: type || "image/png" });
           if (error) throw new Error(error.message);
           return sb.storage.from("course-images").getPublicUrl(path).data.publicUrl;
         }
@@ -977,31 +984,110 @@
           bindDragDrop(grid);
         }
 
+        var REGIONS = ["Pulau Pinang", "Kedah", "Perlis", "Perak", "Selangor", "Kuala Lumpur", "Putrajaya", "Negeri Sembilan", "Melaka", "Johor", "Pahang", "Terengganu", "Kelantan", "Sabah", "Sarawak", "Labuan", "Lain-lain"];
+        var NATIONS = ["Malaysia", "Singapura", "Indonesia", "Brunei", "Thailand", "Lain-lain"];
+
+        function fmt12(t) {
+          if (!t) return "";
+          var h = parseInt(t.slice(0, 2), 10);
+          var mi = t.slice(3, 5);
+          var ap = h >= 12 ? "PM" : "AM";
+          var hh = h % 12 || 12;
+          return hh + ":" + mi + " " + ap;
+        }
+
+        function to24(hh, mi, ap) {
+          var h = parseInt(hh, 10);
+          if (ap === "PM" && h !== 12) h += 12;
+          if (ap === "AM" && h === 12) h = 0;
+          return String(h).padStart(2, "0") + ":" + mi;
+        }
+
+        function optList(list, cur) {
+          return list.map(function (v) {
+            return '<option' + (cur === v ? " selected" : "") + ">" + esc(v) + "</option>";
+          }).join("");
+        }
+
+        function catCard(c) {
+          var style = 'style="background:' + esc(c.bg_color || "#16161c") + ';color:' + esc(c.color || "#f4f4f5") + ';font-family:' + fontPreview(c.font_family) + '"';
+          var titleStyle = 'style="font-size:' + (FONT_SIZES[c.font_size] || "1.15rem") + '"';
+          var img = c.image_url
+            ? '<div class="cat-img-wrap"><img class="cat-img" src="' + esc(c.image_url) + '" alt=""></div>'
+            : "";
+          var price = c.price != null ? '<span class="cat-price">RM ' + esc(Number(c.price).toFixed(2)) + "</span>" : "";
+          var meta = "";
+          if (c.class_time) meta += '<span class="badge in_progress">' + esc(fmt12(c.class_time)) + "</span>";
+          if (c.instructor_name) meta += '<span class="badge confirmed">' + esc(c.instructor_name) + (c.instructor_type ? " (" + esc(c.instructor_type) + ")" : "") + "</span>";
+          var details = [];
+          if (c.region) details.push(esc(c.region));
+          if (c.nation) details.push(esc(c.nation));
+          if (c.ssm) details.push("SSM " + esc(c.ssm));
+          var detHtml = details.length ? '<p class="cat-details">' + details.join(" &middot; ") + "</p>" : "";
+          return '<div class="cat-card" draggable="true" data-cat-id="' + esc(c.id) + '" ' + style + '>' +
+            '<div class="cat-drag-hint">&#8942;&#8942;</div>' + img +
+            '<h3 class="cat-title" ' + titleStyle + '>' + esc(c.name) + price + "</h3>" +
+            '<p class="cat-desc">' + esc(c.description || "") + "</p>" + detHtml +
+            '<div class="cat-meta">' + meta +
+            '<span class="badge ' + (c.active ? "done" : "pending") + '">' + (c.active ? adminI18n.t("cat-active") : adminI18n.t("cat-inactive")) +
+            '</span><span class="badge in_progress">' + esc(c.mode) + "</span></div>" +
+            '<div class="cat-actions">' +
+            '<button class="action-btn" data-edit-cat="' + esc(c.id) + '">' + adminI18n.t("btn-edit") + '</button> ' +
+            '<button class="action-btn" data-toggle-cat="' + esc(c.id) + '">' + (c.active ? adminI18n.t("cat-disable") : adminI18n.t("cat-enable")) + "</button> " +
+            '<button class="action-btn danger" data-delete-cat="' + esc(c.id) + '">' + adminI18n.t("btn-del") + '</button></div></div>';
+        }
+
         function categoryModal(c) {
           var editing = !!c;
-          openModal(editing ? adminI18n.t("btn-edit") + " " + adminI18n.t("cat-title") : adminI18n.t("cat-add"),
-            '<div class="form-group"><label>' + adminI18n.t("cat-name") + '</label><input id="c-name" value="' + (editing ? esc(c.name) : "") + '"></div>' +
-            '<div class="form-group"><label>' + adminI18n.t("cat-desc") + '</label><textarea id="c-desc" rows="3">' + (editing ? esc(c.description) : "") + "</textarea></div>" +
-            '<div class="form-group"><label>' + adminI18n.t("cat-mode") + '</label><select id="c-mode">' +
-            ["Online", "Bersemuka", "Online & Bersemuka"].map(function (m) {
-              return '<option' + (editing && c.mode === m ? " selected" : "") + ">" + m + "</option>";
-            }).join("") + "</select></div>" +
-            '<div class="switch-row"><input type="checkbox" id="c-active" class="checkbox"' + (editing && c.active ? " checked" : "") + '><label for="c-active">' + adminI18n.t("cat-active") + '</label></div>' +
+          var t = adminI18n.t;
+          var ct = c && c.class_time ? c.class_time : "10:00";
+          var h24 = parseInt(ct.slice(0, 2), 10);
+          var mi = ct.slice(3, 5);
+          var ap = h24 >= 12 ? "PM" : "AM";
+          var h12 = h24 % 12 || 12;
+          openModal(editing ? t("btn-edit") + " " + t("cat-title") : t("cat-add"),
+            '<div class="form-group"><label>' + t("cat-name") + '</label><input id="c-name" maxlength="120" value="' + (editing ? esc(c.name) : "") + '"></div>' +
+            '<div class="form-group"><label>' + t("cat-desc") + '</label><textarea id="c-desc" rows="3" maxlength="1000">' + (editing ? esc(c.description) : "") + "</textarea></div>" +
             '<div class="color-row">' +
-            '<div class="form-group"><label>' + adminI18n.t("cat-color") + '</label><input type="color" id="c-color" value="' + (editing && c.color ? esc(c.color) : "#f4f4f5") + '"></div>' +
-            '<div class="form-group"><label>' + adminI18n.t("cat-bgcolor") + '</label><input type="color" id="c-bg" value="' + (editing && c.bg_color ? esc(c.bg_color) : "#16161c") + '"></div>' +
+            '<div class="form-group"><label>' + t("cat-price") + '</label><input type="number" id="c-price" min="0" step="0.01" value="' + (editing && c.price != null ? esc(c.price) : "") + '"></div>' +
+            '<div class="form-group"><label>' + t("cat-time") + '</label><div class="time-row"><select id="c-hour">' +
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (h) {
+              return '<option value="' + h + '"' + (h === h12 ? " selected" : "") + ">" + h + "</option>";
+            }).join("") + '</select><span class="time-colon">:</span><select id="c-minute">' +
+            Array.from({ length: 12 }, function (_, i) {
+              var m = String(i * 5).padStart(2, "0");
+              return '<option value="' + m + '"' + (m === mi ? " selected" : "") + ">" + m + "</option>";
+            }).join("") + '</select><select id="c-ap" class="time-ap">' +
+            '<option value="AM"' + (ap === "AM" ? " selected" : "") + '>AM</option><option value="PM"' + (ap === "PM" ? " selected" : "") + '>PM</option></select></div></div>' +
+            '<div class="color-row">' +
+            '<div class="form-group"><label>' + t("cat-instructor") + '</label><input id="c-instructor" maxlength="120" value="' + (editing ? esc(c.instructor_name || "") : "") + '"></div>' +
+            '<div class="form-group"><label>' + t("cat-instructor-type") + '</label><select id="c-instructor-type">' +
+            '<option value="Individu"' + (editing && c.instructor_type === "Individu" ? " selected" : "") + ">" + t("type-individu") + "</option>" +
+            '<option value="Syarikat"' + (editing && c.instructor_type === "Syarikat" ? " selected" : "") + ">" + t("type-company") + "</option></select></div></div>" +
+            '<div class="color-row">' +
+            '<div class="form-group"><label>' + t("cat-region") + '</label><select id="c-region">' + optList(REGIONS, editing ? c.region : "Pulau Pinang") + "</select></div>" +
+            '<div class="form-group"><label>' + t("cat-nation") + '</label><select id="c-nation">' + optList(NATIONS, editing ? c.nation : "Malaysia") + "</select></div></div>" +
+            '<div class="form-group"><label>' + t("cat-ssm") + '</label><input id="c-ssm" maxlength="30" pattern="[A-Za-z0-9-]{6,30}" placeholder="cth: 202501234567" value="' + (editing ? esc(c.ssm || "") : "") + '"></div>' +
+            '<div class="form-group"><label>' + t("cat-mode") + '</label><select id="c-mode">' +
+            '<option value="Online"' + (editing && c.mode === "Online" ? " selected" : "") + ">" + t("mode-online") + "</option>" +
+            '<option value="Bersemuka"' + (editing && c.mode === "Bersemuka" ? " selected" : "") + ">" + t("mode-f2f") + "</option>" +
+            '<option value="Online & Bersemuka"' + (editing && c.mode === "Online & Bersemuka" ? " selected" : "") + ">" + t("mode-both") + "</option></select></div>" +
+            '<div class="switch-row"><input type="checkbox" id="c-active" class="checkbox"' + (editing && c.active ? " checked" : "") + '><label for="c-active">' + t("cat-active") + '</label></div>' +
+            '<div class="color-row">' +
+            '<div class="form-group"><label>' + t("cat-color") + '</label><input type="color" id="c-color" value="' + (editing && c.color ? esc(c.color) : "#f4f4f5") + '"></div>' +
+            '<div class="form-group"><label>' + t("cat-bgcolor") + '</label><input type="color" id="c-bg" value="' + (editing && c.bg_color ? esc(c.bg_color) : "#16161c") + '"></div>' +
             "</div>" +
-            '<div class="form-group"><label>' + adminI18n.t("cat-font") + '</label><select id="c-font">' +
+            '<div class="form-group"><label>' + t("cat-font") + '</label><select id="c-font">' +
             FONT_OPTIONS.map(function (f) {
               return '<option' + (editing && c.font_family === f ? " selected" : "") + ">" + f + "</option>";
             }).join("") + "</select></div>" +
-            '<div class="form-group"><label>' + adminI18n.t("cat-size") + '</label><select id="c-fontsize">' +
+            '<div class="form-group"><label>' + t("cat-size") + '</label><select id="c-fontsize">' +
             Object.keys(FONT_SIZES).map(function (s) {
               return '<option value="' + s + '"' + (editing && c.font_size === s ? " selected" : "") + ">" + FONT_SIZE_LABELS[s] + "</option>";
             }).join("") + "</select></div>" +
-            '<div class="form-group"><label>' + adminI18n.t("cat-image") + '</label><input id="c-imgurl" placeholder="https://... (atau muat naik fail di bawah)" value="' + (editing ? esc(c.image_url || "") : "") + '"></div>' +
-            '<div class="form-group"><label>' + adminI18n.t("cat-upload") + '</label><input type="file" id="c-imgfile" accept="image/gif,image/png,image/jpeg,image/webp"></div>' +
-            (editing && c.image_url ? '<p class="muted"><img id="c-imgprev" class="modal-preview" src="' + esc(c.image_url) + '" alt=""> <button type="button" class="action-btn danger" id="c-imgclear">' + adminI18n.t("cat-delete") + '</button></p>' : ""));
+            '<div class="form-group"><label>' + t("cat-image") + '</label><input id="c-imgurl" placeholder="https://... (atau muat naik fail di bawah)" value="' + (editing ? esc(c.image_url || "") : "") + '"></div>' +
+            '<div class="form-group"><label>' + t("cat-upload") + '</label><input type="file" id="c-imgfile" accept="image/*"></div>' +
+            (editing && c.image_url ? '<p class="muted"><img id="c-imgprev" class="modal-preview" src="' + esc(c.image_url) + '" alt=""> <button type="button" class="action-btn danger" id="c-imgclear">' + t("cat-delete") + '</button></p>' : ""));
           var prev = document.getElementById("c-imgprev");
           if (prev) {
             document.getElementById("c-imgclear").addEventListener("click", function () {
@@ -1013,6 +1099,10 @@
           fileInput.addEventListener("change", function () {
             var f = fileInput.files && fileInput.files[0];
             if (!f) return;
+            if (!/^image\//.test(f.type || "")) {
+              showToast(t("err-img-type"));
+              return;
+            }
             fileToDataUrl(f, function (dataUrl) {
               var box = document.getElementById("c-imgurl");
               box.value = "";
@@ -1029,6 +1119,13 @@
             var payload = {
               name: document.getElementById("c-name").value.trim(),
               description: document.getElementById("c-desc").value.trim(),
+              price: document.getElementById("c-price").value === "" ? null : Math.max(0, parseFloat(document.getElementById("c-price").value) || 0),
+              class_time: to24(document.getElementById("c-hour").value, document.getElementById("c-minute").value, document.getElementById("c-ap").value),
+              instructor_name: document.getElementById("c-instructor").value.trim(),
+              instructor_type: document.getElementById("c-instructor-type").value,
+              region: document.getElementById("c-region").value,
+              nation: document.getElementById("c-nation").value,
+              ssm: document.getElementById("c-ssm").value.trim(),
               mode: document.getElementById("c-mode").value,
               active: document.getElementById("c-active").checked,
               color: document.getElementById("c-color").value,
@@ -1037,7 +1134,12 @@
               font_size: document.getElementById("c-fontsize").value
             };
             if (!payload.name) {
-              alert("Nama kategori diperlukan.");
+              showToast(t("err-name"));
+              return;
+            }
+            var urlVal = document.getElementById("c-imgurl").value.trim();
+            if (urlVal && !/^https?:\/\//.test(urlVal)) {
+              showToast(t("err-url"));
               return;
             }
             var file = fileInput.files && fileInput.files[0];
@@ -1045,7 +1147,6 @@
               if (file) {
                 payload.image_url = await uploadCourseImage(file);
               } else {
-                var urlVal = document.getElementById("c-imgurl").value.trim();
                 payload.image_url = urlVal ? urlVal : (editing ? c.image_url : null);
               }
               var { error } = editing
@@ -1053,7 +1154,7 @@
                 : await sb.from("courses").insert(Object.assign({ position: catData.length }, payload));
               if (error) showToast("Ralat: " + error.message);
             } catch (err) {
-              alert("Gagal muat naik gambar: " + err.message);
+              showToast(t("err-upload") + err.message);
               return;
             }
             closeModal();

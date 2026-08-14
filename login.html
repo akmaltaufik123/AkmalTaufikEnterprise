@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; frame-src 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="permissions-policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=()">
+
   <title>Log Masuk — Portal Pelanggan</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,6 +32,7 @@
       <p class="muted">Masuk ke portal pelanggan anda.</p>
 
       <form id="login-form" novalidate>
+        <div class="hp-field" aria-hidden="true"><input type="text" id="lg-hp" tabindex="-1" autocomplete="off"></div>
         <div class="form-group">
           <label for="email">E-mel</label>
           <input type="email" id="email" placeholder="anda@email.com" required>
@@ -59,10 +64,33 @@
       }
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
+        if (document.getElementById("lg-hp").value) return;
         var email = document.getElementById("email").value.trim().toLowerCase();
         var password = document.getElementById("password").value;
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !password) {
+          errorBox.textContent = "Sila masukkan e-mel dan kata laluan yang sah.";
+          errorBox.hidden = false;
+          return;
+        }
+        var now = Date.now();
+        var win = form._win || { count: 0, ts: 0 };
+        if (win.count >= 5 && now - win.ts < 60000) {
+          var wait = Math.ceil((60000 - (now - win.ts)) / 1000);
+          errorBox.textContent = "Terlalu banyak percubaan. Sila tunggu " + wait + " saat.";
+          errorBox.hidden = false;
+          return;
+        }
+        var btn = form.querySelector("button[type=submit]");
+        btn.disabled = true;
+        btn.textContent = "Menghantar...";
         var res = await window.portal.supabase.auth.signInWithPassword({ email: email, password: password });
+        btn.disabled = false;
+        btn.textContent = "Log Masuk";
         if (res.error) {
+          if (now - win.ts > 60000) { win.count = 0; win.ts = now; }
+          win.count++;
+          win.ts = now;
+          form._win = win;
           errorBox.textContent = res.error.message;
           errorBox.hidden = false;
           return;

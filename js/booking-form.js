@@ -150,14 +150,19 @@
     dateInput.addEventListener("change", loadTaken);
 
     async function uploadFile(file, kind) {
-      var maxMB = kind === "image" ? 10 : 50;
-      if (file.size > maxMB * 1024 * 1024) {
-        showError(t("Fail " + (kind === "image" ? "gambar" : "video") + " terlalu besar (maksimum " + maxMB + "MB).",
-                    (kind === "image" ? "Image" : "Video") + " file too large (max " + maxMB + "MB)."));
+      var type = (file.type || "").toLowerCase();
+      var ext = (file.name.split(".").pop() || "").toLowerCase();
+      var allowImg = ["image/gif", "image/png", "image/jpeg", "image/webp"];
+      var allowVid = ["video/mp4", "video/webm", "video/quicktime"];
+      var allow = kind === "image" ? allowImg : allowVid;
+      var extMap = { image: ["gif", "png", "jpg", "jpeg", "webp"], video: ["mp4", "webm", "mov"] };
+      if (allow.indexOf(type) === -1 && extMap[kind].indexOf(ext) === -1) {
+        showError(t("Jenis fail tidak dibenarkan (" + (kind === "image" ? "gambar" : "video") + " sahaja).",
+                    "File type not allowed (" + (kind === "image" ? "image" : "video") + " only)."));
         return null;
       }
-      var ext = (file.name.split(".").pop() || "bin").toLowerCase();
-      var path = "booking-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + ext;
+      var safeExt = extMap[kind].indexOf(ext) > -1 ? ext : (kind === "image" ? "png" : "mp4");
+      var path = "booking-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + safeExt;
       var { error } = await sb.storage.from("booking-files").upload(path, file, { upsert: false });
       if (error) {
         showError(t("Gagal muat naik " + (kind === "image" ? "gambar" : "video") + ": ", "Failed to upload " + (kind === "image" ? "image" : "video") + ": ") + error.message);
@@ -167,9 +172,21 @@
       return data.publicUrl;
     }
 
+    var lastSubmit = 0;
+    var hp = form.querySelector("[data-role=hp]");
+
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
       hideError();
+      if (hp && hp.value) {
+        msg.style.display = "block";
+        form.reset();
+        return;
+      }
+      if (Date.now() - lastSubmit < 2500) {
+        showError(t("Sila tunggu sebentar sebelum menghantar semula.", "Please wait a moment before submitting again."));
+        return;
+      }
       var service = form.querySelector("[data-role=service]").value;
       var date = dateInput.value;
       syncFromHour();
@@ -186,6 +203,14 @@
       }
       if (!name || !phone || !email) {
         showError(t("Sila isi nama penuh, telefon dan e-mel.", "Please fill in full name, phone and email."));
+        return;
+      }
+      if (name.length < 2 || name.length > 100 || !/^[A-Za-zÀ-ÖØ-öø-ÿ' .-]+$/.test(name)) {
+        showError(t("Nama tidak sah (2-100 aksara, huruf sahaja).", "Invalid name (2-100 characters, letters only)."));
+        return;
+      }
+      if (!/^(\+?6?0)?1[0-9]{8,9}$/.test(phone)) {
+        showError(t("Nombor telefon tidak sah. Sila gunakan nombor Malaysia (cth: 0189451570 atau +60189451570).", "Invalid phone number. Please use a Malaysian number (e.g. 0189451570 or +60189451570)."));
         return;
       }
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
@@ -237,6 +262,7 @@
         showError(t("Ralat: ", "Error: ") + error.message);
         return;
       }
+      lastSubmit = Date.now();
       msg.style.display = "block";
       form.querySelectorAll("input, select, textarea").forEach(function (el) { el.value = ""; });
       if (imgInput) imgInput.value = "";

@@ -37,6 +37,12 @@
     return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(e);
   }
 
+  function safeUrl(u) {
+    var s = String(u == null ? "" : u).trim();
+    if (!s) return "";
+    return /^https?:\/\//i.test(s) || /^data:image\/(png|jpe?g|gif|webp);/i.test(s) ? s : "";
+  }
+
   window.portal = {
     configured: configured,
     supabase: supabase,
@@ -44,7 +50,8 @@
     badge: badge,
     esc: esc,
     sanitize: sanitize,
-    isValidEmail: isValidEmail
+    isValidEmail: isValidEmail,
+    safeUrl: safeUrl
   };
 
   async function requireAuth() {
