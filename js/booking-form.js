@@ -233,12 +233,12 @@
       if (vidInput && vidInput.files && vidInput.files[0]) videoUrl = await uploadFile(vidInput.files[0], "video");
       if (imgInput && imgInput.files && imgInput.files[0] && !imageUrl) {
         submitBtn.disabled = false;
-        submitBtn.textContent = t("Rekod Temujanji / Set Appointment", "Rekod Temujanji / Set Appointment");
+        submitBtn.textContent = t("Rekod Temujanji", "Set Appointment");
         return;
       }
       if (vidInput && vidInput.files && vidInput.files[0] && !videoUrl) {
         submitBtn.disabled = false;
-        submitBtn.textContent = t("Rekod Temujanji / Set Appointment", "Rekod Temujanji / Set Appointment");
+        submitBtn.textContent = t("Rekod Temujanji", "Set Appointment");
         return;
       }
       var payload = {
@@ -256,7 +256,7 @@
       };
       var { error } = await sb.from("bookings").insert(payload);
       submitBtn.disabled = false;
-      submitBtn.textContent = t("Rekod Temujanji / Set Appointment", "Rekod Temujanji / Set Appointment");
+      submitBtn.textContent = t("Rekod Temujanji", "Set Appointment");
       if (error) {
         showError(t("Ralat: ", "Error: ") + error.message);
         return;
