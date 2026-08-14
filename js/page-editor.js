@@ -222,6 +222,7 @@
       ".pe-box.pe-drop{outline:2px dashed #ff2b2b;box-shadow:0 0 0 4px rgba(255,43,43,0.3);}" +
       ".pe-bar{position:absolute;top:-12px;right:0;z-index:999999;display:none;gap:2px;background:#16161c;border:1px solid rgba(220,38,38,0.7);border-radius:8px;padding:2px;box-shadow:0 4px 16px rgba(0,0,0,0.6);}" +
       ".pe-box:hover > .pe-bar{display:flex;}" +
+      "@media (hover:none){(.pe-box > .pe-bar){display:flex}}" +
       ".pe-bar button{width:24px;height:24px;font-size:0.8rem;line-height:1;color:#ef4444;background:transparent;border:none;cursor:pointer;border-radius:5px;font-family:inherit;}" +
       ".pe-bar button:hover{background:rgba(220,38,38,0.25);}" +
       ".pe-drag{color:#ef4444;cursor:grab;padding:0 6px;font-size:0.95rem;display:flex;align-items:center;user-select:none;}" +
@@ -310,13 +311,36 @@
     var L = document.getElementById("loader");
     if (L && L.parentNode) L.parentNode.removeChild(L);
     injectStyle();
-    decorateAll();
+    try {
+      decorateAll();
+    } catch (e) {
+      peMsg("Ralat editor: " + (e && e.message ? e.message : e));
+      peEditing = false;
+      return;
+    }
     var hint = document.createElement("div");
     hint.className = "pe-hint";
     hint.id = "pe-hint";
     hint.textContent = "Mode Edit: seret mana-mana elemen (guna ⠿) atau anak panah ↑↓←→. Klik teks untuk ubah terus.";
     document.body.appendChild(hint);
+    addModeBtn();
     if (IS_EDIT) addSaveBar();
+  }
+
+  function addModeBtn() {
+    var b = document.getElementById("pe-modebtn");
+    if (b) return;
+    b = document.createElement("button");
+    b.id = "pe-modebtn";
+    b.type = "button";
+    b.style.cssText =
+      "position:fixed;bottom:16px;left:16px;z-index:999999;background:#dc2626;border:none;color:#fff;" +
+      "padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.6);";
+    b.textContent = "Mode Edit: AKTIF — klik untuk tamat";
+    b.addEventListener("click", function () {
+      disableEditor();
+    });
+    document.body.appendChild(b);
   }
 
   function disableEditor() {
@@ -334,6 +358,8 @@
     if (hint && hint.parentNode) hint.parentNode.removeChild(hint);
     var bar = document.getElementById("pe-savebar");
     if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+    var m = document.getElementById("pe-modebtn");
+    if (m && m.parentNode) m.parentNode.removeChild(m);
   }
 
   function addSaveBar() {
@@ -436,5 +462,9 @@
     loadLayout();
     scheduleReapply();
     if (IS_EDIT) setTimeout(enableEditor, 400);
+  }
+  if (IS_EDIT) {
+    window.addEventListener("load", function () { setTimeout(enableEditor, 300); });
+    setTimeout(function () { if (IS_EDIT && !peEditing) enableEditor(); }, 2500);
   }
 })();
