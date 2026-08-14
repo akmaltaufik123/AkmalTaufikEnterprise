@@ -1848,6 +1848,24 @@ var pageSelect = document.getElementById("page-select");
       if (!peFrame) return;
       var peEditing = false;
 
+      function sb() {
+        return window.portal ? window.portal.supabase : null;
+      }
+
+      function toast(msg) {
+        var t = document.getElementById("pe-toast");
+        if (!t) {
+          t = document.createElement("div");
+          t.id = "pe-toast";
+          t.style.cssText = "position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:999999;background:#16161c;border:1px solid rgba(220,38,38,.6);color:#f4f4f5;padding:10px 20px;border-radius:10px;font-size:.9rem;box-shadow:0 8px 24px rgba(0,0,0,.6);";
+          document.body.appendChild(t);
+        }
+        t.textContent = msg;
+        t.style.display = "block";
+        clearTimeout(t._t);
+        t._t = setTimeout(function () { t.style.display = "none"; }, 3500);
+      }
+
       function iframeWin() {
         try { return peFrame.contentWindow; } catch (e) { return null; }
       }
@@ -1872,34 +1890,37 @@ var pageSelect = document.getElementById("page-select");
       });
 
       peSave.addEventListener("click", async function () {
+        var client = sb();
         var w = iframeWin();
+        if (!client) { toast("Ralat: tiada sambungan Supabase."); return; }
         if (!w || !w.__pageEditor) {
-          showToast("Sila tunggu halaman dimuat dahulu.");
+          toast("Sila tunggu halaman dimuat dahulu.");
           return;
         }
         var layout = w.__pageEditor.collect();
         if (!layout || !layout.sections.length) {
-          showToast("Ralat: tiada kotak ditemui.");
+          toast("Ralat: tiada kotak ditemui.");
           return;
         }
         var path = pePage.value;
         var json = JSON.stringify(layout);
-        var { data, error } = await sb.from("site_pages").select("path").eq("path", path).maybeSingle();
+        var { data, error } = await client.from("site_pages").select("path").eq("path", path).maybeSingle();
         if (!error && data) {
-          await sb.from("site_pages").update({ layout_json: json }).eq("path", path);
+          await client.from("site_pages").update({ layout_json: json }).eq("path", path);
         } else {
-          await sb.from("site_pages").insert({ path: path, layout_json: json });
+          await client.from("site_pages").insert({ path: path, layout_json: json });
         }
-        showToast("Susunan laman disimpan!");
+        toast("Susunan laman disimpan!");
       });
 
       peReset.addEventListener("click", async function () {
+        var client = sb();
         if (!confirm("Padam semua susunan tersuai untuk halaman ini?")) return;
         var path = pePage.value;
-        await sb.from("site_pages").update({ layout_json: null }).eq("path", path);
+        await client.from("site_pages").update({ layout_json: null }).eq("path", path);
         var w = iframeWin();
         if (w) w.location.reload();
-        showToast("Susunan dipadamkan.");
+        toast("Susunan dipadamkan.");
       });
     })();
   </script>
