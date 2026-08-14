@@ -225,6 +225,77 @@
     hint.id = "pe-hint";
     hint.textContent = "Mode Edit: seret mana-mana kotak atau guna anak panah. Klik teks untuk ubah. Tekan Simpan di admin panel.";
     document.body.appendChild(hint);
+    if (IS_EDIT) addSaveBar();
+  }
+
+  function addSaveBar() {
+    var bar = document.getElementById("pe-savebar");
+    if (bar) return;
+    bar = document.createElement("div");
+    bar.id = "pe-savebar";
+    bar.style.cssText =
+      "position:fixed;bottom:16px;right:16px;z-index:999999;display:flex;gap:8px;align-items:center;" +
+      "background:#16161c;border:1px solid rgba(220,38,38,0.65);border-radius:12px;padding:10px 14px;" +
+      "box-shadow:0 10px 30px rgba(0,0,0,0.7);";
+    bar.innerHTML =
+      '<span style="color:#f4f4f5;font-size:.85rem">Editor Visual</span>' +
+      '<button type="button" id="pe-save" style="background:#dc2626;border:none;color:#fff;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:700">Simpan Susunan</button>' +
+      '<button type="button" id="pe-reset" style="background:transparent;border:1px solid rgba(220,38,38,.6);color:#ef4444;padding:8px 14px;border-radius:8px;cursor:pointer">Reset</button>' +
+      '<button type="button" id="pe-close" style="background:transparent;border:none;color:#a1a1aa;cursor:pointer;font-size:1.1rem" title="Keluar">&times;</button>';
+    document.body.appendChild(bar);
+
+    document.getElementById("pe-save").addEventListener("click", function () {
+      var layout = collect();
+      var sb = getSb();
+      if (!sb) { peMsg("Ralat: tiada sambungan Supabase."); return; }
+      sb.auth.getSession().then(function (res) {
+        var session = res.data && res.data.session;
+        if (!session) { peMsg("Sila log masuk dahulu sebagai admin."); return; }
+        if (!(session.user.app_metadata && session.user.app_metadata.is_admin)) {
+          peMsg("Akaun ini bukan admin.");
+          return;
+        }
+        var json = JSON.stringify(layout);
+        sb.from("site_pages").select("path").eq("path", PATH).maybeSingle().then(function (r) {
+          if (!r.error && r.data) {
+            return sb.from("site_pages").update({ layout_json: json }).eq("path", PATH);
+          }
+          return sb.from("site_pages").insert({ path: PATH, layout_json: json });
+        }).then(function () {
+          peMsg("Susunan laman disimpan!");
+        }).catch(function (err) {
+          peMsg("Ralat simpan: " + (err && err.message ? err.message : "sila semak SQL column layout_json"));
+        });
+      });
+    });
+
+    document.getElementById("pe-reset").addEventListener("click", function () {
+      if (!confirm("Padam semua susunan tersuai untuk halaman ini?")) return;
+      var sb = getSb();
+      sb.from("site_pages").update({ layout_json: null }).eq("path", PATH).then(function () {
+        window.location.reload();
+      });
+    });
+
+    document.getElementById("pe-close").addEventListener("click", function () {
+      window.location.href = window.location.pathname;
+    });
+  }
+
+  function peMsg(msg) {
+    var m = document.getElementById("pe-msg");
+    if (!m) {
+      m = document.createElement("div");
+      m.id = "pe-msg";
+      m.style.cssText =
+        "position:fixed;bottom:74px;right:16px;z-index:999999;background:#16161c;border:1px solid rgba(220,38,38,.6);" +
+        "color:#f4f4f5;padding:10px 16px;border-radius:10px;font-size:.85rem;box-shadow:0 8px 24px rgba(0,0,0,.6);max-width:320px;";
+      document.body.appendChild(m);
+    }
+    m.textContent = msg;
+    m.style.display = "block";
+    clearTimeout(m._t);
+    m._t = setTimeout(function () { m.style.display = "none"; }, 4000);
   }
 
   function disableEditor() {
@@ -239,6 +310,8 @@
     });
     var hint = document.getElementById("pe-hint");
     if (hint && hint.parentNode) hint.parentNode.removeChild(hint);
+    var bar = document.getElementById("pe-savebar");
+    if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
   }
 
   document.addEventListener("pe:edit-on", enableEditor);

@@ -297,13 +297,10 @@
                    <option value="index.html">index.html (Laman Utama)</option>
                    <option value="classes.html">classes.html (Kelas)</option>
                  </select>
-                 <button id="pe-toggle" class="btn btn-primary btn-sm">Edit Mode</button>
-                 <button id="pe-save" class="btn btn-primary btn-sm">Simpan Susunan</button>
-                 <button id="pe-reset" class="btn btn-ghost btn-sm">Reset Susunan</button>
+                 <button id="pe-open" class="btn btn-primary btn-sm">Buka Editor Penuh</button>
                </div>
              </div>
-             <p class="muted" style="margin-bottom:10px">Klik "Edit Mode", kemudian seret mana-mana kotak ke tempat lain (kotak lain akan ganti slot kosong), guna anak panah 4 arah, atau klik teks untuk ubah. Tekan "Simpan Susunan" untuk simpan ke seluruh laman.</p>
-             <iframe id="pe-frame" src="index.html?edit=1" title="Editor Visual"></iframe>
+             <p class="muted">Editor dibuka dalam tab baharu (seluruh laman boleh diseret). Susun kotak, ubah teks, kemudian tekan "Simpan Susunan" di dalam editor itu sendiri. Tiada iframe — jadi tiada sebarang sekatan.</p>
            </div>
 
            <div class="card">
@@ -1840,102 +1837,13 @@ var pageSelect = document.getElementById("page-select");
     })();
 
     (function () {
-      var peFrame = document.getElementById("pe-frame");
       var pePage = document.getElementById("pe-page");
-      var peToggle = document.getElementById("pe-toggle");
-      var peSave = document.getElementById("pe-save");
-      var peReset = document.getElementById("pe-reset");
-      if (!peFrame) return;
-      var peEditing = false;
+      var peOpen = document.getElementById("pe-open");
+      if (!peOpen) return;
 
-      function sb() {
-        return window.portal ? window.portal.supabase : null;
-      }
-
-      function toast(msg) {
-        var t = document.getElementById("pe-toast");
-        if (!t) {
-          t = document.createElement("div");
-          t.id = "pe-toast";
-          t.style.cssText = "position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:999999;background:#16161c;border:1px solid rgba(220,38,38,.6);color:#f4f4f5;padding:10px 20px;border-radius:10px;font-size:.9rem;box-shadow:0 8px 24px rgba(0,0,0,.6);";
-          document.body.appendChild(t);
-        }
-        t.textContent = msg;
-        t.style.display = "block";
-        clearTimeout(t._t);
-        t._t = setTimeout(function () { t.style.display = "none"; }, 3500);
-      }
-
-      function iframeWin() {
-        try { return peFrame.contentWindow; } catch (e) { return null; }
-      }
-
-      pePage.addEventListener("change", function () {
-        peEditing = false;
-        peToggle.textContent = "Edit Mode";
-        peFrame.src = pePage.value + "?edit=1";
-      });
-
-      peToggle.addEventListener("click", function () {
-        var w = iframeWin();
-        if (!w) return;
-        peEditing = !peEditing;
-        var target = peEditing ? "pe:edit-on" : "pe:edit-off";
-        var label = peEditing ? "Selesai Edit" : "Edit Mode";
-        peToggle.textContent = label;
-        peToggle.disabled = true;
-        var tries = 0;
-        (function fire() {
-          var w2 = iframeWin();
-          if (w2 && w2.__pageEditor && w2.document) {
-            w2.document.dispatchEvent(new w2.CustomEvent(target));
-            peToggle.disabled = false;
-            return;
-          }
-          tries++;
-          if (tries > 20) {
-            peToggle.disabled = false;
-            toast("Halaman belum dimuat. Sila tunggu dan cuba lagi.");
-            peEditing = !peEditing;
-            peToggle.textContent = label === "Selesai Edit" ? "Edit Mode" : "Selesai Edit";
-            return;
-          }
-          setTimeout(fire, 250);
-        })();
-      });
-
-      peSave.addEventListener("click", async function () {
-        var client = sb();
-        var w = iframeWin();
-        if (!client) { toast("Ralat: tiada sambungan Supabase."); return; }
-        if (!w || !w.__pageEditor) {
-          toast("Sila tunggu halaman dimuat dahulu.");
-          return;
-        }
-        var layout = w.__pageEditor.collect();
-        if (!layout || !layout.sections.length) {
-          toast("Ralat: tiada kotak ditemui.");
-          return;
-        }
-        var path = pePage.value;
-        var json = JSON.stringify(layout);
-        var { data, error } = await client.from("site_pages").select("path").eq("path", path).maybeSingle();
-        if (!error && data) {
-          await client.from("site_pages").update({ layout_json: json }).eq("path", path);
-        } else {
-          await client.from("site_pages").insert({ path: path, layout_json: json });
-        }
-        toast("Susunan laman disimpan!");
-      });
-
-      peReset.addEventListener("click", async function () {
-        var client = sb();
-        if (!confirm("Padam semua susunan tersuai untuk halaman ini?")) return;
-        var path = pePage.value;
-        await client.from("site_pages").update({ layout_json: null }).eq("path", path);
-        var w = iframeWin();
-        if (w) w.location.reload();
-        toast("Susunan dipadamkan.");
+      peOpen.addEventListener("click", function () {
+        var path = pePage ? pePage.value : "index.html";
+        window.open(path + "?edit=1", "_blank");
       });
     })();
   </script>
