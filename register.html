@@ -19,38 +19,42 @@
     <div class="loader-inner">
       <div class="loader-ring"><div class="loader-spin"></div></div>
       <div class="loader-dot"></div>
-      <div class="loader-text">Sila tunggu...</div>
+      <div class="loader-text" data-i18n="loading-text">Sila tunggu...</div>
     </div>
   </div>
 
   
 
   <main class="auth-body">
+    <div class="lang-switch login-lang">
+      <button class="lang-btn" data-lang="my">MY</button>
+      <button class="lang-btn" data-lang="en">ENG</button>
+    </div>
     <div class="auth-card">
       <a href="index.html" class="brand auth-brand"><img src="https://plain-apac-prod-public.komododecks.com/202608/12/3HS3RGiBnGa12S29398i/image.png" alt="Logo" class="logo-img"></a>
-      <h1>Daftar Akaun</h1>
-      <p class="muted">Buka akaun portal pelanggan percuma.</p>
+      <h1 data-i18n="rg-title">Daftar Akaun</h1>
+      <p class="muted" data-i18n="rg-sub">Buka akaun portal pelanggan percuma.</p>
 
       <form id="register-form" novalidate>
         <div class="hp-field" aria-hidden="true"><input type="text" id="rg-hp" tabindex="-1" autocomplete="off"></div>
         <div class="form-group">
-          <label for="name">Nama Penuh</label>
+          <label for="name" data-i18n="rg-name">Nama Penuh</label>
           <input type="text" id="name" placeholder="Nama anda" required>
         </div>
         <div class="form-group">
-          <label for="email">E-mel</label>
+          <label for="email" data-i18n="rg-email">E-mel</label>
           <input type="email" id="email" placeholder="anda@email.com" required>
         </div>
         <div class="form-group">
-          <label for="password">Kata Laluan</label>
+          <label for="password" data-i18n="rg-pass">Kata Laluan</label>
           <input type="password" id="password" placeholder="Minimum 6 aksara" minlength="6" required>
         </div>
         <p id="form-error" class="form-error" hidden></p>
-        <button type="submit" class="btn btn-primary btn-block">Daftar</button>
+        <button type="submit" class="btn btn-primary btn-block" data-i18n="rg-btn">Daftar</button>
       </form>
 
-      <p class="auth-switch">Sudah ada akaun? <a href="login.html">Log Masuk</a></p>
-      <p class="auth-switch"><a href="index.html">&larr; Kembali ke laman utama</a></p>
+      <p class="auth-switch" data-i18n="rg-have">Sudah ada akaun? <a href="login.html">Log Masuk</a></p>
+      <p class="auth-switch"><a href="index.html" data-i18n="lg-back">&larr; Kembali ke laman utama</a></p>
     </div>
   </main>
 
@@ -60,10 +64,70 @@
   <script src="js/customize.js"></script>
   <script>
     (function () {
+      var dict = {
+        my: {
+          "rg-title": "Daftar Akaun",
+          "rg-sub": "Buka akaun portal pelanggan percuma.",
+          "rg-name": "Nama Penuh",
+          "rg-email": "E-mel",
+          "rg-pass": "Kata Laluan",
+          "rg-btn": "Daftar",
+          "rg-have": "Sudah ada akaun? <a href=\"login.html\">Log Masuk</a>",
+          "lg-back": "&larr; Kembali ke laman utama",
+          "loading-text": "Sila tunggu...",
+          "err-config": "Pendaftaran belum dikonfigurasi. Hubungi pentadbir.",
+          "err-name": "Sila masukkan nama penuh yang sah (huruf sahaja).",
+          "err-email": "Format e-mel tidak sah.",
+          "err-pass": "Kata laluan minimum 6 aksara.",
+          "rg-ok": "Pendaftaran berjaya! Sila sahkan e-mel anda sebelum log masuk."
+        },
+        en: {
+          "rg-title": "Register Account",
+          "rg-sub": "Create a free customer portal account.",
+          "rg-name": "Full Name",
+          "rg-email": "Email",
+          "rg-pass": "Password",
+          "rg-btn": "Register",
+          "rg-have": "Already have an account? <a href=\"login.html\">Login</a>",
+          "lg-back": "&larr; Back to homepage",
+          "loading-text": "Please wait...",
+          "err-config": "Registration is not configured. Contact the administrator.",
+          "err-name": "Please enter a valid full name (letters only).",
+          "err-email": "Invalid email format.",
+          "err-pass": "Password must be at least 6 characters.",
+          "rg-ok": "Registration successful! Please verify your email before logging in."
+        }
+      };
+      var lang = localStorage.getItem("site_lang") || "my";
+      function apply() {
+        var t = dict[lang];
+        document.querySelectorAll("[data-i18n]").forEach(function (el) {
+          var k = el.getAttribute("data-i18n");
+          if (t[k] != null) el.innerHTML = t[k];
+        });
+        document.querySelectorAll(".lang-btn").forEach(function (b) {
+          b.classList.toggle("active", b.getAttribute("data-lang") === lang);
+        });
+        document.documentElement.lang = lang === "my" ? "ms" : "en";
+        window.__rg = t;
+      }
+      document.querySelectorAll(".lang-btn").forEach(function (b) {
+        b.addEventListener("click", function () {
+          lang = b.getAttribute("data-lang");
+          localStorage.setItem("site_lang", lang);
+          apply();
+        });
+      });
+      apply();
+    })();
+  </script>
+  <script>
+    (function () {
       var errorBox = document.getElementById("form-error");
       var form = document.getElementById("register-form");
+      var T = function (k) { return (window.__rg && window.__rg[k]) || ""; };
       if (!window.portal.supabase) {
-        errorBox.textContent = "Log masuk belum dikonfigurasi. Hubungi pentadbir.";
+        errorBox.textContent = T("err-config");
         errorBox.hidden = false;
       }
       form.addEventListener("submit", async function (e) {
@@ -74,17 +138,17 @@
         var email = document.getElementById("email").value.trim().toLowerCase();
         var password = document.getElementById("password").value;
         if (name.length < 2 || !/^[A-Za-z\u00C0-\u024F' .-]+$/.test(name)) {
-          errorBox.textContent = "Sila masukkan nama penuh yang sah (huruf sahaja).";
+          errorBox.textContent = T("err-name");
           errorBox.hidden = false;
           return;
         }
         if (!p.isValidEmail(email)) {
-          errorBox.textContent = "Format e-mel tidak sah.";
+          errorBox.textContent = T("err-email");
           errorBox.hidden = false;
           return;
         }
         if (password.length < 6 || password.length > 72) {
-          errorBox.textContent = "Kata laluan minimum 6 aksara.";
+          errorBox.textContent = T("err-pass");
           errorBox.hidden = false;
           return;
         }
@@ -102,7 +166,7 @@
           window.location.href = "dashboard.html";
         } else {
           errorBox.className = "alert ok";
-          errorBox.textContent = "Pendaftaran berjaya! Sila sahkan e-mel anda sebelum log masuk.";
+          errorBox.textContent = T("rg-ok");
           errorBox.hidden = false;
         }
       });

@@ -1619,8 +1619,7 @@ var REPORT_SCOPES = {
 
         setTimeout(function () {
           document.querySelectorAll("[data-i18n=loading]").forEach(function (el) {
-            if ((el.textContent || "").trim() === "Memuatkan...") el.textContent = adminI18n.t("no-data");
-          });
+            if ((el.textContent || "").trim() === "Memuatkan...") el.textContent = adminI18n.t("no-data");          });
         }, 6000);
         loadTx();
         wireReport();
@@ -1641,6 +1640,137 @@ var REPORT_SCOPES = {
       }
       window.addEventListener("load", done);
       setTimeout(done, 4000);
+    })();
+  </script>
+  <script>
+    (function () {
+      var MONTHS = {
+        my: ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September", "Oktober", "November", "Disember"],
+        en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+      };
+      var DAYS = {
+        my: ["ISN", "SEL", "RAB", "KHA", "JUM", "SAB", "AHAD"],
+        en: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+      };
+      var TODAY_LBL = { my: "Hari Ini", en: "Today" };
+      var pop = null;
+
+      function lang() {
+        return (window.adminI18n && window.adminI18n.lang && window.adminI18n.lang()) || "my";
+      }
+
+      function pad(n) { return n < 10 ? "0" + n : "" + n; }
+
+      function openPicker(input) {
+        closePicker();
+        var wrap = input.parentNode;
+        var l = lang();
+        pop = document.createElement("div");
+        pop.className = "dp-pop";
+        wrap.appendChild(pop);
+        var view = new Date();
+        var val = input.value;
+        if (val) {
+          var m = val.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+          if (m) view = new Date(+m[1], +m[2] - 1, +m[3]);
+        }
+
+        function render() {
+          var y = view.getFullYear();
+          var m = view.getMonth();
+          var first = new Date(y, m, 1).getDay();
+          var start = (first + 6) % 7;
+          var dim = new Date(y, m + 1, 0).getDate();
+          var prevDim = new Date(y, m, 0).getDate();
+          var today = new Date();
+          var todayStr = pad(today.getFullYear()) + "-" + pad(today.getMonth() + 1) + "-" + pad(today.getDate());
+          var html = "";
+          html += '<div class="dp-head"><button type="button" data-dp="prev">&#8249;</button>';
+          html += '<span class="dp-month">' + MONTHS[l][m] + " " + y + "</span>";
+          html += '<button type="button" data-dp="next">&#8250;</button></div>';
+          html += '<div class="dp-days">' + DAYS[l].map(function (d) { return "<span>" + d + "</span>"; }).join("") + "</div>";
+          html += '<div class="dp-grid">';
+          for (var i = 0; i < start; i++) {
+            var pd = prevDim - start + 1 + i;
+            html += '<button type="button" class="dp-cell other" data-d="' + (m > 0 ? pad(m) : "12") + "-" + pad(pd) + '" data-other="1" data-m="' + (m > 0 ? m : 11) + '" data-y="' + (m > 0 ? y : y - 1) + '">' + pd + "</button>";
+          }
+          for (var d = 1; d <= dim; d++) {
+            var ds = y + "-" + pad(m + 1) + "-" + pad(d);
+            var cls = "dp-cell";
+            if (ds === todayStr) cls += " today";
+            if (ds === input.value) cls += " sel";
+            html += '<button type="button" class="' + cls + '" data-d="' + ds + '">' + d + "</button>";
+          }
+          var trail = (start + dim) % 7;
+          for (var i2 = 0; trail && i2 < 7 - trail; i2++) {
+            var nd = i2 + 1;
+            html += '<button type="button" class="dp-cell other" data-d="' + pad(m + 2 === 13 ? 1 : m + 2) + "-" + pad(nd) + '" data-other="1" data-m="' + (m + 2 === 13 ? 0 : m + 1) + '" data-y="' + (m + 2 === 13 ? y + 1 : y) + '">' + nd + "</button>";
+          }
+          html += "</div>";
+          html += '<button type="button" class="dp-today">' + TODAY_LBL[l] + "</button>";
+          pop.innerHTML = html;
+        }
+        render();
+
+        pop.addEventListener("click", function (e) {
+          var b = e.target;
+          if (b.classList && b.classList.contains("dp-cell")) {
+            if (b.dataset.other) {
+              view = new Date(+b.dataset.y, +b.dataset.m, 1);
+              render();
+              return;
+            }
+            input.value = b.dataset.d;
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+            closePicker();
+            return;
+          }
+          if (b.classList && b.classList.contains("dp-today")) {
+            var t = new Date();
+            input.value = pad(t.getFullYear()) + "-" + pad(t.getMonth() + 1) + "-" + pad(t.getDate());
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+            closePicker();
+            return;
+          }
+          if (b.dataset && b.dataset.dp === "prev") { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); render(); }
+          if (b.dataset && b.dataset.dp === "next") { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); render(); }
+        });
+      }
+
+      function closePicker() {
+        if (pop && pop.parentNode) pop.parentNode.removeChild(pop);
+        pop = null;
+      }
+
+      document.addEventListener("click", function (e) {
+        if (pop && !pop.contains(e.target) && !e.target.classList.contains("dp-btn")) closePicker();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closePicker();
+      });
+
+      ["report-from", "report-to", "gr-from", "gr-to"].forEach(function (id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        var wrap = document.createElement("div");
+        wrap.className = "dp-wrap";
+        input.parentNode.insertBefore(wrap, input);
+        wrap.appendChild(input);
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "dp-btn";
+        btn.title = "Calendar";
+        btn.textContent = "\uD83D\uDCC5";
+        wrap.appendChild(btn);
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          if (pop) closePicker();
+          else openPicker(input);
+        });
+        input.addEventListener("focus", function () {
+          openPicker(input);
+        });
+      });
     })();
   </script>
 </body>

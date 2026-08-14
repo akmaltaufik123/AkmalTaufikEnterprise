@@ -330,7 +330,7 @@
     }
   };
 
-  var lang = localStorage.getItem("site_admin_lang") || "my";
+  var lang = localStorage.getItem("site_lang") || "my";
 
   function t(key) {
     var l = dict[lang] || {};
@@ -341,7 +341,7 @@
 
   function setLang(l) {
     lang = l;
-    localStorage.setItem("site_admin_lang", l);
+    localStorage.setItem("site_lang", l);
   }
 
   function apply() {
@@ -362,7 +362,7 @@
   document.querySelectorAll(".lang-btn").forEach(function (b) {
     b.addEventListener("click", function () {
       setLang(b.getAttribute("data-lang"));
-      localStorage.setItem("site_admin_lang", lang);
+      localStorage.setItem("site_lang", lang);
       location.reload();
     });
   });
