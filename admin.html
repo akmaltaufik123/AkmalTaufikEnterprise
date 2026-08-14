@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https: blob:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; frame-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https: blob:; media-src 'self'; connect-src 'self' https://lmvgxcdlnpckmqjjsqwf.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; frame-src 'self'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="permissions-policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=()">
@@ -1880,13 +1880,28 @@ var pageSelect = document.getElementById("page-select");
         var w = iframeWin();
         if (!w) return;
         peEditing = !peEditing;
-        if (peEditing) {
-          w.document.dispatchEvent(new w.CustomEvent("pe:edit-on"));
-          peToggle.textContent = "Selesai Edit";
-        } else {
-          w.document.dispatchEvent(new w.CustomEvent("pe:edit-off"));
-          peToggle.textContent = "Edit Mode";
-        }
+        var target = peEditing ? "pe:edit-on" : "pe:edit-off";
+        var label = peEditing ? "Selesai Edit" : "Edit Mode";
+        peToggle.textContent = label;
+        peToggle.disabled = true;
+        var tries = 0;
+        (function fire() {
+          var w2 = iframeWin();
+          if (w2 && w2.__pageEditor && w2.document) {
+            w2.document.dispatchEvent(new w2.CustomEvent(target));
+            peToggle.disabled = false;
+            return;
+          }
+          tries++;
+          if (tries > 20) {
+            peToggle.disabled = false;
+            toast("Halaman belum dimuat. Sila tunggu dan cuba lagi.");
+            peEditing = !peEditing;
+            peToggle.textContent = label === "Selesai Edit" ? "Edit Mode" : "Selesai Edit";
+            return;
+          }
+          setTimeout(fire, 250);
+        })();
       });
 
       peSave.addEventListener("click", async function () {
