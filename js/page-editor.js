@@ -343,6 +343,35 @@
     document.body.appendChild(b);
   }
 
+  function addEntryBtn() {
+    if (IS_EDIT) return;
+    var b = document.getElementById("pe-entry");
+    if (b) return;
+    b = document.createElement("button");
+    b.id = "pe-entry";
+    b.type = "button";
+    b.style.cssText =
+      "position:fixed;bottom:16px;right:16px;z-index:999999;background:#dc2626;border:none;color:#fff;" +
+      "padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.6);";
+    b.textContent = "🛠 Edit Mode";
+    b.addEventListener("click", function () {
+      if (peEditing) { disableEditor(); b.textContent = "🛠 Edit Mode"; }
+      else { enableEditor(); b.textContent = "🛠 Selesai Edit"; }
+    });
+    document.body.appendChild(b);
+  }
+
+  function addAdminEntry() {
+    var sb = getSb();
+    if (!sb || IS_EDIT) return;
+    sb.auth.getSession().then(function (res) {
+      var session = res.data && res.data.session;
+      if (session && session.user && session.user.app_metadata && session.user.app_metadata.is_admin) {
+        addEntryBtn();
+      }
+    }).catch(function () {});
+  }
+
   function disableEditor() {
     if (!peEditing) return;
     peEditing = false;
@@ -360,6 +389,8 @@
     if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
     var m = document.getElementById("pe-modebtn");
     if (m && m.parentNode) m.parentNode.removeChild(m);
+    var e = document.getElementById("pe-entry");
+    if (e && e.parentNode) e.parentNode.removeChild(e);
   }
 
   function addSaveBar() {
@@ -456,15 +487,20 @@
     document.addEventListener("DOMContentLoaded", function () {
       loadLayout();
       scheduleReapply();
+      addAdminEntry();
       if (IS_EDIT) setTimeout(enableEditor, 400);
     });
   } else {
     loadLayout();
     scheduleReapply();
+    addAdminEntry();
     if (IS_EDIT) setTimeout(enableEditor, 400);
   }
   if (IS_EDIT) {
     window.addEventListener("load", function () { setTimeout(enableEditor, 300); });
     setTimeout(function () { if (IS_EDIT && !peEditing) enableEditor(); }, 2500);
   }
+  window.addEventListener("error", function (e) {
+    if (IS_EDIT) peMsg("JS ralat: " + (e.message || "unknown"));
+  });
 })();
