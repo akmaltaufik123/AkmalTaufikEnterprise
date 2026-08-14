@@ -888,7 +888,18 @@
           var { error } = await sb.storage.from("course-images").upload(path, file, { contentType: type || "image/png" });
           if (error) throw new Error(error.message);
           return sb.storage.from("course-images").getPublicUrl(path).data.publicUrl;
-        }
+
+
+        async function uploadCourseVideo(file) {
+          var type = (file.type || "").toLowerCase();
+          var ext = (file.name.split(".").pop() || "").toLowerCase();
+          var vidExt = ["mp4", "webm", "mov"];
+          var safeExt = vidExt.indexOf(ext) > -1 ? ext : "mp4";
+          var path = "course-vid-" + Date.now() + "-" + Math.floor(Math.random() * 9999) + "." + safeExt;
+          var { error } = await sb.storage.from("course-images").upload(path, file, { contentType: type || "video/mp4" });
+          if (error) throw new Error(error.message);
+          return sb.storage.from("course-images").getPublicUrl(path).data.publicUrl;
+        }        }
 
         function catCard(c) {
           var style = 'style="background:' + esc(c.bg_color || "#16161c") + ';color:' + esc(c.color || "#f4f4f5") + ';font-family:' + fontPreview(c.font_family) + '"';
@@ -1037,7 +1048,7 @@
             '<button class="action-btn danger" data-delete-cat="' + esc(c.id) + '">' + adminI18n.t("btn-del") + '</button></div></div>';
         }
 
-        function categoryModal(c) {
+function categoryModal(c) {
           var editing = !!c;
           var t = adminI18n.t;
           var ct = c && c.class_time ? c.class_time : "10:00";
@@ -1045,74 +1056,113 @@
           var mi = ct.slice(3, 5);
           var ap = h24 >= 12 ? "PM" : "AM";
           var h12 = h24 % 12 || 12;
-          openModal(editing ? t("btn-edit") + " " + t("cat-title") : t("cat-add"),
-            '<div class="form-group"><label>' + t("cat-name") + '</label><input id="c-name" maxlength="120" value="' + (editing ? esc(c.name) : "") + '"></div>' +
-            '<div class="form-group"><label>' + t("cat-desc") + '</label><textarea id="c-desc" rows="3" maxlength="1000">' + (editing ? esc(c.description) : "") + "</textarea></div>" +
-            '<div class="color-row">' +
-            '<div class="form-group"><label>' + t("cat-price") + '</label><input type="number" id="c-price" min="0" step="0.01" value="' + (editing && c.price != null ? esc(c.price) : "") + '"></div>' +
-            '<div class="form-group"><label>' + t("cat-time") + '</label><div class="time-row"><select id="c-hour">' +
-            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (h) {
-              return '<option value="' + h + '"' + (h === h12 ? " selected" : "") + ">" + h + "</option>";
-            }).join("") + '</select><span class="time-colon">:</span><select id="c-minute">' +
-            Array.from({ length: 12 }, function (_, i) {
-              var m = String(i * 5).padStart(2, "0");
-              return '<option value="' + m + '"' + (m === mi ? " selected" : "") + ">" + m + "</option>";
-            }).join("") + '</select><select id="c-ap" class="time-ap">' +
-            '<option value="AM"' + (ap === "AM" ? " selected" : "") + '>AM</option><option value="PM"' + (ap === "PM" ? " selected" : "") + '>PM</option></select></div></div>' +
-            '<div class="color-row">' +
-            '<div class="form-group"><label>' + t("cat-instructor") + '</label><input id="c-instructor" maxlength="120" value="' + (editing ? esc(c.instructor_name || "") : "") + '"></div>' +
-            '<div class="form-group"><label>' + t("cat-instructor-type") + '</label><select id="c-instructor-type">' +
-            '<option value="Individu"' + (editing && c.instructor_type === "Individu" ? " selected" : "") + ">" + t("type-individu") + "</option>" +
-            '<option value="Syarikat"' + (editing && c.instructor_type === "Syarikat" ? " selected" : "") + ">" + t("type-company") + "</option></select></div></div>" +
-            '<div class="color-row">' +
-            '<div class="form-group"><label>' + t("cat-region") + '</label><select id="c-region">' + optList(REGIONS, editing ? c.region : "Pulau Pinang") + "</select></div>" +
-            '<div class="form-group"><label>' + t("cat-nation") + '</label><select id="c-nation">' + optList(NATIONS, editing ? c.nation : "Malaysia") + "</select></div></div>" +
-            '<div class="form-group"><label>' + t("cat-ssm") + '</label><input id="c-ssm" maxlength="30" pattern="[A-Za-z0-9-]{6,30}" placeholder="cth: 202501234567" value="' + (editing ? esc(c.ssm || "") : "") + '"></div>' +
-            '<div class="form-group"><label>' + t("cat-mode") + '</label><select id="c-mode">' +
-            '<option value="Online"' + (editing && c.mode === "Online" ? " selected" : "") + ">" + t("mode-online") + "</option>" +
-            '<option value="Bersemuka"' + (editing && c.mode === "Bersemuka" ? " selected" : "") + ">" + t("mode-f2f") + "</option>" +
-            '<option value="Online & Bersemuka"' + (editing && c.mode === "Online & Bersemuka" ? " selected" : "") + ">" + t("mode-both") + "</option></select></div>" +
-            '<div class="switch-row"><input type="checkbox" id="c-active" class="checkbox"' + (editing && c.active ? " checked" : "") + '><label for="c-active">' + t("cat-active") + '</label></div>' +
-            '<div class="color-row">' +
-            '<div class="form-group"><label>' + t("cat-color") + '</label><input type="color" id="c-color" value="' + (editing && c.color ? esc(c.color) : "#f4f4f5") + '"></div>' +
-            '<div class="form-group"><label>' + t("cat-bgcolor") + '</label><input type="color" id="c-bg" value="' + (editing && c.bg_color ? esc(c.bg_color) : "#16161c") + '"></div>' +
-            "</div>" +
-            '<div class="form-group"><label>' + t("cat-font") + '</label><select id="c-font">' +
-            FONT_OPTIONS.map(function (f) {
+          var modal = document.querySelector(".modal-box");
+          if (modal) modal.classList.add("modal-lg");
+          var rows = [
+            [t("cat-name"), '<input id="c-name" maxlength="120" value="' + (editing ? esc(c.name) : "") + '">'],
+            [t("cat-desc"), '<textarea id="c-desc" rows="4" maxlength="1000">' + (editing ? esc(c.description) : "") + "</textarea>"],
+            [t("cat-price"), '<input type="number" id="c-price" min="0" step="0.01" value="' + (editing && c.price != null ? esc(c.price) : "") + '">'],
+            [t("cat-time"), '<div class="time-row"><select id="c-hour">' +
+              [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (h) {
+                return '<option value="' + h + '"' + (h === h12 ? " selected" : "") + ">" + h + "</option>";
+              }).join("") + '</select><span class="time-colon">:</span><select id="c-minute">' +
+              Array.from({ length: 12 }, function (_, i) {
+                var m = String(i * 5).padStart(2, "0");
+                return '<option value="' + m + '"' + (m === mi ? " selected" : "") + ">" + m + "</option>";
+              }).join("") + '</select><select id="c-ap" class="time-ap">' +
+              '<option value="AM"' + (ap === "AM" ? " selected" : "") + '>AM</option><option value="PM"' + (ap === "PM" ? " selected" : "") + '>PM</option></select></div>'],
+            [t("cat-instructor"), '<input id="c-instructor" maxlength="120" value="' + (editing ? esc(c.instructor_name || "") : "") + '">'],
+            [t("cat-instructor-type"), '<select id="c-instructor-type">' +
+              '<option value="Individu"' + (editing && c.instructor_type === "Individu" ? " selected" : "") + ">" + t("type-individu") + "</option>" +
+              '<option value="Syarikat"' + (editing && c.instructor_type === "Syarikat" ? " selected" : "") + ">" + t("type-company") + "</option></select>"],
+            [t("cat-region"), '<select id="c-region">' + optList(REGIONS, editing ? c.region : "Pulau Pinang") + "</select>"],
+            [t("cat-nation"), '<select id="c-nation">' + optList(NATIONS, editing ? c.nation : "Malaysia") + "</select>"],
+            [t("cat-ssm"), '<input id="c-ssm" maxlength="30" pattern="[A-Za-z0-9-]{6,30}" placeholder="cth: 202501234567" value="' + (editing ? esc(c.ssm || "") : "") + '">'],
+            [t("cat-mode"), '<select id="c-mode">' +
+              '<option value="Online"' + (editing && c.mode === "Online" ? " selected" : "") + ">" + t("mode-online") + "</option>" +
+              '<option value="Bersemuka"' + (editing && c.mode === "Bersemuka" ? " selected" : "") + ">" + t("mode-f2f") + "</option>" +
+              '<option value="Online & Bersemuka"' + (editing && c.mode === "Online & Bersemuka" ? " selected" : "") + ">" + t("mode-both") + "</option></select>"],
+            [t("cat-color"), '<input type="color" id="c-color" value="' + (editing && c.color ? esc(c.color) : "#f4f4f5") + '">'],
+            [t("cat-bgcolor"), '<input type="color" id="c-bg" value="' + (editing && c.bg_color ? esc(c.bg_color) : "#16161c") + '">'],
+            [t("cat-font"), '<select id="c-font">' + FONT_OPTIONS.map(function (f) {
               return '<option' + (editing && c.font_family === f ? " selected" : "") + ">" + f + "</option>";
-            }).join("") + "</select></div>" +
-            '<div class="form-group"><label>' + t("cat-size") + '</label><select id="c-fontsize">' +
-            Object.keys(FONT_SIZES).map(function (s) {
+            }).join("") + "</select>"],
+            [t("cat-size"), '<select id="c-fontsize">' + Object.keys(FONT_SIZES).map(function (s) {
               return '<option value="' + s + '"' + (editing && c.font_size === s ? " selected" : "") + ">" + FONT_SIZE_LABELS[s] + "</option>";
-            }).join("") + "</select></div>" +
-            '<div class="form-group"><label>' + t("cat-image") + '</label><input id="c-imgurl" placeholder="https://... (atau muat naik fail di bawah)" value="' + (editing ? esc(c.image_url || "") : "") + '"></div>' +
-            '<div class="form-group"><label>' + t("cat-upload") + '</label><input type="file" id="c-imgfile" accept="image/*"></div>' +
-            (editing && c.image_url ? '<p class="muted"><img id="c-imgprev" class="modal-preview" src="' + esc(c.image_url) + '" alt=""> <button type="button" class="action-btn danger" id="c-imgclear">' + t("cat-delete") + '</button></p>' : ""));
-          var prev = document.getElementById("c-imgprev");
-          if (prev) {
-            document.getElementById("c-imgclear").addEventListener("click", function () {
-              prev.remove();
+            }).join("") + "</select>"]
+          ];
+          var html = '<div class="modal-fields">';
+          rows.forEach(function (r) {
+            html += '<div class="form-group"><label>' + r[0] + '</label>' + r[1] + "</div>";
+          });
+          html += "</div>";
+          html += '<div class="switch-row"><input type="checkbox" id="c-active" class="checkbox"' + (editing && c.active ? " checked" : "") + '><label for="c-active">' + t("cat-active") + '</label></div>';
+          html += '<div class="form-group"><label>' + t("cat-image") + '</label><input id="c-imgurl" placeholder="https://... (atau muat naik fail di bawah)" value="' + (editing ? esc(c.image_url || "") : "") + '"></div>';
+          html += '<div class="form-group"><label>' + t("cat-upload") + ' (gambar)</label><input type="file" id="c-imgfile" accept="image/*"></div>';
+          html += '<div id="c-imgprevwrap"></div>';
+          if (editing && c.image_url) {
+            html += '<p class="muted"><img id="c-imgprev" class="modal-preview" src="' + esc(c.image_url) + '" alt=""> <button type="button" class="action-btn danger" id="c-imgclear">' + t("cat-delete") + '</button></p>';
+          }
+          html += '<div class="form-group"><label>' + t("cat-video") + ' (URL)</label><input id="c-videourl" placeholder="https://... (atau muat naik fail di bawah)" value="' + (editing ? esc(c.video_url || "") : "") + '"></div>';
+          html += '<div class="form-group"><label>' + t("cat-video") + ' (muat naik)</label><input type="file" id="c-vidfile" accept="video/mp4,video/webm,video/quicktime"></div>';
+          html += '<div id="c-vidprevwrap"></div>';
+          if (editing && c.video_url) {
+            html += '<p class="muted"><video id="c-vidprev" class="modal-preview modal-video" src="' + esc(c.video_url) + '" controls></video> <button type="button" class="action-btn danger" id="c-vidclear">' + t("cat-delete") + '</button></p>';
+          }
+          openModal(editing ? t("btn-edit") + " " + t("cat-title") : t("cat-add"), html);
+          var imgPrevWrap = document.getElementById("c-imgprevwrap");
+          var imgClearBtn = document.getElementById("c-imgclear");
+          if (imgClearBtn) {
+            imgClearBtn.addEventListener("click", function () {
               document.getElementById("c-imgurl").value = "";
+              var p = document.getElementById("c-imgprev");
+              if (p) p.remove();
+              imgClearBtn.remove();
             });
           }
-          var fileInput = document.getElementById("c-imgfile");
-          fileInput.addEventListener("change", function () {
-            var f = fileInput.files && fileInput.files[0];
+          var vidPrevWrap = document.getElementById("c-vidprevwrap");
+          var vidClearBtn = document.getElementById("c-vidclear");
+          if (vidClearBtn) {
+            vidClearBtn.addEventListener("click", function () {
+              document.getElementById("c-videourl").value = "";
+              var p = document.getElementById("c-vidprev");
+              if (p) p.remove();
+              vidClearBtn.remove();
+            });
+          }
+          var imgFileInput = document.getElementById("c-imgfile");
+          imgFileInput.addEventListener("change", function () {
+            var f = imgFileInput.files && imgFileInput.files[0];
             if (!f) return;
             if (!/^image\//.test(f.type || "")) {
               showToast(t("err-img-type"));
               return;
             }
             fileToDataUrl(f, function (dataUrl) {
-              var box = document.getElementById("c-imgurl");
-              box.value = "";
-              var wrap = document.getElementById("modal-body");
-              var old = wrap.querySelector(".modal-preview");
-              if (old) old.remove();
+              document.getElementById("c-imgurl").value = "";
+              imgPrevWrap.innerHTML = "";
               var im = document.createElement("img");
               im.className = "modal-preview";
               im.src = dataUrl;
-              wrap.insertBefore(im, box.parentNode.nextSibling || null);
+              imgPrevWrap.appendChild(im);
+            });
+          });
+          var vidFileInput = document.getElementById("c-vidfile");
+          vidFileInput.addEventListener("change", function () {
+            var f = vidFileInput.files && vidFileInput.files[0];
+            if (!f) return;
+            if (!/^video\/(mp4|webm|quicktime)$/.test(f.type || "")) {
+              showToast(t("err-vid-type"));
+              return;
+            }
+            fileToDataUrl(f, function (dataUrl) {
+              document.getElementById("c-videourl").value = "";
+              vidPrevWrap.innerHTML = "";
+              var v = document.createElement("video");
+              v.className = "modal-preview modal-video";
+              v.controls = true;
+              v.src = dataUrl;
+              vidPrevWrap.appendChild(v);
             });
           });
           modalSave.onclick = async function () {
@@ -1137,17 +1187,28 @@
               showToast(t("err-name"));
               return;
             }
-            var urlVal = document.getElementById("c-imgurl").value.trim();
-            if (urlVal && !/^https?:\/\//.test(urlVal)) {
+            var imgUrlVal = document.getElementById("c-imgurl").value.trim();
+            if (imgUrlVal && !/^https?:\/\//.test(imgUrlVal)) {
               showToast(t("err-url"));
               return;
             }
-            var file = fileInput.files && fileInput.files[0];
+            var vidUrlVal = document.getElementById("c-videourl").value.trim();
+            if (vidUrlVal && !/^https?:\/\//.test(vidUrlVal)) {
+              showToast(t("err-url"));
+              return;
+            }
+            var imgFile = imgFileInput.files && imgFileInput.files[0];
+            var vidFile = vidFileInput.files && vidFileInput.files[0];
             try {
-              if (file) {
-                payload.image_url = await uploadCourseImage(file);
+              if (imgFile) {
+                payload.image_url = await uploadCourseImage(imgFile);
               } else {
-                payload.image_url = urlVal ? urlVal : (editing ? c.image_url : null);
+                payload.image_url = imgUrlVal ? imgUrlVal : (editing ? c.image_url : null);
+              }
+              if (vidFile) {
+                payload.video_url = await uploadCourseVideo(vidFile);
+              } else {
+                payload.video_url = vidUrlVal ? vidUrlVal : (editing ? c.video_url : null);
               }
               var { error } = editing
                 ? await sb.from("courses").update(payload).eq("id", c.id)
@@ -1161,6 +1222,7 @@
             loadCategories();
           };
         }
+
 
         document.getElementById("add-cat-btn").addEventListener("click", function () {
           categoryModal(null);
@@ -1727,6 +1789,12 @@ var pageSelect = document.getElementById("page-select");
         loadEnrollments();
         loadCustomers();
         loadWebPage();
+
+        setTimeout(function () {
+          document.querySelectorAll("[data-i18n=loading]").forEach(function (el) {
+            if ((el.textContent || "").trim() === "Memuatkan...") el.textContent = adminI18n.t("no-data");
+          });
+        }, 6000);
         loadWebTheme();
         loadTx();
         wireReport();

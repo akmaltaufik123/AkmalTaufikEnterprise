@@ -1895,3 +1895,77 @@ body.radial-bg::before {
   opacity: 0;
   pointer-events: none;
 }
+
+.modal-box.modal-lg {
+  width: 600px;
+  max-width: 94vw;
+  min-height: 420px;
+  padding: 26px 28px;
+}
+.modal-lg .modal-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 18px;
+}
+.modal-lg .modal-fields .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 0;
+}
+.modal-lg .modal-fields .form-group:nth-child(2) {
+  grid-column: 1 / -1;
+}
+.modal-lg .form-group label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 600;
+}
+.modal-lg input:not([type=color]):not([type=file]):not([type=checkbox]),
+.modal-lg select,
+.modal-lg textarea {
+  width: 100%;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: #101014;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.modal-lg input:focus, .modal-lg select:focus, .modal-lg textarea:focus {
+  outline: none;
+  border-color: rgba(220, 38, 38, 0.6);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+.modal-lg .switch-row {
+  margin: 14px 0;
+}
+.modal-preview {
+  max-width: 100%;
+  max-height: 360px;
+  width: auto;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  display: block;
+  margin: 10px 0;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+}
+.modal-video {
+  max-height: 280px;
+  background: #000;
+}
+
+.course-video {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
+  max-height: 260px;
+  background: #000;
+}

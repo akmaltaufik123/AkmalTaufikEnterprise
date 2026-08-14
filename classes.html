@@ -104,6 +104,9 @@
             var img = c.image_url
               ? '<div class="course-img-wrap"><img class="course-img" src="' + esc(c.image_url) + '" alt=""></div>'
               : "";
+            var vid = c.video_url
+              ? '<video class="course-video" src="' + esc(c.video_url) + '" controls preload="metadata"></video>'
+              : "";
             var price = c.price != null && c.price !== ""
               ? '<p class="class-price">RM ' + esc(Number(c.price).toFixed(2)) + '</p>'
               : "";
@@ -123,6 +126,7 @@
               : "";
             return '<div class="card class-card" data-course="' + esc(c.id) + '" ' + cardStyle + '>' +
               img +
+              vid +
               '<h3 ' + titleStyle + '>' + esc(c.name) + '</h3>' +
               price +
               '<p>' + esc(c.description || "") + '</p>' +

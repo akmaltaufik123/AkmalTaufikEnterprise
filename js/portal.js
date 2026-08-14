@@ -85,4 +85,13 @@
       }
     });
   }
+
+  setTimeout(function () {
+    if (document.getElementById("cat-grid") || document.getElementById("tx-list")) return;
+    var boxes = document.querySelectorAll("#recent-list, #requests-list, #bookings-list, #enrolled-list, #courses-grid");
+    boxes.forEach(function (el) {
+      var t = (el.textContent || "").trim();
+      if (t.indexOf("Memuatkan") > -1) el.innerHTML = '<p class="muted">Tiada data.</p>';
+    });
+  }, 6000);
 })();
