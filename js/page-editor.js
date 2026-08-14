@@ -307,6 +307,8 @@
   function enableEditor() {
     if (peEditing) return;
     peEditing = true;
+    var L = document.getElementById("loader");
+    if (L && L.parentNode) L.parentNode.removeChild(L);
     injectStyle();
     decorateAll();
     var hint = document.createElement("div");
