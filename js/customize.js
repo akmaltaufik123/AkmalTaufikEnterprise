@@ -1,13 +1,25 @@
 (function () {
+  var sharedSb = null;
+
   function getSb() {
+    if (sharedSb) return sharedSb;
+    if (window.portal && window.portal.supabase) {
+      sharedSb = window.portal.supabase;
+      window.sb = sharedSb;
+      return sharedSb;
+    }
     try {
-      if (!window.supabase) return null;
-      if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) return null;
-      return window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+      if (!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) return null;
+      sharedSb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, {
+        auth: { persistSession: true, autoRefreshToken: true }
+      });
+      window.sb = sharedSb;
     } catch (e) {
       return null;
     }
+    return sharedSb;
   }
+  getSb();
 
   function safeFont(f) {
     if (!f) return null;
