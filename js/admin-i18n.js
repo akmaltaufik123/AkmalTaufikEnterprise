@@ -162,24 +162,7 @@
       "web-save": "Simpan",
       "web-delete": "Padam Tetapan",
       "web-open": "Buka Halaman",
-      "deleted": "Tetapan dipadam.",
-      "tab-home": "Edit Homepage",
-      "home-title": "Edit Halaman Utama",
-      "home-hint": "Ubah tajuk, keterangan dan gambar kotak pada halaman utama. Perubahan disimpan serta-merta dan kelihatan kepada semua pelawat selepas muat semula.",
-      "home-add": "+ Tambah Kotak Baru",
-      "home-save": "Simpan Semua Perubahan",
-      "home-zone": "Bahagian",
-      "home-zone-services": "Perkhidmatan",
-      "home-zone-why": "Kenapa Pilih Kami",
-      "home-title-label": "Tajuk",
-      "home-desc-label": "Keterangan",
-      "home-img-label": "Gambar (URL)",
-      "home-img-upload": "Muat Naik Gambar",
-      "home-img-hint": "Tempel URL gambar ATAU muat naik dari komputer.",
-      "home-del": "Buang",
-      "home-saved": "Perubahan disimpan! Buka index.html untuk melihat.",
-      "home-err": "Ralat menyimpan: ",
-      "home-load-err": "Ralat memuat kotak: "
+      "deleted": "Tetapan dipadam."
     },
     en: {
       "loading-text": "Please wait...",
@@ -343,24 +326,7 @@
       "web-save": "Save",
       "web-delete": "Delete Settings",
       "web-open": "Open Page",
-      "deleted": "Settings deleted.",
-      "tab-home": "Edit Homepage",
-      "home-title": "Edit Homepage",
-      "home-hint": "Edit the title, description and picture of the boxes on the homepage. Changes are saved immediately and visible to all visitors after refresh.",
-      "home-add": "+ Add New Box",
-      "home-save": "Save All Changes",
-      "home-zone": "Section",
-      "home-zone-services": "Services",
-      "home-zone-why": "Why Choose Us",
-      "home-title-label": "Title",
-      "home-desc-label": "Description",
-      "home-img-label": "Picture (URL)",
-      "home-img-upload": "Upload Picture",
-      "home-img-hint": "Paste an image URL OR upload from your computer.",
-      "home-del": "Remove",
-      "home-saved": "Changes saved! Open index.html to see them.",
-      "home-err": "Error saving: ",
-      "home-load-err": "Error loading boxes: "
+      "deleted": "Settings deleted."
     }
   };
 
