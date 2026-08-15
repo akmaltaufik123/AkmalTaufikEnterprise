@@ -363,7 +363,7 @@
           btn.addEventListener("click", function () {
             document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
             btn.classList.add("active");
-            ["dashboard", "requests", "bookings", "classes", "customers", "report", "web"].forEach(function (t) {
+            ["dashboard", "requests", "bookings", "classes", "customers", "report", "web", "home"].forEach(function (t) {
               document.getElementById("tab-" + t).hidden = btn.getAttribute("data-tab") !== t;
             });
           });
@@ -1653,10 +1653,10 @@ var REPORT_SCOPES = {
           var cont = document.getElementById("home-boxes");
           if (!cont) return;
           var { data, error } = await sb.from("site_pages").select("layout_json").eq("path", "index.html").maybeSingle();
-          if (error) { showToast(adminI18n.t("home-load-err") + error.message); return; }
+          if (error) { showToast(adminI18n.t("home-load-err") + error.message); }
           var layout = null;
           try { layout = data && data.layout_json ? JSON.parse(data.layout_json) : null; } catch (e) {}
-          if (layout && layout.version === 3 && Array.isArray(layout.boxes) && layout.boxes.length) {
+          if (!error && layout && layout.version === 3 && Array.isArray(layout.boxes) && layout.boxes.length) {
             homeBoxes = layout.boxes;
           } else {
             homeBoxes = HOME_DEFAULTS.map(function (b) { return { id: b.id, zone: b.zone, title: b.title, desc: b.desc, image_url: b.image_url || "" }; });
