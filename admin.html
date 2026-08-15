@@ -214,7 +214,7 @@
       <p class="muted form-hint" data-i18n="fmt-hint">Semua format mengandungi kandungan yang sama. Kosongkan tarikh untuk laporan penuh.</p>
     </div>
   </div>
-        <div id="tab-requests" class="tab-panel">
+        <div id="tab-requests" class="tab-panel" hidden>
           <div class="card">
             <div id="requests-list"><p class="muted" data-i18n="loading">Memuatkan...</p></div>
           </div>
@@ -1647,7 +1647,7 @@ var REPORT_SCOPES = {
           { id: "why-3", zone: "why", title: "Remote & On-Site", desc: "Daripada pembaikan jauh yang pantas kepada pemasangan bersemuka penuh, kami mengikut jadual anda.", image_url: "" }
         ];
         var homeBoxes = [];
-        var homeBoxSeq = 1;
+        var homeBoxSeq = 0;
 
         async function loadHomeBoxes() {
           var cont = document.getElementById("home-boxes");
@@ -1695,10 +1695,12 @@ var REPORT_SCOPES = {
                 '<button type="button" class="btn btn-outline btn-sm" data-act="up">' + adminI18n.t("home-img-upload") + "</button>" +
               "</div>" +
               '<p class="muted form-hint">' + adminI18n.t("home-img-hint") + "</p>" +
+              '<div data-f="imgprev" style="margin-top:8px;max-width:200px;display:' + (b.image_url ? "block" : "none") + ';"><img style="width:100%;border-radius:8px;border:1px solid var(--border);" src="' + esc(b.image_url || "") + '" alt=""></div>' +
             "</div>";
           row._i = i;
+          row.setAttribute("data-box-id", b.id || "");
           row.querySelector('[data-act="del"]').addEventListener("click", function () {
-            homeBoxes.splice(row._i, 1);
+            homeBoxes = homeBoxes.filter(function (x) { return x.id !== row.getAttribute("data-box-id"); });
             renderHomeBoxes();
           });
           row.querySelector('[data-act="up"]').addEventListener("click", function () {
@@ -1717,20 +1719,33 @@ var REPORT_SCOPES = {
             };
             fi.click();
           });
+          var imgUrlInput = row.querySelector('[data-f="image_url"]');
+          imgUrlInput.addEventListener("input", function () {
+            var prev = row.querySelector('[data-f="imgprev"]');
+            var img = prev && prev.querySelector("img");
+            if (!prev) return;
+            var v = imgUrlInput.value.trim();
+            if (v) {
+              prev.style.display = "block";
+              if (img) img.src = v;
+            } else {
+              prev.style.display = "none";
+            }
+          });
           return row;
         }
 
         document.getElementById("home-add").addEventListener("click", function () {
-          homeBoxes.push({ id: "bx-" + Date.now(), zone: "services", title: "", desc: "", image_url: "" });
+          homeBoxSeq++;
+          homeBoxes.push({ id: "bx-" + Date.now() + "-" + homeBoxSeq, zone: "services", title: "", desc: "", image_url: "" });
           renderHomeBoxes();
         });
 
         document.getElementById("home-save").addEventListener("click", async function () {
           var rows = document.querySelectorAll("#home-boxes .home-box");
-          var boxes = Array.prototype.map.call(rows, function (r, i) {
-            var prev = homeBoxes[i];
+          var boxes = Array.prototype.map.call(rows, function (r) {
             return {
-              id: (prev && prev.id) || "bx-" + Date.now(),
+              id: r.getAttribute("data-box-id") || "bx-" + Date.now(),
               zone: r.querySelector('[data-f="zone"]').value,
               title: r.querySelector('[data-f="title"]').value.trim(),
               desc: r.querySelector('[data-f="desc"]').value.trim(),
