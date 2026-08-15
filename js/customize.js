@@ -11,7 +11,7 @@
     try {
       if (!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) return null;
       sharedSb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, {
-        auth: { persistSession: true, autoRefreshToken: true }
+        auth: { persistSession: false, autoRefreshToken: false }
       });
       window.sb = sharedSb;
     } catch (e) {
